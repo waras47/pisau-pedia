@@ -1,4 +1,9 @@
-.next
 node_modules
+.next
 out
+build
+coverage
 public
+*.lock
+pnpm-lock.yaml
+package-lock.json

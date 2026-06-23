@@ -1,0 +1,511 @@
+Oke, checkout dengan **Xendit**. Karena kamu pakai Xendit, alurnya: halaman checkout (form + ringkasan) → POST ke **Route Handler** Next.js → server bikin **Xendit Invoice** → redirect user ke `invoice_url` Xendit (halaman pembayaran hosted). Ini cara paling aman & cepat (tak perlu SDK, cukup `fetch`).
+
+Seperti biasa — hanya contoh untuk kamu copy, **tidak ditulis ke folder `kissaki-knives`**.
+
+---
+
+## Ringkasan file
+
+| # | File | Status |
+|---|------|--------|
+| 1 | `.env.local` | **baru** (secret Xendit) |
+| 2 | `src/features/checkout/ui/CheckoutForm.tsx` (+`index.ts`) | **baru** (client) |
+| 3 | `src/app/checkout/page.tsx` | **baru** (form + ringkasan) |
+| 4 | `src/app/api/checkout/route.ts` | **baru** (server → Xendit) |
+| 5 | `src/app/checkout/success/page.tsx` & `failure/page.tsx` | **baru** |
+| 6 | Drawer & `/cart` | ubah: tombol Checkout → `/checkout` |
+
+> **Penting soal mata uang:** data dummy produk pakai `EUR`. Xendit akun Indonesia memproses **IDR** (integer, tanpa desimal). Di route saya pakai konstanta `CURRENCY = "IDR"` dan harga dianggap nominal IDR. Sesuaikan harga produkmu nanti.
+
+---
+
+## Langkah 1 — Environment variable
+
+Buat `.env.local` di root (jangan di-commit — sudah ada `.gitignore`):
+
+```bash
+# .env.local
+XENDIT_SECRET_KEY=xnd_development_xxxxxxxxxxxxxxxxxxxxx
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+Ambil secret key dari **Dashboard Xendit → Settings → API Keys** (pakai key *development* dulu). `XENDIT_SECRET_KEY` **tanpa** `NEXT_PUBLIC_` → hanya hidup di server, tidak bocor ke browser.
+
+---
+
+## Langkah 2 — Route Handler: buat Invoice Xendit (server)
+
+`src/app/api/checkout/route.ts`. Server **menghitung ulang harga dari katalog** berdasarkan `slug` (jangan percaya harga dari browser → cegah manipulasi).
+
+```ts
+// src/app/api/checkout/route.ts
+import { NextResponse } from "next/server";
+
+import { getProductBySlug } from "@/entities/product";
+
+// Xendit ID memproses IDR (integer). Harga produk diperlakukan sbg nominal IDR.
+const CURRENCY = "IDR";
+
+interface CheckoutPayload {
+  email: string;
+  name: string;
+  items: { slug: string; quantity: number }[];
+}
+
+export async function POST(request: Request) {
+  const secret = process.env.XENDIT_SECRET_KEY;
+  if (!secret) {
+    return NextResponse.json(
+      { error: "Server is missing XENDIT_SECRET_KEY" },
+      { status: 500 },
+    );
+  }
+
+  let body: CheckoutPayload;
+  try {
+    body = (await request.json()) as CheckoutPayload;
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const { email, name, items } = body;
+  if (!email || !items?.length) {
+    return NextResponse.json(
+      { error: "Email and at least one item are required" },
+      { status: 400 },
+    );
+  }
+
+  // Hitung ulang dari katalog (sumber kebenaran harga = server)
+  const lineItems = [];
+  let amount = 0;
+  for (const { slug, quantity } of items) {
+    const product = getProductBySlug(slug);
+    if (!product || quantity <= 0) continue;
+    const qty = Math.floor(quantity);
+    amount += product.price * qty;
+    lineItems.push({
+      name: product.name,
+      quantity: qty,
+      price: product.price,
+      category: product.category,
+    });
+  }
+
+  if (amount <= 0) {
+    return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
+  }
+
+  const externalId = `order-${Date.now()}`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+  // Buat invoice. Docs: https://docs.xendit.co/api-reference/#create-invoice
+  const res = await fetch("https://api.xendit.co/v2/invoices", {
+    method: "POST",
+    headers: {
+      // Basic auth: base64(secretKey + ":")
+      Authorization: `Basic ${Buffer.from(`${secret}:`).toString("base64")}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      external_id: externalId,
+      amount,
+      currency: CURRENCY,
+      payer_email: email,
+      description: `Kissaki Knives order — ${lineItems.length} item(s)`,
+      customer: { given_names: name, email },
+      items: lineItems,
+      success_redirect_url: `${siteUrl}/checkout/success?order=${externalId}`,
+      failure_redirect_url: `${siteUrl}/checkout/failure?order=${externalId}`,
+    }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    return NextResponse.json(
+      { error: data?.message ?? "Failed to create invoice" },
+      { status: res.status },
+    );
+  }
+
+  // invoice_url = halaman pembayaran hosted Xendit
+  return NextResponse.json({ invoiceUrl: data.invoice_url });
+}
+```
+
+---
+
+## Langkah 3 — Form checkout (client)
+
+`src/features/checkout/ui/CheckoutForm.tsx`:
+
+```tsx
+// src/features/checkout/ui/CheckoutForm.tsx
+"use client";
+
+import { useState } from "react";
+
+import { useCart } from "@/features/cart";
+import { Button } from "@/shared/ui/Button";
+
+export function CheckoutForm() {
+  const { items } = useCart();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+
+    if (items.length === 0) {
+      setError("Your cart is empty.");
+      return;
+    }
+
+    const form = new FormData(e.currentTarget);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: form.get("email"),
+          name: `${form.get("firstName")} ${form.get("lastName")}`.trim(),
+          items: items.map((i) => ({ slug: i.slug, quantity: i.quantity })),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Checkout failed");
+
+      // Redirect ke halaman pembayaran Xendit
+      window.location.href = data.invoiceUrl;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Checkout failed");
+      setLoading(false);
+    }
+  }
+
+  const inputClass =
+    "h-11 w-full border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent";
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+      <fieldset className="flex flex-col gap-3">
+        <legend className="mb-2 font-display text-lg font-semibold tracking-tightest">
+          Contact
+        </legend>
+        <input
+          type="email"
+          name="email"
+          required
+          placeholder="Email"
+          className={inputClass}
+        />
+      </fieldset>
+
+      <fieldset className="flex flex-col gap-3">
+        <legend className="mb-2 font-display text-lg font-semibold tracking-tightest">
+          Shipping address
+        </legend>
+        <div className="grid grid-cols-2 gap-3">
+          <input
+            name="firstName"
+            required
+            placeholder="First name"
+            className={inputClass}
+          />
+          <input
+            name="lastName"
+            required
+            placeholder="Last name"
+            className={inputClass}
+          />
+        </div>
+        <input
+          name="address"
+          required
+          placeholder="Address"
+          className={inputClass}
+        />
+        <div className="grid grid-cols-2 gap-3">
+          <input
+            name="city"
+            required
+            placeholder="City"
+            className={inputClass}
+          />
+          <input
+            name="postalCode"
+            required
+            placeholder="Postal code"
+            className={inputClass}
+          />
+        </div>
+        <input
+          name="phone"
+          placeholder="Phone (optional)"
+          className={inputClass}
+        />
+      </fieldset>
+
+      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
+      <Button type="submit" size="lg" disabled={loading || items.length === 0}>
+        {loading ? "Redirecting to payment…" : "Pay with Xendit"}
+      </Button>
+    </form>
+  );
+}
+```
+
+Barrel `src/features/checkout/index.ts`:
+
+```ts
+export { CheckoutForm } from "./ui/CheckoutForm";
+```
+
+---
+
+## Langkah 4 — Halaman checkout (form + ringkasan)
+
+`src/app/checkout/page.tsx`:
+
+```tsx
+// src/app/checkout/page.tsx
+"use client";
+
+import { formatPrice } from "@/entities/product";
+import { useCart } from "@/features/cart";
+import { CheckoutForm } from "@/features/checkout";
+import { Container } from "@/shared/ui/Container";
+
+export default function CheckoutPage() {
+  const { items, subtotal } = useCart();
+  const currency = items[0]?.currency ?? "EUR";
+
+  return (
+    <section className="py-16">
+      <Container className="grid gap-12 lg:grid-cols-2">
+        {/* Form */}
+        <div>
+          <h1 className="mb-8 font-display text-3xl font-semibold tracking-tightest">
+            Checkout
+          </h1>
+          <CheckoutForm />
+        </div>
+
+        {/* Ringkasan order */}
+        <aside className="h-fit border border-border bg-surface p-6 lg:sticky lg:top-8">
+          <h2 className="mb-6 font-display text-lg font-semibold tracking-tightest">
+            Order summary
+          </h2>
+
+          {items.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Your cart is empty.</p>
+          ) : (
+            <>
+              <div className="divide-y divide-border border-y border-border">
+                {items.map((item) => (
+                  <div
+                    key={item.slug}
+                    className="flex items-center gap-4 py-4"
+                  >
+                    <div className="relative h-16 w-16 flex-none bg-muted">
+                      <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-[11px] text-background">
+                        {item.quantity}
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{item.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.category}
+                      </p>
+                    </div>
+                    <span className="text-sm font-semibold">
+                      {formatPrice(item.price * item.quantity, item.currency)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-semibold">
+                  {formatPrice(subtotal, currency)}
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Shipping &amp; taxes calculated at the payment step.
+              </p>
+            </>
+          )}
+        </aside>
+      </Container>
+    </section>
+  );
+}
+```
+
+---
+
+## Langkah 5 — Halaman success & failure
+
+`src/app/checkout/success/page.tsx`:
+
+```tsx
+// src/app/checkout/success/page.tsx
+"use client";
+
+import { CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { useEffect } from "react";
+
+import { useCart } from "@/features/cart";
+import { Button } from "@/shared/ui/Button";
+import { Container } from "@/shared/ui/Container";
+
+export default function CheckoutSuccessPage() {
+  const { clearCart } = useCart();
+
+  // Kosongkan cart setelah bayar sukses
+  useEffect(() => {
+    clearCart();
+  }, [clearCart]);
+
+  return (
+    <section className="py-24">
+      <Container className="flex max-w-lg flex-col items-center gap-4 text-center">
+        <CheckCircle2 size={56} className="text-green-600" />
+        <h1 className="font-display text-3xl font-semibold tracking-tightest">
+          Thank you for your order
+        </h1>
+        <p className="text-muted-foreground">
+          Your payment was received. A confirmation email is on its way.
+        </p>
+        <Link href="/collections/japanese-knives">
+          <Button>Continue shopping</Button>
+        </Link>
+      </Container>
+    </section>
+  );
+}
+```
+
+`src/app/checkout/failure/page.tsx`:
+
+```tsx
+// src/app/checkout/failure/page.tsx
+"use client";
+
+import { XCircle } from "lucide-react";
+import Link from "next/link";
+
+import { Button } from "@/shared/ui/Button";
+import { Container } from "@/shared/ui/Container";
+
+export default function CheckoutFailurePage() {
+  return (
+    <section className="py-24">
+      <Container className="flex max-w-lg flex-col items-center gap-4 text-center">
+        <XCircle size={56} className="text-red-600" />
+        <h1 className="font-display text-3xl font-semibold tracking-tightest">
+          Payment not completed
+        </h1>
+        <p className="text-muted-foreground">
+          Something went wrong or the payment was cancelled. Your cart is still
+          saved.
+        </p>
+        <Link href="/checkout">
+          <Button>Try again</Button>
+        </Link>
+      </Container>
+    </section>
+  );
+}
+```
+
+---
+
+## Langkah 6 — Arahkan tombol Checkout ke `/checkout`
+
+Tombol "Checkout" di **Drawer** (`CartDrawer.tsx`) dan **halaman `/cart`** masih `<Button>` polos. Bungkus dengan `Link`:
+
+```tsx
+// di CartDrawer.tsx — ganti tombol Checkout
+<Link href="/checkout" onClick={closeCart}>
+  <Button size="lg" className="w-full">
+    Checkout
+  </Button>
+</Link>
+```
+
+```tsx
+// di app/cart/page.tsx — ganti tombol Checkout
+<Link href="/checkout">
+  <Button size="lg" className="w-full">
+    Checkout
+  </Button>
+</Link>
+```
+
+(`Link` sudah di-import di kedua file.)
+
+---
+
+## Langkah 7 — Jalankan & uji
+
+```bash
+cd kissaki-knives
+npm run dev
+```
+
+Alur:
+1. Tambah produk → buka `/checkout`.
+2. Isi email + alamat → klik **Pay with Xendit**.
+3. Redirect ke halaman invoice Xendit → bayar pakai **test channel** (mis. VA simulasi di mode development).
+4. Sukses → balik ke `/checkout/success` (cart dikosongkan). Gagal → `/checkout/failure`.
+
+Gate:
+
+```bash
+npm run typecheck
+npm run lint
+```
+
+---
+
+## Alur & keamanan
+
+```
+/checkout (client)
+   └─ CheckoutForm → POST /api/checkout { email, name, items:[{slug,qty}] }
+                         │
+                         ▼
+   /api/checkout (server, Route Handler)
+       ├─ getProductBySlug → HITUNG ULANG harga & amount  (anti-tamper)
+       ├─ POST https://api.xendit.co/v2/invoices  (Basic auth, secret di server)
+       └─ balikan { invoiceUrl }
+                         │
+   window.location.href = invoiceUrl  → halaman bayar Xendit (hosted)
+                         │
+   bayar → success_redirect_url → /checkout/success  (clearCart)
+   gagal → failure_redirect_url → /checkout/failure
+```
+
+Poin penting:
+- **Secret hanya di server.** `XENDIT_SECRET_KEY` tanpa `NEXT_PUBLIC_`; key tak pernah sampai browser.
+- **Harga dihitung ulang di server** dari katalog — browser hanya kirim `slug` + `quantity`, jadi user tak bisa mengubah harga.
+- **Tanpa dependency baru** — cukup `fetch` bawaan + `Buffer` (Node runtime). Route ini otomatis berjalan di Node runtime Next.js.
+- **Hosted checkout** = paling aman utk mulai; kamu tak menyentuh data kartu.
+
+---
+
+## Langkah selanjutnya yang disarankan (produksi)
+
+1. **Webhook Xendit** (`POST /api/webhooks/xendit`) untuk update status order secara andal — jangan andalkan redirect saja. Verifikasi header `x-callback-token` dengan `XENDIT_CALLBACK_TOKEN`. Ini **wajib** sebelum live karena user bisa saja menutup tab setelah bayar.
+2. **Simpan order** ke database (Prisma/Postgres) saat invoice dibuat (status `PENDING`) lalu update via webhook (`PAID`/`EXPIRED`).
+3. **Mata uang**: pastikan harga produk dalam IDR integer (Xendit ID menolak desimal untuk IDR).
+4. **Validasi input** (mis. zod) di route handler.
+
+Mau saya lanjutkan dengan **webhook Xendit + struktur penyimpanan order** (poin 1 & 2)? Itu bagian yang bikin pembayaran benar-benar reliable.
