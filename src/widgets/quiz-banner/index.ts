@@ -1,0 +1,1 @@
+export { QuizBanner } from "./QuizBanner";

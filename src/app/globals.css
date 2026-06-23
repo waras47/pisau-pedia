@@ -1,17 +1,98 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-surface: hsl(var(--surface));
+  --color-surface-foreground: hsl(var(--surface-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-border: hsl(var(--border));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-copper: hsl(var(--copper));
+  --color-copper-foreground: hsl(var(--copper-foreground));
+  --color-gold: hsl(var(--gold));
+  --font-display: var(--font-display), system-ui, sans-serif;
+  --font-body: var(--font-body), system-ui, sans-serif;
+  --font-accent: var(--font-accent), Georgia, serif;
+  --animate-marquee: marquee 28s linear infinite;
+  --animate-fade-up: fade-up 0.6s ease-out both;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/*
+  Design tokens — "Steel & Washi"
+  Light: cool brushed-steel paper background, ink text, muted steel-indigo accent.
+  Dark: graphite background, warm washi text, lightened steel-periwinkle accent.
+  Copper is reserved strictly for sale/discount signals — never used as a base color.
+*/
+
 :root {
-  --color-gold: #C9A84C;
-  --color-gold-muted: #B8963E;
-  --color-bg: #0A0A0A;
-  --color-bg-surface: #111111;
-  --color-border: #1E1E1E;
-  --color-text: #FFFFFF;
-  --color-text-muted: #888888;
+  --background: 60 9% 96%;
+  --foreground: 240 6% 10%;
+
+  --surface: 0 0% 100%;
+  --surface-foreground: 240 6% 10%;
+
+  --muted: 40 14% 91%;
+  --muted-foreground: 30 6% 40%;
+
+  --border: 32 14% 88%;
+
+  --accent: 226 16% 31%;
+  --accent-foreground: 0 0% 100%;
+
+  --copper: 14 45% 40%;
+  --copper-foreground: 0 0% 100%;
+
+  --gold: 38 48% 45%;
+}
+
+.dark {
+  --background: 240 6% 8%;
+  --foreground: 48 18% 94%;
+
+  --surface: 240 6% 11%;
+  --surface-foreground: 48 18% 94%;
+
+  --muted: 240 5% 16%;
+  --muted-foreground: 30 8% 65%;
+
+  --border: 240 5% 20%;
+
+  --accent: 226 32% 74%;
+  --accent-foreground: 240 8% 12%;
+
+  --copper: 16 60% 62%;
+  --copper-foreground: 16 40% 12%;
+
+  --gold: 40 55% 62%;
 }
 
 * {
-  box-sizing: border-box;
+  border-color: hsl(var(--border));
 }
 
 html {
@@ -19,33 +100,49 @@ html {
 }
 
 body {
-  background-color: #0A0A0A;
-  color: #FFFFFF;
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
 }
 
 ::selection {
-  background-color: #C9A84C;
-  color: #0A0A0A;
+  background-color: hsl(var(--accent) / 0.25);
 }
 
+/* Visible keyboard focus, kept consistent across the app */
 :focus-visible {
-  outline: 2px solid #C9A84C;
+  outline: 2px solid hsl(var(--accent));
   outline-offset: 2px;
+  border-radius: 2px;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
+@utility clip-blade-br {
+  clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%);
 }
-::-webkit-scrollbar-track {
-  background: #0A0A0A;
+
+@utility clip-blade-tr {
+  clip-path: polygon(0 10%, 100% 0, 100% 100%, 0 100%);
 }
-::-webkit-scrollbar-thumb {
-  background: #2A2A2A;
-  border-radius: 0;
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #C9A84C;
+
+/* Thin scrollbar for horizontal product rails */
+.scroll-rail::-webkit-scrollbar {
+  height: 6px;
+}
+.scroll-rail::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+  border-radius: 9999px;
+}
+.scroll-rail {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
 }
