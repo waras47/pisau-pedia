@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { japaneseKnives } from "@/entities/product";
+import { accessories,japaneseKnives } from "@/entities/product";
 import { CollectionListing } from "@/widgets/collection-listing";
 
 interface CollectionPageProps {
@@ -16,6 +16,13 @@ const collections = {
     description:
       "Traditional carbon and stainless blades, forged by independent makers and finished by hand.",
     products: japaneseKnives,
+  },
+  accessories: {
+    eyebrow: "Complete Your Kitchen",
+    title: "Accessories",
+    description:
+      "Cutting boards, knife rolls, magnetic holders, sheaths, mandoline slicers, and essential kitchen tools.",
+    products: accessories
   },
 } as const;
 

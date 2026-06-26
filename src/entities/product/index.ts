@@ -5,6 +5,7 @@ export {
   getRelatedProducts,
 } from "./lib/get-product";
 export {
+  accessories,
   featuredProducts,
   japaneseKnives,
   monthlyPick,

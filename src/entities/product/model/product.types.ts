@@ -14,7 +14,7 @@ export interface Product {
   reviewCount: number;
   badge?: "new" | "sale" | "sold-out";
   slug: string;
-
+  maker?: string;
   // — field opsional untuk halaman detail —
   description?: string;
   highlights?: string[];
