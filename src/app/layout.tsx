@@ -3,13 +3,9 @@ import "./globals.css";
 import { Inter, Newsreader, Space_Grotesk } from "next/font/google";
 import { type ReactNode } from "react";
 
-import { CartProvider } from "@/features/cart";
-import { ThemeProvider } from "@/features/theme-toggle";
-import { siteConfig } from "@/shared/config/site.config";
-import { Footer } from "@/widgets/footer";
-import { Header } from "@/widgets/header";
-
 import type { Metadata } from "next";
+
+import { siteConfig } from "@/shared/config/site.config";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -45,15 +41,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${inter.variable} ${newsreader.variable}`}
     >
-      <body className="font-body antialiased">
-        <ThemeProvider>
-          <CartProvider>
-            <Header />
-            <main>{children}</main>
-            <Footer />
-          </CartProvider>
-        </ThemeProvider>
-      </body>
+      <body className="font-body antialiased">{children}</body>
     </html>
   );
 }
