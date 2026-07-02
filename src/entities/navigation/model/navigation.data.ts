@@ -61,6 +61,13 @@ export const mainNav: NavItem[] = [
           { label: "Honing Rods", href: "/collections/honing-rods" },
         ],
       },
+      {
+        title: "Services",
+        links: [
+          { label: "Sharpening & Repairs", href: "/pages/sharpening-repairs" },
+          { label: "Knife Engravings", href: "/collections/knife-engravings" },
+        ],
+      },
     ],
   },
   {

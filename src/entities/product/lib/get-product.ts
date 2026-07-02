@@ -1,5 +1,6 @@
 import {
   accessories,
+  engravings,
   featuredProducts,
   japaneseKnives,
   monthlyPick,
@@ -11,6 +12,7 @@ import { type Product } from "@/entities/product/model/product.types";
 export const allProducts: Product[] = [
   ...japaneseKnives,
   ...accessories,
+  ...engravings,
   ...featuredProducts,
   ...newArrivals,
   monthlyPick,

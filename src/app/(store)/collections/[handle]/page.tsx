@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { accessories,japaneseKnives } from "@/entities/product";
+import { accessories, engravings, japaneseKnives } from "@/entities/product";
 import { CollectionListing } from "@/widgets/collection-listing";
 
 interface CollectionPageProps {
@@ -22,7 +22,14 @@ const collections = {
     title: "Accessories",
     description:
       "Cutting boards, knife rolls, magnetic holders, sheaths, mandoline slicers, and essential kitchen tools.",
-    products: accessories
+    products: accessories,
+  },
+  "knife-engravings": {
+    eyebrow: "Make It Yours",
+    title: "Knife Engravings",
+    description:
+      "Personalize any knife with custom text, initials, or iconic Japanese designs. Engraved knives are custom-made and not eligible for return.",
+    products: engravings,
   },
 } as const;
 

@@ -10,11 +10,20 @@ export function MonthlyPick() {
   return (
     <section className="bg-surface py-16">
       <Container className="grid items-center gap-10 lg:grid-cols-2">
-        <PlaceholderImage
-          ratio="landscape"
-          label="Knife of the month"
-          className="clip-blade-tr lg:order-2"
-        />
+        {monthlyPick.image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={monthlyPick.image}
+            alt={monthlyPick.name}
+            className="clip-blade-tr aspect-[4/3] w-full object-cover lg:order-2"
+          />
+        ) : (
+          <PlaceholderImage
+            ratio="landscape"
+            label="Knife of the month"
+            className="clip-blade-tr lg:order-2"
+          />
+        )}
 
         <div className="flex flex-col items-start gap-4 lg:order-1">
           <span className="font-accent text-lg italic text-copper">

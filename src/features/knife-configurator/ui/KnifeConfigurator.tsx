@@ -128,22 +128,28 @@ export function KnifeConfigurator() {
     <div className="pb-20">
       {/* ── Preview sticky ── */}
       <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
-        <Container className="py-6">
+        <Container className="py-4">
           <p className="text-center text-sm font-medium uppercase tracking-widest2 text-muted-foreground">
             Knife Configurator — Build Your Own Knife
           </p>
           <div className="mx-auto mt-2 h-px w-10 bg-border" />
 
-          <div className="relative mt-4">
-            <PlaceholderImage
-              ratio="wide"
-              label={
-                blade
-                  ? `${blade.name}${handle ? ` · ${handle.name}` : ""}`
-                  : "Select a shape to start"
-              }
-            />
-            <div className="mt-3 flex items-center justify-end gap-4">
+          <div className="relative mt-3">
+            {blade?.image || shape?.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={blade?.image ?? shape?.image}
+                alt={blade ? blade.name : shape?.name ?? "Selected knife"}
+                className="aspect-[16/7] max-h-[30vh] w-full bg-muted object-contain"
+              />
+            ) : (
+              <PlaceholderImage
+                ratio="wide"
+                label="Select a shape to start"
+                className="max-h-[30vh]"
+              />
+            )}
+            <div className="mt-2 flex items-center justify-end gap-4">
               {blade ? (
                 <span className="text-sm font-semibold">
                   {formatPrice(total, CURRENCY)}
@@ -185,6 +191,7 @@ export function KnifeConfigurator() {
                 key={s.id}
                 label={`${s.name} [${s.category}]`}
                 previewLabel={s.name}
+                image={s.image}
                 active={shapeId === s.id}
                 onClick={() => selectShape(s.id)}
               />
@@ -208,6 +215,7 @@ export function KnifeConfigurator() {
                   key={b.id}
                   label={b.name}
                   previewLabel={`${b.steel} · ${b.lengthMm}mm`}
+                  image={b.image}
                   price={b.price}
                   compareAtPrice={b.compareAtPrice}
                   active={bladeId === b.id}
@@ -234,6 +242,7 @@ export function KnifeConfigurator() {
                   key={h.id}
                   label={h.name}
                   previewLabel={h.material}
+                  image={h.image}
                   price={h.priceDelta > 0 ? h.priceDelta : undefined}
                   priceIsDelta
                   active={handleId === h.id}
@@ -264,6 +273,7 @@ export function KnifeConfigurator() {
                   key={a.id}
                   label={a.name}
                   previewLabel="Accessory"
+                  image={a.image}
                   price={a.price}
                   priceIsDelta
                   active={accessoryIds.includes(a.id)}
@@ -362,6 +372,7 @@ function StepSection({
 interface OptionCardProps {
   label: string;
   previewLabel: string;
+  image?: string;
   price?: number;
   compareAtPrice?: number;
   priceIsDelta?: boolean;
@@ -372,6 +383,7 @@ interface OptionCardProps {
 function OptionCard({
   label,
   previewLabel,
+  image,
   price,
   compareAtPrice,
   priceIsDelta,
@@ -394,7 +406,16 @@ function OptionCard({
         size={16}
         className="absolute right-3 top-3 text-muted-foreground/60"
       />
-      <PlaceholderImage ratio="landscape" label={previewLabel} />
+      {image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={image}
+          alt={previewLabel}
+          className="aspect-[4/3] w-full bg-muted object-contain"
+        />
+      ) : (
+        <PlaceholderImage ratio="landscape" label={previewLabel} />
+      )}
       <span className="text-xs font-medium uppercase tracking-widest2">
         {label}
       </span>

@@ -9,6 +9,7 @@ export const featuredProducts: Product[] = [
   {
     id: "fp-1",
     slug: "aoi-gyuto-210",
+    image: "/dev-images/products/aoi-gyuto-210.jpg",
     name: "Aoi Gyuto 210mm",
     category: "Chef's Knife",
     price: 248,
@@ -21,6 +22,7 @@ export const featuredProducts: Product[] = [
   {
     id: "fp-2",
     slug: "sumi-santoku-180",
+    image: "/dev-images/products/sumi-santoku-180.jpg",
     name: "Sumi Santoku 180mm",
     category: "Multi-Purpose",
     price: 162,
@@ -31,6 +33,7 @@ export const featuredProducts: Product[] = [
   {
     id: "fp-3",
     slug: "kuro-bunka-190",
+    image: "/dev-images/products/kuro-bunka-190.jpg",
     name: "Kuro Bunka 190mm",
     category: "Multi-Purpose",
     price: 176,
@@ -43,6 +46,7 @@ export const featuredProducts: Product[] = [
   {
     id: "fp-4",
     slug: "tsuchime-nakiri-165",
+    image: "/dev-images/products/tsuchime-nakiri-165.jpg",
     name: "Tsuchime Nakiri 165mm",
     category: "Vegetable",
     price: 138,
@@ -57,6 +61,7 @@ export const newArrivals: Product[] = [
   {
     id: "na-1",
     slug: "hibana-petty-120",
+    image: "/dev-images/products/hibana-petty-120.jpg",
     name: "Hibana Petty 120mm",
     category: "Paring",
     price: 86,
@@ -68,6 +73,7 @@ export const newArrivals: Product[] = [
   {
     id: "na-2",
     slug: "shirobana-sujihiki-240",
+    image: "/dev-images/products/shirobana-sujihiki-240.jpg",
     name: "Shirobana Sujihiki 240mm",
     category: "Slicer",
     price: 254,
@@ -79,6 +85,7 @@ export const newArrivals: Product[] = [
   {
     id: "na-3",
     slug: "ginko-cutting-board-s",
+    image: "/dev-images/products/ginko-cutting-board-s.jpg",
     name: "Ginko Cutting Board — Small",
     category: "Accessories",
     price: 58,
@@ -90,6 +97,7 @@ export const newArrivals: Product[] = [
   {
     id: "na-4",
     slug: "ren-kitchen-tweezers",
+    image: "/dev-images/products/ren-kitchen-tweezers.jpg",
     name: "Ren Kitchen Tweezers",
     category: "Accessories",
     price: 46,
@@ -103,6 +111,7 @@ export const newArrivals: Product[] = [
 export const monthlyPick: Product = {
   id: "mp-1",
   slug: "ginrei-santoku-170",
+  image: "/dev-images/products/ginrei-santoku-170.jpg",
   name: "Ginrei Santoku 170mm",
   category: "Knife of the Month",
   price: 136,
@@ -117,6 +126,7 @@ export const japaneseKnives: Product[] = [
   {
     id: "jk-1",
     slug: "aoi-gyuto-210",
+    image: "/dev-images/products/aoi-gyuto-210.jpg",
     name: "Aoi Gyuto 210mm",
     category: "Chef's Knife",
     price: 248,
@@ -146,6 +156,7 @@ export const japaneseKnives: Product[] = [
   {
     id: "jk-2",
     slug: "sumi-santoku-180",
+    image: "/dev-images/products/sumi-santoku-180.jpg",
     name: "Sumi Santoku 180mm",
     category: "Santoku",
     price: 162,
@@ -156,6 +167,7 @@ export const japaneseKnives: Product[] = [
   {
     id: "jk-3",
     slug: "kuro-bunka-190",
+    image: "/dev-images/products/kuro-bunka-190.jpg",
     name: "Kuro Bunka 190mm",
     category: "Bunka",
     price: 176,
@@ -168,6 +180,7 @@ export const japaneseKnives: Product[] = [
   {
     id: "jk-4",
     slug: "tsuchime-nakiri-165",
+    image: "/dev-images/products/tsuchime-nakiri-165.jpg",
     name: "Tsuchime Nakiri 165mm",
     category: "Nakiri",
     price: 138,
@@ -178,6 +191,7 @@ export const japaneseKnives: Product[] = [
   {
     id: "jk-5",
     slug: "shirobana-sujihiki-240",
+    image: "/dev-images/products/shirobana-sujihiki-240.jpg",
     name: "Shirobana Sujihiki 240mm",
     category: "Slicer",
     price: 254,
@@ -188,6 +202,7 @@ export const japaneseKnives: Product[] = [
   {
     id: "jk-6",
     slug: "hibana-petty-120",
+    image: "/dev-images/products/hibana-petty-120.jpg",
     name: "Hibana Petty 120mm",
     category: "Petty",
     price: 86,
@@ -199,6 +214,7 @@ export const japaneseKnives: Product[] = [
   {
     id: "jk-7",
     slug: "yama-gyuto-240",
+    image: "/dev-images/products/yama-gyuto-240.jpg",
     name: "Yama Gyuto 240mm",
     category: "Chef's Knife",
     price: 296,
@@ -209,6 +225,7 @@ export const japaneseKnives: Product[] = [
   {
     id: "jk-8",
     slug: "mori-nakiri-170",
+    image: "/dev-images/products/mori-nakiri-170.jpg",
     name: "Mori Nakiri 170mm",
     category: "Nakiri",
     price: 148,
@@ -225,6 +242,7 @@ export const accessories: Product[] = [
   {
     id: "acc-1",
     slug: "leather-knife-roll-10",
+    image: "/dev-images/products/leather-knife-roll-10.jpg",
     name: "Chef's Leather Knife Roll — 10 Slots",
     maker: "Kissaki",
     category: "Knife Bags & Rolls",
@@ -252,6 +270,7 @@ export const accessories: Product[] = [
   {
     id: "acc-2",
     slug: "magnetic-knife-holder-walnut",
+    image: "/dev-images/products/magnetic-knife-holder-walnut.jpg",
     name: "Magnetic Knife Holder — Walnut",
     maker: "Kissaki",
     category: "Knife Holders",
@@ -265,6 +284,7 @@ export const accessories: Product[] = [
   {
     id: "acc-3",
     slug: "hasegawa-cutting-board-m",
+    image: "/dev-images/products/hasegawa-cutting-board-m.jpg",
     name: "Hasegawa Soft Cutting Board — Medium",
     maker: "Hasegawa",
     category: "Cutting Boards",
@@ -276,6 +296,7 @@ export const accessories: Product[] = [
   {
     id: "acc-4",
     slug: "hasegawa-cutting-board-l",
+    image: "/dev-images/products/hasegawa-cutting-board-l.jpg",
     name: "Hasegawa Soft Cutting Board — Large",
     maker: "Hasegawa",
     category: "Cutting Boards",
@@ -287,6 +308,7 @@ export const accessories: Product[] = [
   {
     id: "acc-5",
     slug: "end-grain-walnut-board",
+    image: "/dev-images/products/end-grain-walnut-board.jpg",
     name: "End Grain Walnut Cutting Board",
     maker: "Kissaki",
     category: "Cutting Boards",
@@ -299,6 +321,7 @@ export const accessories: Product[] = [
   {
     id: "acc-6",
     slug: "benriner-mandoline-slicer",
+    image: "/dev-images/products/benriner-mandoline-slicer.jpg",
     name: "Benriner Mandoline Slicer",
     maker: "Benriner",
     category: "Mandoline Slicers",
@@ -310,6 +333,7 @@ export const accessories: Product[] = [
   {
     id: "acc-7",
     slug: "benriner-mandoline-pro",
+    image: "/dev-images/products/benriner-mandoline-pro.jpg",
     name: "Benriner Mandoline Slicer — Pro",
     maker: "Benriner",
     category: "Mandoline Slicers",
@@ -321,6 +345,7 @@ export const accessories: Product[] = [
   {
     id: "acc-8",
     slug: "chiba-mandoline-slicer",
+    image: "/dev-images/products/chiba-mandoline-slicer.jpg",
     name: "Chiba Mandoline Slicer",
     maker: "Chiba",
     category: "Mandoline Slicers",
@@ -332,6 +357,7 @@ export const accessories: Product[] = [
   {
     id: "acc-9",
     slug: "wooden-saya-gyuto-210",
+    image: "/dev-images/products/wooden-saya-gyuto-210.jpg",
     name: "Wooden Saya — Gyuto 210mm",
     maker: "Kissaki",
     category: "Knife Sheaths",
@@ -345,6 +371,7 @@ export const accessories: Product[] = [
   {
     id: "acc-10",
     slug: "wooden-saya-santoku-180",
+    image: "/dev-images/products/wooden-saya-santoku-180.jpg",
     name: "Wooden Saya — Santoku 180mm",
     maker: "Kissaki",
     category: "Knife Sheaths",
@@ -358,6 +385,7 @@ export const accessories: Product[] = [
   {
     id: "acc-11",
     slug: "wooden-saya-nakiri-165",
+    image: "/dev-images/products/wooden-saya-nakiri-165.jpg",
     name: "Wooden Saya — Nakiri 165mm",
     maker: "Kissaki",
     category: "Knife Sheaths",
@@ -371,6 +399,7 @@ export const accessories: Product[] = [
   {
     id: "acc-12",
     slug: "kitchen-tweezers-stainless",
+    image: "/dev-images/products/kitchen-tweezers-stainless.jpg",
     name: "Kitchen Tweezers — Stainless 300mm",
     maker: "Kissaki",
     category: "Kitchen Tools",
@@ -382,6 +411,7 @@ export const accessories: Product[] = [
   {
     id: "acc-13",
     slug: "fish-bone-tweezers",
+    image: "/dev-images/products/fish-bone-tweezers.jpg",
     name: "Fish Bone Tweezers",
     maker: "Kissaki",
     category: "Kitchen Tools",
@@ -393,6 +423,7 @@ export const accessories: Product[] = [
   {
     id: "acc-14",
     slug: "kitchen-scissors-stainless",
+    image: "/dev-images/products/kitchen-scissors-stainless.jpg",
     name: "Kitchen Scissors — Stainless",
     maker: "Kissaki",
     category: "Kitchen Tools",
@@ -404,6 +435,7 @@ export const accessories: Product[] = [
   {
     id: "acc-15",
     slug: "small-scissors-40mm",
+    image: "/dev-images/products/small-scissors-40mm.jpg",
     name: "Small Scissors 40mm",
     maker: "Kissaki",
     category: "Kitchen Tools",
@@ -415,6 +447,7 @@ export const accessories: Product[] = [
   {
     id: "acc-16",
     slug: "fish-scaler-brass",
+    image: "/dev-images/products/fish-scaler-brass.jpg",
     name: "Fish Scaler — Brass",
     maker: "Kissaki",
     category: "Kitchen Tools",
@@ -427,6 +460,7 @@ export const accessories: Product[] = [
   {
     id: "acc-17",
     slug: "leather-knife-bag-5",
+    image: "/dev-images/products/leather-knife-bag-5.jpg",
     name: "Leather Knife Bag — 5 Slots",
     maker: "Kissaki",
     category: "Knife Bags & Rolls",
@@ -438,6 +472,7 @@ export const accessories: Product[] = [
   {
     id: "acc-18",
     slug: "canvas-knife-roll-8",
+    image: "/dev-images/products/canvas-knife-roll-8.jpg",
     name: "Waxed Canvas Knife Roll — 8 Slots",
     maker: "Kissaki",
     category: "Knife Bags & Rolls",
@@ -449,6 +484,7 @@ export const accessories: Product[] = [
   {
     id: "acc-19",
     slug: "magnetic-knife-holder-oak",
+    image: "/dev-images/products/magnetic-knife-holder-oak.jpg",
     name: "Magnetic Knife Holder — Oak",
     maker: "Kissaki",
     category: "Knife Holders",
@@ -460,6 +496,7 @@ export const accessories: Product[] = [
   {
     id: "acc-20",
     slug: "sushi-making-kit",
+    image: "/dev-images/products/sushi-making-kit.jpg",
     name: "Sushi Making Kit — Bamboo",
     maker: "Kissaki",
     category: "Kitchen Tools",
@@ -482,6 +519,7 @@ export const accessories: Product[] = [
   {
     id: "acc-22",
     slug: "suncraft-mandoline-v",
+    image: "/dev-images/products/suncraft-mandoline-v.jpg",
     name: "Suncraft V-Shape Mandoline Slicer",
     maker: "Suncraft",
     category: "Mandoline Slicers",
@@ -494,6 +532,7 @@ export const accessories: Product[] = [
   {
     id: "acc-23",
     slug: "wooden-saya-petty-150",
+    image: "/dev-images/products/wooden-saya-petty-150.jpg",
     name: "Wooden Saya — Petty 150mm",
     maker: "Kissaki",
     category: "Knife Sheaths",
@@ -505,6 +544,7 @@ export const accessories: Product[] = [
   {
     id: "acc-24",
     slug: "knife-edge-guard-set",
+    image: "/dev-images/products/knife-edge-guard-set.jpg",
     name: "Universal Edge Guard Set — 3 Pieces",
     maker: "Kissaki",
     category: "Knife Sheaths",
@@ -520,6 +560,7 @@ export const engravings: Product[] = [
   {
     id: "eng-1",
     slug: "custom-engraving",
+    image: "/dev-images/products/custom-engraving.jpg",
     name: "Custom Engraving",
     maker: "Kissaki Studio",
     category: "Custom",
@@ -545,6 +586,7 @@ export const engravings: Product[] = [
   {
     id: "eng-2",
     slug: "engraving-sakura",
+    image: "/dev-images/products/engraving-sakura.jpg",
     name: "Sakura Design Engraving",
     maker: "Kissaki Studio",
     category: "Japanese Motifs",
@@ -556,6 +598,7 @@ export const engravings: Product[] = [
   {
     id: "eng-3",
     slug: "engraving-mt-fuji",
+    image: "/dev-images/products/engraving-mt-fuji.jpg",
     name: "Mt. Fuji Design Engraving",
     maker: "Kissaki Studio",
     category: "Japanese Motifs",
@@ -567,6 +610,7 @@ export const engravings: Product[] = [
   {
     id: "eng-4",
     slug: "engraving-daruma",
+    image: "/dev-images/products/engraving-daruma.jpg",
     name: "Daruma Doll Design Engraving",
     maker: "Kissaki Studio",
     category: "Japanese Motifs",
@@ -579,6 +623,7 @@ export const engravings: Product[] = [
   {
     id: "eng-5",
     slug: "engraving-crane",
+    image: "/dev-images/products/engraving-crane.jpg",
     name: "Crane Design Engraving",
     maker: "Kissaki Studio",
     category: "Japanese Motifs",
@@ -590,6 +635,7 @@ export const engravings: Product[] = [
   {
     id: "eng-6",
     slug: "engraving-hannya",
+    image: "/dev-images/products/engraving-hannya.jpg",
     name: "Hannya Mask Design Engraving",
     maker: "Kissaki Studio",
     category: "Japanese Motifs",
@@ -601,6 +647,7 @@ export const engravings: Product[] = [
   {
     id: "eng-7",
     slug: "engraving-dragon",
+    image: "/dev-images/products/engraving-dragon.jpg",
     name: "Dragon Design Engraving",
     maker: "Kissaki Studio",
     category: "Japanese Motifs",
@@ -613,6 +660,7 @@ export const engravings: Product[] = [
   {
     id: "eng-8",
     slug: "engraving-kanji-name",
+    image: "/dev-images/products/engraving-kanji-name.jpg",
     name: "Kanji Name Engraving",
     maker: "Kissaki Studio",
     category: "Custom",

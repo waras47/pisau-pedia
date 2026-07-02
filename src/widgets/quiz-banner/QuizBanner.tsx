@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { Button } from "@/shared/ui/Button";
 import { Container } from "@/shared/ui/Container";
-import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
 
 export function QuizBanner() {
   return (
@@ -27,10 +26,11 @@ export function QuizBanner() {
                 </Button>
               </Link>
             </div>
-            <PlaceholderImage
-              ratio="landscape"
-              label="Quiz preview"
-              className="opacity-90"
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/dev-images/products/shirobana-sujihiki-240.jpg"
+              alt="Find your knife quiz preview"
+              className="aspect-[4/3] w-full bg-background/10 object-contain opacity-90"
             />
           </div>
         </div>

@@ -26,7 +26,16 @@ export function ProductCard({ product, className }: ProductCardProps) {
       className={`group flex w-full flex-col gap-3 ${className ?? ""}`}
     >
       <div className="relative">
-        <PlaceholderImage label={product.category} ratio="square" />
+        {product.image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={product.image}
+            alt={product.name}
+            className="aspect-square w-full object-cover"
+          />
+        ) : (
+          <PlaceholderImage label={product.category} ratio="square" />
+        )}
         {product.badge ? (
           <Badge
             variant={product.badge === "sale" ? "copper" : "neutral"}

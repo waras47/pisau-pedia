@@ -9,17 +9,18 @@ export const CURRENCY = "EUR";
 
 // Langkah 1 — bentuk pisau
 export const shapes: KnifeShape[] = [
-  { id: "gyuto", name: "Gyuto", category: "Multi-Purpose" },
-  { id: "santoku", name: "Santoku", category: "Multi-Purpose" },
-  { id: "bunka", name: "Bunka", category: "Multi-Purpose" },
-  { id: "nakiri", name: "Nakiri", category: "Vegetable" },
-  { id: "petty", name: "Petty", category: "Paring" },
+  { id: "gyuto", name: "Gyuto", category: "Multi-Purpose", image: "/dev-images/products/aoi-gyuto-210.jpg" },
+  { id: "santoku", name: "Santoku", category: "Multi-Purpose", image: "/dev-images/products/sumi-santoku-180.jpg" },
+  { id: "bunka", name: "Bunka", category: "Multi-Purpose", image: "/dev-images/products/kuro-bunka-190.jpg" },
+  { id: "nakiri", name: "Nakiri", category: "Vegetable", image: "/dev-images/products/tsuchime-nakiri-165.jpg" },
+  { id: "petty", name: "Petty", category: "Paring", image: "/dev-images/products/hibana-petty-120.jpg" },
 ];
 
 // Langkah 2 — blade, masing-masing terikat ke satu shape (shapeId)
 export const blades: KnifeBlade[] = [
   {
     id: "aoi-gyuto-210",
+    image: "/dev-images/products/aoi-gyuto-210.jpg",
     shapeId: "gyuto",
     name: "Aoi Gyuto 210mm",
     steel: "Aogami #2",
@@ -29,6 +30,7 @@ export const blades: KnifeBlade[] = [
   },
   {
     id: "yama-gyuto-240",
+    image: "/dev-images/products/yama-gyuto-240.jpg",
     shapeId: "gyuto",
     name: "Yama Gyuto 240mm",
     steel: "VG-10",
@@ -37,6 +39,7 @@ export const blades: KnifeBlade[] = [
   },
   {
     id: "sumi-santoku-180",
+    image: "/dev-images/products/sumi-santoku-180.jpg",
     shapeId: "santoku",
     name: "Sumi Santoku 180mm",
     steel: "Aogami #2",
@@ -45,6 +48,7 @@ export const blades: KnifeBlade[] = [
   },
   {
     id: "ginrei-santoku-170",
+    image: "/dev-images/products/ginrei-santoku-170.jpg",
     shapeId: "santoku",
     name: "Ginrei Santoku 170mm",
     steel: "VG-10",
@@ -53,6 +57,7 @@ export const blades: KnifeBlade[] = [
   },
   {
     id: "kuro-bunka-190",
+    image: "/dev-images/products/kuro-bunka-190.jpg",
     shapeId: "bunka",
     name: "Kuro Bunka 190mm",
     steel: "Shirogami #2",
@@ -62,6 +67,7 @@ export const blades: KnifeBlade[] = [
   },
   {
     id: "hap40-bunka-190",
+    image: "/dev-images/configurator/hap40-bunka-190.jpg",
     shapeId: "bunka",
     name: "HAP-40 Bunka Black 190mm",
     steel: "HAP-40",
@@ -71,6 +77,7 @@ export const blades: KnifeBlade[] = [
   },
   {
     id: "tsuchime-nakiri-165",
+    image: "/dev-images/products/tsuchime-nakiri-165.jpg",
     shapeId: "nakiri",
     name: "Tsuchime Nakiri 165mm",
     steel: "VG-10",
@@ -79,6 +86,7 @@ export const blades: KnifeBlade[] = [
   },
   {
     id: "mori-nakiri-170",
+    image: "/dev-images/products/mori-nakiri-170.jpg",
     shapeId: "nakiri",
     name: "Mori Nakiri 170mm",
     steel: "Aogami #2",
@@ -87,6 +95,7 @@ export const blades: KnifeBlade[] = [
   },
   {
     id: "hibana-petty-120",
+    image: "/dev-images/products/hibana-petty-120.jpg",
     shapeId: "petty",
     name: "Hibana Petty 120mm",
     steel: "Shirogami #2",
@@ -97,17 +106,17 @@ export const blades: KnifeBlade[] = [
 
 // Langkah 3 — handle (priceDelta = tambahan harga)
 export const handles: KnifeHandle[] = [
-  { id: "magnolia", name: "Magnolia", material: "Magnolia wood", priceDelta: 0 },
-  { id: "walnut", name: "Walnut", material: "Walnut wood", priceDelta: 20 },
-  { id: "horn", name: "Buffalo Horn", material: "Magnolia + horn", priceDelta: 35 },
-  { id: "ebony", name: "Ebony", material: "Ebony + horn", priceDelta: 45 },
+  { id: "magnolia", name: "Magnolia", material: "Magnolia wood", priceDelta: 0, image: "/dev-images/configurator/handle-magnolia.jpg" },
+  { id: "walnut", name: "Walnut", material: "Walnut wood", priceDelta: 20, image: "/dev-images/configurator/handle-walnut.jpg" },
+  { id: "horn", name: "Buffalo Horn", material: "Magnolia + horn", priceDelta: 35, image: "/dev-images/configurator/handle-horn.jpg" },
+  { id: "ebony", name: "Ebony", material: "Ebony + horn", priceDelta: 45, image: "/dev-images/configurator/handle-ebony.jpg" },
 ];
 
 // Langkah 4 — accessories (opsional, bisa pilih lebih dari satu)
 export const accessories: KnifeAccessory[] = [
-  { id: "saya", name: "Magnolia Saya (sheath)", price: 24 },
-  { id: "engraving", name: "Custom Engraving", price: 15 },
-  { id: "board", name: "Ginko Cutting Board", price: 58 },
+  { id: "saya", name: "Magnolia Saya (sheath)", price: 24, image: "/dev-images/products/wooden-saya-gyuto-210.jpg" },
+  { id: "engraving", name: "Custom Engraving", price: 15, image: "/dev-images/products/custom-engraving.jpg" },
+  { id: "board", name: "Ginko Cutting Board", price: 58, image: "/dev-images/products/ginko-cutting-board-s.jpg" },
 ];
 
 /** Blade yang tersedia untuk sebuah shape. */

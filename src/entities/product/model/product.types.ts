@@ -15,6 +15,8 @@ export interface Product {
   badge?: "new" | "sale" | "sold-out";
   slug: string;
   maker?: string;
+  /** Local dev-only preview photo (not committed — see /public/dev-images). */
+  image?: string;
 
   // — field opsional untuk halaman detail —
   description?: string;
