@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { Container } from "@/shared/ui/Container";
-import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
 
 const banners = [
   {
@@ -11,6 +10,7 @@ const banners = [
     href: "/collections/sharpening",
     cta: "Discover Sharpening Tools",
     label: "Sharpening stone in use",
+    image: "/dev-images/products/sharpening-stone.jpg",
   },
   {
     title: "Accessories",
@@ -18,6 +18,7 @@ const banners = [
     href: "/collections/accessories",
     cta: "Browse Accessories",
     label: "Kitchen accessories",
+    image: "/dev-images/products/hasegawa-cutting-board-m.jpg",
   },
 ];
 
@@ -31,7 +32,12 @@ export function CategoryBanners() {
             href={banner.href}
             className="group relative flex flex-col justify-end overflow-hidden"
           >
-            <PlaceholderImage ratio="landscape" label={banner.label} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={banner.image}
+              alt={banner.label}
+              className="aspect-[4/3] w-full bg-muted object-contain"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/0 to-foreground/0" />
             <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-6 text-background">
               <h3 className="font-display text-2xl font-semibold">{banner.title}</h3>

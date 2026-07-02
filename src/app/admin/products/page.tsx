@@ -338,9 +338,18 @@ export default function ProductsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-[10px] text-gray-400">
-                          IMG
-                        </div>
+                        {p.image ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={p.image}
+                            alt={p.name}
+                            className="h-10 w-10 shrink-0 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-[10px] text-gray-400">
+                            IMG
+                          </div>
+                        )}
                         <div>
                           <p className="font-medium text-gray-700">{p.name}</p>
                           <p className="text-[11px] text-gray-400">{p.slug}</p>
@@ -597,7 +606,16 @@ export default function ProductsPage() {
             </div>
             <div className="max-h-[70vh] overflow-y-auto p-6">
               <div className="mb-4 flex items-center gap-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gray-100 text-xs text-gray-400">IMG</div>
+                {editProduct.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={editProduct.image}
+                    alt={editProduct.name}
+                    className="h-16 w-16 rounded-xl object-cover"
+                  />
+                ) : (
+                  <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gray-100 text-xs text-gray-400">IMG</div>
+                )}
                 <div>
                   <h3 className="text-xl font-bold text-gray-800">{editProduct.name}</h3>
                   <p className="text-sm text-gray-400">{editProduct.slug}</p>

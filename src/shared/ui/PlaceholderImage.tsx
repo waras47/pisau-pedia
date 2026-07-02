@@ -5,7 +5,7 @@ import { cn } from "@/shared/lib/utils";
 
 interface PlaceholderImageProps extends HTMLAttributes<HTMLDivElement> {
   label?: string;
-  ratio?: "square" | "portrait" | "landscape" | "wide";
+  ratio?: "square" | "portrait" | "landscape" | "wide" | "video";
 }
 
 const ratioClasses: Record<NonNullable<PlaceholderImageProps["ratio"]>, string> = {
@@ -13,6 +13,7 @@ const ratioClasses: Record<NonNullable<PlaceholderImageProps["ratio"]>, string> 
   portrait: "aspect-[4/5]",
   landscape: "aspect-[4/3]",
   wide: "aspect-[16/7]",
+  video: "aspect-video",
 };
 
 /**

@@ -4,16 +4,17 @@ import { ArrowRight } from "lucide-react";
 import { featuredProducts, ProductCarousel } from "@/entities/product";
 import { Badge } from "@/shared/ui/Badge";
 import { Container } from "@/shared/ui/Container";
-import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
 
 export function FeaturedCollection() {
   return (
     <section className="bg-muted/40 py-16">
       <Container className="flex flex-col gap-10">
         <div className="grid items-center gap-8 lg:grid-cols-2">
-          <PlaceholderImage
-            ratio="landscape"
-            label="Workshop visit — Tanaka Forge"
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/dev-images/products/kuro-bunka-190.jpg"
+            alt="Tanaka Forge Damascus bunka knife"
+            className="aspect-[4/3] w-full bg-muted object-contain"
           />
           <div className="flex flex-col items-start gap-4">
             <Badge variant="copper">20% Off — Until June 21</Badge>

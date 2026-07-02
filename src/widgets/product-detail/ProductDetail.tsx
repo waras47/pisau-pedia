@@ -45,11 +45,30 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
         {/* Galeri + Info */}
         <div className="grid gap-10 lg:grid-cols-2">
           <div className="flex flex-col gap-4">
-            <PlaceholderImage label={galleryLabels[0]} ratio="square" />
+            {product.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={product.image}
+                alt={product.name}
+                className="aspect-square w-full object-cover"
+              />
+            ) : (
+              <PlaceholderImage label={galleryLabels[0]} ratio="square" />
+            )}
             <div className="grid grid-cols-3 gap-4">
-              {galleryLabels.slice(1, 4).map((label) => (
-                <PlaceholderImage key={label} label={label} ratio="square" />
-              ))}
+              {galleryLabels.slice(1, 4).map((label) =>
+                product.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={label}
+                    src={product.image}
+                    alt={`${product.name} — ${label}`}
+                    className="aspect-square w-full object-cover"
+                  />
+                ) : (
+                  <PlaceholderImage key={label} label={label} ratio="square" />
+                ),
+              )}
             </div>
           </div>
 

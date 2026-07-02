@@ -2,16 +2,25 @@ import Link from "next/link";
 
 import { Button } from "@/shared/ui/Button";
 import { Container } from "@/shared/ui/Container";
-import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
 
 export function ConfiguratorBanner() {
   return (
     <section className="bg-muted/40 py-16">
       <Container className="grid items-center gap-10 lg:grid-cols-2">
         <div className="relative">
-          <PlaceholderImage ratio="square" label="Blade options" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/dev-images/products/yama-gyuto-240.jpg"
+            alt="Blade options"
+            className="aspect-square w-full bg-muted object-contain"
+          />
           <div className="absolute -bottom-6 -right-6 hidden w-2/3 border-4 border-background sm:block">
-            <PlaceholderImage ratio="square" label="Handle options" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/dev-images/products/wooden-saya-gyuto-210.jpg"
+              alt="Handle options"
+              className="aspect-square w-full bg-muted object-contain"
+            />
           </div>
         </div>
 

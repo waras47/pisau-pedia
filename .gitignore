@@ -29,6 +29,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local-dev-only product photos sourced from a third-party shop for CMS
+# preview purposes — not licensed for redistribution, never commit these.
+/public/dev-images/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

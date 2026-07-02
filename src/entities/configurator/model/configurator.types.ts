@@ -3,6 +3,7 @@ export interface KnifeShape {
   name: string;
   category: string; // mis. "Multi-Purpose", "Vegetable"
   description?: string;
+  image?: string;
 }
 
 export interface KnifeBlade {
@@ -13,6 +14,7 @@ export interface KnifeBlade {
   lengthMm: number;
   price: number;
   compareAtPrice?: number;
+  image?: string;
 }
 
 export interface KnifeHandle {
@@ -20,10 +22,12 @@ export interface KnifeHandle {
   name: string;
   material: string;
   priceDelta: number;
+  image?: string;
 }
 
 export interface KnifeAccessory {
   id: string;
   name: string;
   price: number;
+  image?: string;
 }

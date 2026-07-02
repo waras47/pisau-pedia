@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/shared/ui/Button";
 import { Container } from "@/shared/ui/Container";
-import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
+
+import { HeroImageSlider } from "./HeroImageSlider";
 
 export function Hero() {
   return (
@@ -12,6 +14,7 @@ export function Hero() {
           <span className="font-accent text-lg italic text-copper">
             The heart of your kitchen
           </span>
+          <span className="h-px w-16 bg-gradient-to-r from-gold to-transparent" />
           <h1 className="font-display text-4xl font-semibold leading-[1.05] tracking-tightest sm:text-5xl lg:text-6xl">
             Japanese kitchen
             <br />
@@ -24,24 +27,26 @@ export function Hero() {
             home cooks and professional chefs — and sharpened to a precision
             edge before they ever leave us.
           </p>
-          <div className="flex flex-wrap gap-4 pt-2">
+          <div className="flex flex-wrap items-center gap-6 pt-2">
             <Link href="/collections/knives">
               <Button size="lg">Find Your Knife</Button>
             </Link>
-            <Link href="/pages/configurator">
-              <Button size="lg" variant="outline">
-                Build a Knife
-              </Button>
+            <Link
+              href="/pages/configurator"
+              className="inline-flex items-center gap-1.5 text-sm font-medium uppercase tracking-widest2 text-foreground transition-colors hover:text-copper"
+            >
+              Build a Knife
+              <ArrowRight size={14} />
             </Link>
           </div>
+
+          <p className="text-xs uppercase tracking-widest2 text-muted-foreground">
+            Hand-forged in Sakai, Japan — since 1998
+          </p>
         </div>
 
         <div className="relative">
-          <PlaceholderImage
-            ratio="portrait"
-            label="Hero photography — hand-forged blade"
-            className="clip-blade-br"
-          />
+          <HeroImageSlider />
         </div>
       </Container>
     </section>
