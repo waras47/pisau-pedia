@@ -10,8 +10,9 @@ import {
   handles,
   shapes,
 } from "@/entities/configurator";
-import { formatPrice, type Product } from "@/entities/product";
+import { type Product } from "@/entities/product";
 import { useCart } from "@/features/cart";
+import { useLocaleCurrency } from "@/features/locale-currency";
 import { Button } from "@/shared/ui/Button";
 import { Container } from "@/shared/ui/Container";
 import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
@@ -19,6 +20,7 @@ import { cn } from "@/shared/lib/utils";
 
 export function KnifeConfigurator() {
   const { addItem } = useCart();
+  const { formatPrice } = useLocaleCurrency();
 
   const [shapeId, setShapeId] = useState<string | null>(null);
   const [bladeId, setBladeId] = useState<string | null>(null);
@@ -140,7 +142,7 @@ export function KnifeConfigurator() {
               <img
                 src={blade?.image ?? shape?.image}
                 alt={blade ? blade.name : shape?.name ?? "Selected knife"}
-                className="aspect-[16/7] max-h-[30vh] w-full bg-muted object-contain"
+                className="aspect-[16/7] max-h-[30vh] w-full object-cover"
               />
             ) : (
               <PlaceholderImage
@@ -390,6 +392,7 @@ function OptionCard({
   active,
   onClick,
 }: OptionCardProps) {
+  const { formatPrice } = useLocaleCurrency();
   return (
     <button
       type="button"
@@ -411,7 +414,7 @@ function OptionCard({
         <img
           src={image}
           alt={previewLabel}
-          className="aspect-[4/3] w-full bg-muted object-contain"
+          className="aspect-[4/3] w-full object-cover"
         />
       ) : (
         <PlaceholderImage ratio="landscape" label={previewLabel} />

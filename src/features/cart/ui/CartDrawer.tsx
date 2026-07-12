@@ -4,7 +4,7 @@ import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 
-import { formatPrice } from "@/entities/product";
+import { useLocaleCurrency } from "@/features/locale-currency";
 import { Button } from "@/shared/ui/Button";
 import { IconButton } from "@/shared/ui/IconButton";
 
@@ -20,6 +20,7 @@ export function CartDrawer() {
     updateQuantity,
     removeItem,
   } = useCart();
+  const { formatPrice, t } = useLocaleCurrency();
 
   // Tutup dengan Esc + kunci scroll body saat terbuka
   useEffect(() => {
@@ -65,9 +66,9 @@ export function CartDrawer() {
         {items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
             <ShoppingBag size={40} className="text-muted-foreground" />
-            <p className="text-muted-foreground">Your cart is empty.</p>
+            <p className="text-muted-foreground">{t("cart_empty")}</p>
             <Button variant="outline" onClick={closeCart}>
-              Continue shopping
+              {t("continue_shopping")}
             </Button>
           </div>
         ) : (
@@ -134,7 +135,7 @@ export function CartDrawer() {
         {items.length > 0 ? (
           <div className="border-t border-border px-6 py-5">
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Subtotal</span>
+              <span className="text-sm text-muted-foreground">{t("subtotal")}</span>
               <span className="text-lg font-semibold">
                 {formatPrice(subtotal, currency)}
               </span>
@@ -145,7 +146,7 @@ export function CartDrawer() {
             <div className="flex flex-col gap-2">
               <Link href="/checkout" onClick={closeCart}>
                 <Button size="lg" className="w-full">
-                  Checkout
+                  {t("checkout")}
                 </Button>
               </Link>
               <Link href="/cart" onClick={closeCart}>

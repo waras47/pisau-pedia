@@ -1,14 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
 import {
-  formatPrice,
   type Product,
   ProductGrid,
   RatingStars,
 } from "@/entities/product";
 import { reviews, ReviewCard } from "@/entities/review";
 import { AddToCart } from "@/features/add-to-cart";
+import { useLocaleCurrency } from "@/features/locale-currency";
 import { Badge } from "@/shared/ui/Badge";
 import { Container } from "@/shared/ui/Container";
 import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
@@ -20,6 +22,7 @@ interface ProductDetailProps {
 }
 
 export function ProductDetail({ product, related }: ProductDetailProps) {
+  const { formatPrice } = useLocaleCurrency();
   const galleryLabels =
     product.galleryLabels ?? [product.category, "Detail", "In use"];
 

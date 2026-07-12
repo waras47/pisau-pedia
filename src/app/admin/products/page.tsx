@@ -1,14 +1,22 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { HttpError } from "@/shared/api/http-error";
+import { uploadImage } from "@/shared/api/upload.api";
+
+import { type CategoryApiItem,listCategories } from "@/entities/category/api/category.api";
+import { type Product, type ProductSpec } from "@/entities/product";
 import {
-  accessories,
-  engravings,
-  japaneseKnives,
-  type Product,
-  type ProductSpec,
-} from "@/entities/product";
+  createProduct,
+  deleteProduct,
+  getInventoryReport,
+  getProductBySlug,
+  type InventoryReportData,
+  listProducts,
+  type ProductApiItem,
+  updateProduct,
+} from "@/entities/product/api/product.api";
 
 // --- Types ---
 
@@ -25,14 +33,20 @@ const emptyProduct: Product = {
   slug: "",
   category: "",
   price: 0,
-  currency: "EUR",
+  currency: "IDR",
   rating: 0,
   reviewCount: 0,
   maker: "",
   description: "",
   badge: undefined,
   compareAtPrice: undefined,
+  stock: 0,
+  weight: 500,
 };
+
+function formatRupiah(amount: number) {
+  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(amount);
+}
 
 const badgeOptions: { value: Product["badge"] | ""; label: string }[] = [
   { value: "", label: "In Stock" },
@@ -89,12 +103,6 @@ function getStatusLabel(badge: Product["badge"]) {
 // --- Main Component ---
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>(() => [
-    ...japaneseKnives,
-    ...accessories,
-    ...engravings,
-  ]);
-
   const [modal, setModal] = useState<ModalMode>("closed");
   const [editProduct, setEditProduct] = useState<Product>(emptyProduct);
   const [search, setSearch] = useState("");
@@ -104,6 +112,36 @@ export default function ProductsPage() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [successInfo, setSuccessInfo] = useState<SuccessInfo | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<CategoryApiItem[]>([]);
+  const [inventory, setInventory] = useState<InventoryReportData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  async function loadProducts() {
+    setLoading(true);
+    try {
+      const [items, cats, inv] = await Promise.all([listProducts(), listCategories(), getInventoryReport()]);
+      setProducts(items.map(toProductVM));
+      setCategories(cats);
+      setInventory(inv);
+    } catch (err) {
+      alert(err instanceof HttpError ? err.message : "Gagal memuat produk");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { loadProducts(); }, []);
+
+  function toProductVM(p: ProductApiItem): Product {
+    return {
+      id: p.id, name: p.name, slug: p.slug, category: p.category ?? "",
+      price: p.price, compareAtPrice: p.compare_at_price, currency: "IDR",
+      rating: p.rating, reviewCount: p.review_count, maker: p.maker,
+      badge: p.badge as Product["badge"], stock: p.stock, weight: p.weight, image: p.image,
+    };
+  }
 
   const PER_PAGE = 10;
 
@@ -164,14 +202,21 @@ export default function ProductsPage() {
 
   // CRUD handlers
   const handleAdd = () => {
-    setEditProduct({ ...emptyProduct, id: generateId(), currency: "EUR" });
+    setEditProduct({ ...emptyProduct, id: generateId() });
     setModal("add");
   };
 
-  const handleEdit = (product: Product) => {
-    setEditProduct({ ...product });
+  async function handleEdit(product: Product) {
+    const detail = await getProductBySlug(product.slug);
+    setEditProduct({
+      ...product,
+      description: detail.description,
+      specs: detail.specs,
+      highlights: detail.highlights,
+      image: detail.images[0],
+    });
     setModal("edit");
-  };
+  }
 
   const handleView = (product: Product) => {
     setEditProduct(product);
@@ -183,27 +228,54 @@ export default function ProductsPage() {
     setModal("delete");
   };
 
-  const handleSave = () => {
+  async function handleSave() {
     if (!editProduct.name.trim()) return;
-    const slug = editProduct.slug || generateSlug(editProduct.name);
-    const saved = { ...editProduct, slug };
-
-    if (modal === "add") {
-      setProducts((prev) => [saved, ...prev]);
-      showSuccess("added", saved.name);
-    } else {
-      setProducts((prev) => prev.map((p) => (p.id === saved.id ? saved : p)));
-      showSuccess("updated", saved.name);
+    setSaving(true);
+    try {
+      const categoryId = categories.find((c) => c.name === editProduct.category)?.id;
+      const payload = {
+        category_id: categoryId,
+        name: editProduct.name,
+        price: editProduct.price,
+        compare_at_price: editProduct.compareAtPrice,
+        maker: editProduct.maker || undefined,
+        badge: editProduct.badge,
+        stock: editProduct.stock,
+        weight: editProduct.weight,
+        description: editProduct.description,
+        specs: editProduct.specs,
+        highlights: editProduct.highlights,
+        images: editProduct.image ? [editProduct.image] : undefined,
+      };
+      if (modal === "add") {
+        await createProduct(payload);
+        showSuccess("added", editProduct.name);
+      } else {
+        await updateProduct(editProduct.id, payload);
+        showSuccess("updated", editProduct.name);
+      }
+      await loadProducts();
+      setModal("closed");
+    } catch (err) {
+      alert(err instanceof HttpError ? err.message : "Gagal menyimpan produk");
+    } finally {
+      setSaving(false);
     }
-    setModal("closed");
-  };
+  }
 
-  const handleDelete = () => {
-    const name = editProduct.name;
-    setProducts((prev) => prev.filter((p) => p.id !== editProduct.id));
-    showSuccess("deleted", name);
-    setModal("closed");
-  };
+  async function handleDelete() {
+    setSaving(true);
+    try {
+      await deleteProduct(editProduct.id);
+      showSuccess("deleted", editProduct.name);
+      await loadProducts();
+    } catch (err) {
+      alert(err instanceof HttpError ? err.message : "Gagal menghapus produk");
+    } finally {
+      setSaving(false);
+      setModal("closed");
+    }
+  }
 
   const handleSort = (key: typeof sortKey) => {
     if (sortKey === key) {
@@ -243,9 +315,31 @@ export default function ProductsPage() {
           onClick={handleAdd}
           className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-600"
         >
-          <PlusIcon /> Add Product
+          <PlusIcon /> Tambah Produk
         </button>
       </div>
+
+      {/* Stock stat cards */}
+      {inventory && (
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+          {[
+            { label: "Total Produk", value: inventory.total_products, icon: "🔪", bg: "bg-amber-50" },
+            { label: "Stok Tersedia", value: inventory.total_products - inventory.out_of_stock_count, icon: "✅", bg: "bg-green-50" },
+            { label: "Stok Menipis", value: inventory.low_stock_count, icon: "⚠️", bg: "bg-yellow-50" },
+            { label: "Stok Habis", value: inventory.out_of_stock_count, icon: "❌", bg: "bg-red-50" },
+          ].map((s) => (
+            <div key={s.label} className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm sm:p-4">
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-lg ${s.bg}`}>
+                {s.icon}
+              </div>
+              <div>
+                <p className="text-lg font-bold text-gray-800">{s.value}</p>
+                <p className="text-[11px] text-gray-400">{s.label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Search & Filters bar */}
       <div className="flex flex-wrap items-center gap-3 rounded-xl bg-white p-4 shadow-sm">
@@ -362,9 +456,9 @@ export default function ProductsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-gray-500">{p.maker || "—"}</td>
-                    <td className="px-4 py-3 font-medium text-gray-700">€{p.price}</td>
+                    <td className="px-4 py-3 font-medium text-gray-700">{formatRupiah(p.price)}</td>
                     <td className="px-4 py-3 text-gray-400">
-                      {p.compareAtPrice ? <span className="line-through">€{p.compareAtPrice}</span> : "—"}
+                      {p.compareAtPrice ? <span className="line-through">{formatRupiah(p.compareAtPrice)}</span> : "—"}
                     </td>
                     <td className="px-4 py-3">
                       {p.reviewCount > 0 ? (
@@ -480,17 +574,18 @@ export default function ProductsPage() {
                 {/* Row 2 */}
                 <div className="grid gap-4 sm:grid-cols-3">
                   <Field label="Category *">
-                    <input
-                      type="text"
+                    <select
                       value={editProduct.category}
                       onChange={(e) => updateField("category", e.target.value)}
                       className="admin-input"
-                      list="categories-list"
-                      placeholder="e.g. Gyuto"
-                    />
-                    <datalist id="categories-list">
-                      {allCategories.map((c) => <option key={c} value={c} />)}
-                    </datalist>
+                    >
+                      <option value="">Pilih kategori</option>
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.name}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
                   </Field>
                   <Field label="Maker / Brand">
                     <input
@@ -514,39 +609,55 @@ export default function ProductsPage() {
                   </Field>
                 </div>
 
-                {/* Row 3 - Pricing */}
+                {/* Image */}
+                <ImageUploadField
+                  image={editProduct.image}
+                  onChange={(url) => updateField("image", url)}
+                />
+
+                {/* Row 3 - Pricing & Stock */}
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <Field label="Price (€) *">
+                  <Field label="Harga (Rp) *">
                     <input
                       type="number"
                       min="0"
-                      step="0.01"
+                      step="1"
                       value={editProduct.price}
                       onChange={(e) => updateField("price", Number(e.target.value))}
                       className="admin-input"
                     />
                   </Field>
-                  <Field label="Compare At Price (€)">
+                  <Field label="Harga Coret (Rp)">
                     <input
                       type="number"
                       min="0"
-                      step="0.01"
+                      step="1"
                       value={editProduct.compareAtPrice ?? ""}
                       onChange={(e) => updateField("compareAtPrice", e.target.value ? Number(e.target.value) : undefined)}
                       className="admin-input"
-                      placeholder="Original price"
+                      placeholder="Harga sebelum diskon"
                     />
                   </Field>
-                  <Field label="Currency">
-                    <select
-                      value={editProduct.currency}
-                      onChange={(e) => updateField("currency", e.target.value)}
+                  <Field label="Stok">
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={editProduct.stock ?? 0}
+                      onChange={(e) => updateField("stock", Number(e.target.value))}
                       className="admin-input"
-                    >
-                      <option value="EUR">EUR (€)</option>
-                      <option value="USD">USD ($)</option>
-                      <option value="GBP">GBP (£)</option>
-                    </select>
+                    />
+                  </Field>
+                  <Field label="Berat (gram)">
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={editProduct.weight ?? 500}
+                      onChange={(e) => updateField("weight", Number(e.target.value))}
+                      className="admin-input"
+                      placeholder="Berat untuk hitung ongkir"
+                    />
                   </Field>
                 </div>
 
@@ -624,8 +735,9 @@ export default function ProductsPage() {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <DetailRow label="Category" value={editProduct.category} />
                 <DetailRow label="Maker" value={editProduct.maker || "—"} />
-                <DetailRow label="Price" value={`€${editProduct.price}`} />
-                <DetailRow label="Compare At" value={editProduct.compareAtPrice ? `€${editProduct.compareAtPrice}` : "—"} />
+                <DetailRow label="Harga" value={formatRupiah(editProduct.price)} />
+                <DetailRow label="Harga Coret" value={editProduct.compareAtPrice ? formatRupiah(editProduct.compareAtPrice) : "—"} />
+                <DetailRow label="Stok" value={String(editProduct.stock ?? 0)} />
                 <DetailRow label="Status" value={getStatusLabel(editProduct.badge)} />
                 <DetailRow label="Rating" value={editProduct.reviewCount > 0 ? `★ ${editProduct.rating} (${editProduct.reviewCount})` : "No reviews"} />
               </div>
@@ -779,6 +891,55 @@ function DetailRow({ label, value }: { label: string; value: string }) {
       <p className="text-xs text-gray-400">{label}</p>
       <p className="font-medium text-gray-700">{value}</p>
     </div>
+  );
+}
+
+function ImageUploadField({ image, onChange }: { image?: string; onChange: (url: string | undefined) => void }) {
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      onChange(url);
+    } catch (err) {
+      alert(err instanceof HttpError ? err.message : "Gagal upload gambar");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  return (
+    <Field label="Gambar Produk">
+      <div className="flex items-center gap-3">
+        {image ? (
+          <div className="relative h-20 w-20 shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={image} alt="" className="h-20 w-20 rounded-lg object-cover" />
+            <button
+              type="button"
+              onClick={() => onChange(undefined)}
+              className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white"
+            >
+              ✕
+            </button>
+          </div>
+        ) : null}
+        <label className="flex h-20 w-20 shrink-0 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-center text-xs text-gray-400 hover:border-emerald-400 hover:text-emerald-500">
+          {uploading ? "..." : image ? "Ganti" : "+ Upload"}
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            onChange={handleFile}
+            disabled={uploading}
+          />
+        </label>
+      </div>
+    </Field>
   );
 }
 

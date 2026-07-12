@@ -3,6 +3,7 @@
 import { ArrowRight } from "lucide-react";
 import { type FormEvent, useState } from "react";
 
+import { subscribeNewsletter } from "@/entities/newsletter/api/newsletter.api";
 import { cn } from "@/shared/lib/utils";
 
 interface NewsletterFormProps {
@@ -12,11 +13,21 @@ interface NewsletterFormProps {
 export function NewsletterForm({ className }: NewsletterFormProps) {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    // TODO: wire up to the newsletter API once integration begins.
-    setSubmitted(true);
+    setSubmitting(true);
+    setError(null);
+    try {
+      await subscribeNewsletter(email, "footer");
+      setSubmitted(true);
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (submitted) {
@@ -28,29 +39,31 @@ export function NewsletterForm({ className }: NewsletterFormProps) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={cn("flex w-full max-w-sm border border-border", className)}
-    >
-      <label htmlFor="newsletter-email" className="sr-only">
-        Email address
-      </label>
-      <input
-        id="newsletter-email"
-        type="email"
-        required
-        value={email}
-        onChange={(event) => setEmail(event.target.value)}
-        placeholder="Email address"
-        className="w-full bg-transparent px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-      />
-      <button
-        type="submit"
-        aria-label="Subscribe"
-        className="flex items-center justify-center bg-accent px-4 text-accent-foreground transition-opacity hover:opacity-90"
-      >
-        <ArrowRight size={18} />
-      </button>
-    </form>
+    <div className={cn("w-full max-w-sm", className)}>
+      <form onSubmit={handleSubmit} className="flex w-full border border-border">
+        <label htmlFor="newsletter-email" className="sr-only">
+          Email address
+        </label>
+        <input
+          id="newsletter-email"
+          type="email"
+          required
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="Email address"
+          disabled={submitting}
+          className="w-full bg-transparent px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-60"
+        />
+        <button
+          type="submit"
+          aria-label="Subscribe"
+          disabled={submitting}
+          className="flex items-center justify-center bg-accent px-4 text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+        >
+          <ArrowRight size={18} />
+        </button>
+      </form>
+      {error ? <p className="mt-2 text-xs text-destructive">{error}</p> : null}
+    </div>
   );
 }

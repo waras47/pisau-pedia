@@ -36,7 +36,7 @@ export function BrowseCategories() {
               <img
                 src={category.image}
                 alt={category.label}
-                className="aspect-[4/5] w-full bg-muted object-contain"
+                className="aspect-[4/3] w-full object-cover"
               />
               <span className="text-center font-display text-lg font-medium transition-colors group-hover:text-accent">
                 {category.title}

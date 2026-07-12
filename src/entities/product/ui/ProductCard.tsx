@@ -1,8 +1,10 @@
+"use client";
+
 import Link from "next/link";
 
-import { formatPrice } from "@/entities/product/lib/format-price";
 import { type Product } from "@/entities/product/model/product.types";
 import { RatingStars } from "@/entities/product/ui/RatingStars";
+import { useLocaleCurrency } from "@/features/locale-currency";
 import { Badge } from "@/shared/ui/Badge";
 import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
 
@@ -18,6 +20,7 @@ const badgeLabel: Record<NonNullable<Product["badge"]>, string> = {
 };
 
 export function ProductCard({ product, className }: ProductCardProps) {
+  const { formatPrice, t } = useLocaleCurrency();
   const isSoldOut = product.badge === "sold-out";
 
   return (
@@ -31,10 +34,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <img
             src={product.image}
             alt={product.name}
-            className="aspect-square w-full object-cover"
+            className="aspect-[4/3] w-full object-cover"
           />
         ) : (
-          <PlaceholderImage label={product.category} ratio="square" />
+          <PlaceholderImage label={product.category} ratio="landscape" />
         )}
         {product.badge ? (
           <Badge
@@ -54,12 +57,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
         {product.reviewCount > 0 ? (
           <RatingStars rating={product.rating} reviewCount={product.reviewCount} />
         ) : (
-          <span className="text-xs text-muted-foreground">No reviews yet</span>
+          <span className="text-xs text-muted-foreground">{t("no_reviews_yet")}</span>
         )}
 
         <div className="flex items-center gap-2 pt-0.5">
           {isSoldOut ? (
-            <span className="text-sm text-muted-foreground">Sold Out</span>
+            <span className="text-sm text-muted-foreground">{t("sold_out")}</span>
           ) : (
             <>
               <span className="text-sm font-semibold text-foreground">

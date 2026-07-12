@@ -12,14 +12,14 @@ export function ConfiguratorBanner() {
           <img
             src="/dev-images/products/yama-gyuto-240.jpg"
             alt="Blade options"
-            className="aspect-square w-full bg-muted object-contain"
+            className="aspect-square w-full object-cover"
           />
           <div className="absolute -bottom-6 -right-6 hidden w-2/3 border-4 border-background sm:block">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/dev-images/products/wooden-saya-gyuto-210.jpg"
               alt="Handle options"
-              className="aspect-square w-full bg-muted object-contain"
+              className="aspect-square w-full object-cover"
             />
           </div>
         </div>

@@ -30,7 +30,7 @@ export function QuizBanner() {
             <img
               src="/dev-images/products/shirobana-sujihiki-240.jpg"
               alt="Find your knife quiz preview"
-              className="aspect-[4/3] w-full bg-background/10 object-contain opacity-90"
+              className="aspect-[4/3] w-full object-cover opacity-90"
             />
           </div>
         </div>

@@ -1,23 +1,34 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import {
+  createCoupon,
+  deleteCoupon,
+  listCoupons,
+  updateCoupon,
+  type CouponApiItem,
+  type CouponApiType,
+} from "@/entities/coupon/api/coupon.api";
+import { HttpError } from "@/shared/api/http-error";
 
 // --- Types ---
 
 interface Coupon {
   id: string;
   code: string;
-  type: "percentage" | "fixed" | "free-shipping";
+  type: CouponApiType;
   value: number;
   minOrder: number;
   maxUses: number;
   usedCount: number;
   startDate: string;
   endDate: string;
-  status: "active" | "expired" | "scheduled" | "disabled";
-  applicableTo: "all" | "knives" | "accessories" | "engravings" | "sharpening";
+  isActive: boolean;
   description: string;
 }
+
+type DisplayStatus = "active" | "expired" | "scheduled" | "disabled";
 
 type ModalMode = "closed" | "add" | "edit" | "delete";
 
@@ -36,135 +47,37 @@ const emptyCoupon: Coupon = {
   usedCount: 0,
   startDate: "",
   endDate: "",
-  status: "active",
-  applicableTo: "all",
+  isActive: true,
   description: "",
 };
 
-// --- Mock data ---
+function toCouponVM(c: CouponApiItem): Coupon {
+  return {
+    id: c.id,
+    code: c.code,
+    type: c.type,
+    value: c.value,
+    minOrder: c.min_order,
+    maxUses: c.max_uses ?? 0,
+    usedCount: c.used_count,
+    startDate: c.starts_at ?? "",
+    endDate: c.ends_at ?? "",
+    isActive: c.is_active,
+    description: c.description ?? "",
+  };
+}
 
-const initialCoupons: Coupon[] = [
-  {
-    id: "c-1",
-    code: "WELCOME10",
-    type: "percentage",
-    value: 10,
-    minOrder: 50,
-    maxUses: 500,
-    usedCount: 234,
-    startDate: "2026-01-01",
-    endDate: "2026-12-31",
-    status: "active",
-    applicableTo: "all",
-    description: "10% off first order for new customers",
-  },
-  {
-    id: "c-2",
-    code: "KNIFE20",
-    type: "percentage",
-    value: 20,
-    minOrder: 150,
-    maxUses: 100,
-    usedCount: 67,
-    startDate: "2026-05-01",
-    endDate: "2026-07-31",
-    status: "active",
-    applicableTo: "knives",
-    description: "Summer sale — 20% off all Japanese knives",
-  },
-  {
-    id: "c-3",
-    code: "FREESHIP",
-    type: "free-shipping",
-    value: 0,
-    minOrder: 100,
-    maxUses: 0,
-    usedCount: 412,
-    startDate: "2026-01-01",
-    endDate: "2026-12-31",
-    status: "active",
-    applicableTo: "all",
-    description: "Free shipping on orders over €100",
-  },
-  {
-    id: "c-4",
-    code: "SHARP15",
-    type: "fixed",
-    value: 15,
-    minOrder: 0,
-    maxUses: 50,
-    usedCount: 50,
-    startDate: "2026-03-01",
-    endDate: "2026-04-30",
-    status: "expired",
-    applicableTo: "sharpening",
-    description: "€15 off sharpening service",
-  },
-  {
-    id: "c-5",
-    code: "ENGRAVE25",
-    type: "percentage",
-    value: 25,
-    minOrder: 0,
-    maxUses: 200,
-    usedCount: 0,
-    startDate: "2026-07-01",
-    endDate: "2026-09-30",
-    status: "scheduled",
-    applicableTo: "engravings",
-    description: "25% off all engraving services (upcoming)",
-  },
-  {
-    id: "c-6",
-    code: "BUNDLE50",
-    type: "fixed",
-    value: 50,
-    minOrder: 300,
-    maxUses: 30,
-    usedCount: 12,
-    startDate: "2026-04-01",
-    endDate: "2026-06-30",
-    status: "active",
-    applicableTo: "all",
-    description: "€50 off orders over €300 — bundle deal",
-  },
-  {
-    id: "c-7",
-    code: "ACCS10",
-    type: "percentage",
-    value: 10,
-    minOrder: 30,
-    maxUses: 150,
-    usedCount: 89,
-    startDate: "2026-02-01",
-    endDate: "2026-05-31",
-    status: "expired",
-    applicableTo: "accessories",
-    description: "10% off accessories — spring cleaning",
-  },
-  {
-    id: "c-8",
-    code: "HOLIDAY30",
-    type: "percentage",
-    value: 30,
-    minOrder: 200,
-    maxUses: 100,
-    usedCount: 0,
-    startDate: "2026-12-01",
-    endDate: "2026-12-31",
-    status: "scheduled",
-    applicableTo: "all",
-    description: "Holiday season 30% off — coming December",
-  },
-];
+function displayStatus(c: Coupon): DisplayStatus {
+  if (!c.isActive) return "disabled";
+  const today = new Date().toISOString().slice(0, 10);
+  if (c.startDate && c.startDate > today) return "scheduled";
+  if (c.endDate && c.endDate < today) return "expired";
+  return "active";
+}
 
 // --- Helpers ---
 
-function generateId() {
-  return `c-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`;
-}
-
-function statusStyle(s: Coupon["status"]) {
+function statusStyle(s: DisplayStatus) {
   switch (s) {
     case "active": return "bg-emerald-50 text-emerald-600";
     case "expired": return "bg-red-50 text-red-500";
@@ -177,32 +90,54 @@ function typeLabel(t: Coupon["type"]) {
   switch (t) {
     case "percentage": return "Percentage";
     case "fixed": return "Fixed Amount";
-    case "free-shipping": return "Free Shipping";
+    case "free_shipping": return "Free Shipping";
   }
+}
+
+function formatRupiah(amount: number) {
+  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(amount);
 }
 
 function valueLabel(c: Coupon) {
   switch (c.type) {
     case "percentage": return `${c.value}%`;
-    case "fixed": return `€${c.value}`;
-    case "free-shipping": return "Free";
+    case "fixed": return formatRupiah(c.value);
+    case "free_shipping": return "Free";
   }
 }
 
 function formatDate(d: string) {
   if (!d) return "—";
-  return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  return new Date(d).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 }
 
 // --- Page ---
 
 export default function CouponsPage() {
-  const [coupons, setCoupons] = useState<Coupon[]>(initialCoupons);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [modal, setModal] = useState<ModalMode>("closed");
   const [editCoupon, setEditCoupon] = useState<Coupon>(emptyCoupon);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [successInfo, setSuccessInfo] = useState<SuccessInfo | null>(null);
+
+  async function loadCoupons() {
+    setLoading(true);
+    try {
+      const items = await listCoupons();
+      setCoupons(items.map(toCouponVM));
+    } catch (err) {
+      alert(err instanceof HttpError ? err.message : "Gagal memuat kupon");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadCoupons();
+  }, []);
 
   const showSuccess = useCallback((type: SuccessInfo["type"], name: string) => {
     setSuccessInfo({ type, name });
@@ -218,20 +153,20 @@ export default function CouponsPage() {
       );
     }
     if (filterStatus) {
-      result = result.filter((c) => c.status === filterStatus);
+      result = result.filter((c) => displayStatus(c) === filterStatus);
     }
     return result;
   }, [coupons, search, filterStatus]);
 
   const stats = useMemo(() => {
-    const active = coupons.filter((c) => c.status === "active").length;
+    const active = coupons.filter((c) => displayStatus(c) === "active").length;
     const totalUsed = coupons.reduce((sum, c) => sum + c.usedCount, 0);
-    const scheduled = coupons.filter((c) => c.status === "scheduled").length;
+    const scheduled = coupons.filter((c) => displayStatus(c) === "scheduled").length;
     return { total: coupons.length, active, totalUsed, scheduled };
   }, [coupons]);
 
   const handleAdd = () => {
-    setEditCoupon({ ...emptyCoupon, id: generateId(), startDate: new Date().toISOString().slice(0, 10) });
+    setEditCoupon({ ...emptyCoupon, startDate: new Date().toISOString().slice(0, 10) });
     setModal("add");
   };
 
@@ -245,33 +180,74 @@ export default function CouponsPage() {
     setModal("delete");
   };
 
-  const handleSave = () => {
+  async function handleSave() {
     if (!editCoupon.code.trim()) return;
-    const saved = { ...editCoupon, code: editCoupon.code.toUpperCase().replace(/\s+/g, "") };
-    if (modal === "add") {
-      setCoupons((prev) => [saved, ...prev]);
-      showSuccess("created", saved.code);
-    } else {
-      setCoupons((prev) => prev.map((c) => (c.id === saved.id ? saved : c)));
-      showSuccess("updated", saved.code);
+    setSaving(true);
+    try {
+      const code = editCoupon.code.toUpperCase().replace(/\s+/g, "");
+      const payload = {
+        code,
+        type: editCoupon.type,
+        value: editCoupon.value,
+        min_order: editCoupon.minOrder,
+        max_uses: editCoupon.maxUses > 0 ? editCoupon.maxUses : undefined,
+        starts_at: editCoupon.startDate || undefined,
+        ends_at: editCoupon.endDate || undefined,
+        is_active: editCoupon.isActive,
+        description: editCoupon.description || undefined,
+      };
+      if (modal === "add") {
+        await createCoupon(payload);
+        showSuccess("created", code);
+      } else {
+        await updateCoupon(editCoupon.id, payload);
+        showSuccess("updated", code);
+      }
+      await loadCoupons();
+      setModal("closed");
+    } catch (err) {
+      alert(err instanceof HttpError ? err.message : "Gagal menyimpan kupon");
+    } finally {
+      setSaving(false);
     }
-    setModal("closed");
-  };
+  }
 
-  const handleDelete = () => {
-    const code = editCoupon.code;
-    setCoupons((prev) => prev.filter((c) => c.id !== editCoupon.id));
-    showSuccess("deleted", code);
-    setModal("closed");
-  };
+  async function handleDelete() {
+    setSaving(true);
+    try {
+      await deleteCoupon(editCoupon.id);
+      showSuccess("deleted", editCoupon.code);
+      await loadCoupons();
+    } catch (err) {
+      alert(err instanceof HttpError ? err.message : "Gagal menghapus kupon");
+    } finally {
+      setSaving(false);
+      setModal("closed");
+    }
+  }
 
-  const toggleStatus = (coupon: Coupon) => {
-    const newStatus = coupon.status === "active" ? "disabled" : "active";
-    setCoupons((prev) =>
-      prev.map((c) => (c.id === coupon.id ? { ...c, status: newStatus } : c)),
-    );
-    showSuccess(newStatus === "active" ? "enabled" : "disabled", coupon.code);
-  };
+  async function toggleStatus(coupon: Coupon) {
+    setSaving(true);
+    try {
+      await updateCoupon(coupon.id, {
+        code: coupon.code,
+        type: coupon.type,
+        value: coupon.value,
+        min_order: coupon.minOrder,
+        max_uses: coupon.maxUses > 0 ? coupon.maxUses : undefined,
+        starts_at: coupon.startDate || undefined,
+        ends_at: coupon.endDate || undefined,
+        is_active: !coupon.isActive,
+        description: coupon.description || undefined,
+      });
+      showSuccess(coupon.isActive ? "disabled" : "enabled", coupon.code);
+      await loadCoupons();
+    } catch (err) {
+      alert(err instanceof HttpError ? err.message : "Gagal mengubah status kupon");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   const updateField = <K extends keyof Coupon>(key: K, value: Coupon[K]) => {
     setEditCoupon((prev) => ({ ...prev, [key]: value }));
@@ -288,24 +264,24 @@ export default function CouponsPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Coupons</h1>
-          <p className="text-sm text-gray-400">Manage discount codes and promotions</p>
+          <p className="text-sm text-gray-400">Kelola kode diskon & promosi</p>
         </div>
         <button
           type="button"
           onClick={handleAdd}
           className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-600"
         >
-          <PlusIcon /> Create Coupon
+          <PlusIcon /> Buat Kupon
         </button>
       </div>
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-4">
         {[
-          { label: "Total Coupons", value: stats.total, bg: "bg-gray-50", text: "text-gray-600" },
-          { label: "Active", value: stats.active, bg: "bg-emerald-50", text: "text-emerald-600" },
-          { label: "Scheduled", value: stats.scheduled, bg: "bg-blue-50", text: "text-blue-600" },
-          { label: "Total Redemptions", value: stats.totalUsed, bg: "bg-amber-50", text: "text-amber-600" },
+          { label: "Total Kupon", value: stats.total, bg: "bg-gray-50", text: "text-gray-600" },
+          { label: "Aktif", value: stats.active, bg: "bg-emerald-50", text: "text-emerald-600" },
+          { label: "Terjadwal", value: stats.scheduled, bg: "bg-blue-50", text: "text-blue-600" },
+          { label: "Total Terpakai", value: stats.totalUsed, bg: "bg-amber-50", text: "text-amber-600" },
         ].map((s) => (
           <div key={s.label} className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm">
             <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold ${s.bg} ${s.text}`}>
@@ -322,7 +298,7 @@ export default function CouponsPage() {
           <SearchIcon />
           <input
             type="text"
-            placeholder="Search by code or description..."
+            placeholder="Cari kode atau deskripsi..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
@@ -336,11 +312,11 @@ export default function CouponsPage() {
           onChange={(e) => setFilterStatus(e.target.value)}
           className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600"
         >
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="scheduled">Scheduled</option>
-          <option value="expired">Expired</option>
-          <option value="disabled">Disabled</option>
+          <option value="">Semua Status</option>
+          <option value="active">Aktif</option>
+          <option value="scheduled">Terjadwal</option>
+          <option value="expired">Kedaluwarsa</option>
+          <option value="disabled">Nonaktif</option>
         </select>
       </div>
 
@@ -350,65 +326,69 @@ export default function CouponsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 text-left text-xs text-gray-400">
-                <th className="px-4 py-4 font-medium">Code</th>
-                <th className="px-4 py-4 font-medium">Type</th>
-                <th className="px-4 py-4 font-medium">Discount</th>
+                <th className="px-4 py-4 font-medium">Kode</th>
+                <th className="px-4 py-4 font-medium">Tipe</th>
+                <th className="px-4 py-4 font-medium">Diskon</th>
                 <th className="px-4 py-4 font-medium">Min. Order</th>
-                <th className="px-4 py-4 font-medium">Usage</th>
-                <th className="px-4 py-4 font-medium">Valid Period</th>
-                <th className="px-4 py-4 font-medium">Applies To</th>
+                <th className="px-4 py-4 font-medium">Pemakaian</th>
+                <th className="px-4 py-4 font-medium">Periode</th>
                 <th className="px-4 py-4 font-medium">Status</th>
-                <th className="px-4 py-4 text-right font-medium">Actions</th>
+                <th className="px-4 py-4 text-right font-medium">Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
+              {loading ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-gray-400">No coupons found.</td>
+                  <td colSpan={8} className="px-4 py-12 text-center text-gray-400">Memuat...</td>
+                </tr>
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-4 py-12 text-center text-gray-400">Belum ada kupon.</td>
                 </tr>
               ) : (
-                filtered.map((c) => (
-                  <tr key={c.id} className="border-b border-gray-50 transition-colors hover:bg-gray-50/50">
-                    <td className="px-4 py-3">
-                      <span className="rounded bg-gray-100 px-2 py-1 font-mono text-xs font-bold text-gray-700">{c.code}</span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-500">{typeLabel(c.type)}</td>
-                    <td className="px-4 py-3 font-semibold text-gray-700">{valueLabel(c)}</td>
-                    <td className="px-4 py-3 text-gray-500">{c.minOrder > 0 ? `€${c.minOrder}` : "—"}</td>
-                    <td className="px-4 py-3 text-gray-500">
-                      {c.usedCount}{c.maxUses > 0 ? ` / ${c.maxUses}` : " / ∞"}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">
-                      {formatDate(c.startDate)} — {formatDate(c.endDate)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] capitalize text-gray-600">{c.applicableTo}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium capitalize ${statusStyle(c.status)}`}>{c.status}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-1">
-                        {(c.status === "active" || c.status === "disabled") && (
-                          <button
-                            type="button"
-                            onClick={() => toggleStatus(c)}
-                            className={`rounded p-1.5 text-gray-400 hover:bg-gray-100 ${c.status === "active" ? "hover:text-amber-500" : "hover:text-emerald-500"}`}
-                            title={c.status === "active" ? "Disable" : "Enable"}
-                          >
-                            {c.status === "active" ? <PauseIcon /> : <PlayIcon />}
+                filtered.map((c) => {
+                  const status = displayStatus(c);
+                  return (
+                    <tr key={c.id} className="border-b border-gray-50 transition-colors hover:bg-gray-50/50">
+                      <td className="px-4 py-3">
+                        <span className="rounded bg-gray-100 px-2 py-1 font-mono text-xs font-bold text-gray-700">{c.code}</span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-500">{typeLabel(c.type)}</td>
+                      <td className="px-4 py-3 font-semibold text-gray-700">{valueLabel(c)}</td>
+                      <td className="px-4 py-3 text-gray-500">{c.minOrder > 0 ? formatRupiah(c.minOrder) : "—"}</td>
+                      <td className="px-4 py-3 text-gray-500">
+                        {c.usedCount}{c.maxUses > 0 ? ` / ${c.maxUses}` : " / ∞"}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-gray-500">
+                        {formatDate(c.startDate)} — {formatDate(c.endDate)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium capitalize ${statusStyle(status)}`}>{status}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-1">
+                          {(status === "active" || status === "disabled") && (
+                            <button
+                              type="button"
+                              onClick={() => toggleStatus(c)}
+                              disabled={saving}
+                              className={`rounded p-1.5 text-gray-400 hover:bg-gray-100 disabled:opacity-40 ${status === "active" ? "hover:text-amber-500" : "hover:text-emerald-500"}`}
+                              title={status === "active" ? "Nonaktifkan" : "Aktifkan"}
+                            >
+                              {status === "active" ? <PauseIcon /> : <PlayIcon />}
+                            </button>
+                          )}
+                          <button type="button" onClick={() => handleEdit(c)} className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-emerald-500" title="Edit">
+                            <EditIcon />
                           </button>
-                        )}
-                        <button type="button" onClick={() => handleEdit(c)} className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-emerald-500" title="Edit">
-                          <EditIcon />
-                        </button>
-                        <button type="button" onClick={() => handleDeleteConfirm(c)} className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-red-500" title="Delete">
-                          <TrashIcon />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          <button type="button" onClick={() => handleDeleteConfirm(c)} className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-red-500" title="Hapus">
+                            <TrashIcon />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -421,75 +401,63 @@ export default function CouponsPage() {
           <div className="w-full max-w-lg rounded-xl bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
               <h2 className="text-lg font-bold text-gray-800">
-                {modal === "add" ? "Create Coupon" : `Edit: ${editCoupon.code}`}
+                {modal === "add" ? "Buat Kupon" : `Edit: ${editCoupon.code}`}
               </h2>
               <button type="button" onClick={() => setModal("closed")} className="text-gray-400 hover:text-gray-600">✕</button>
             </div>
             <div className="max-h-[70vh] overflow-y-auto p-6">
               <div className="grid gap-5">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Coupon Code *">
-                    <input type="text" value={editCoupon.code} onChange={(e) => updateField("code", e.target.value.toUpperCase())} className="admin-input font-mono" placeholder="e.g. SUMMER20" />
+                  <Field label="Kode Kupon *">
+                    <input type="text" value={editCoupon.code} onChange={(e) => updateField("code", e.target.value.toUpperCase())} className="admin-input font-mono" placeholder="misal SUMMER20" />
                   </Field>
-                  <Field label="Status">
-                    <select value={editCoupon.status} onChange={(e) => updateField("status", e.target.value as Coupon["status"])} className="admin-input">
-                      <option value="active">Active</option>
-                      <option value="scheduled">Scheduled</option>
-                      <option value="disabled">Disabled</option>
-                      <option value="expired">Expired</option>
+                  <Field label="Aktif?">
+                    <select value={editCoupon.isActive ? "1" : "0"} onChange={(e) => updateField("isActive", e.target.value === "1")} className="admin-input">
+                      <option value="1">Aktif</option>
+                      <option value="0">Nonaktif</option>
                     </select>
                   </Field>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <Field label="Discount Type">
+                  <Field label="Tipe Diskon">
                     <select value={editCoupon.type} onChange={(e) => updateField("type", e.target.value as Coupon["type"])} className="admin-input">
-                      <option value="percentage">Percentage (%)</option>
-                      <option value="fixed">Fixed Amount (€)</option>
-                      <option value="free-shipping">Free Shipping</option>
+                      <option value="percentage">Persentase (%)</option>
+                      <option value="fixed">Nominal Tetap (Rp)</option>
+                      <option value="free_shipping">Gratis Ongkir</option>
                     </select>
                   </Field>
-                  {editCoupon.type !== "free-shipping" && (
-                    <Field label={editCoupon.type === "percentage" ? "Value (%)" : "Value (€)"}>
+                  {editCoupon.type !== "free_shipping" && (
+                    <Field label={editCoupon.type === "percentage" ? "Nilai (%)" : "Nilai (Rp)"}>
                       <input type="number" min="0" value={editCoupon.value} onChange={(e) => updateField("value", Number(e.target.value))} className="admin-input" />
                     </Field>
                   )}
-                  <Field label="Min. Order (€)">
-                    <input type="number" min="0" value={editCoupon.minOrder} onChange={(e) => updateField("minOrder", Number(e.target.value))} className="admin-input" placeholder="0 = no minimum" />
+                  <Field label="Min. Order (Rp)">
+                    <input type="number" min="0" value={editCoupon.minOrder} onChange={(e) => updateField("minOrder", Number(e.target.value))} className="admin-input" placeholder="0 = tanpa minimum" />
                   </Field>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <Field label="Max Uses">
-                    <input type="number" min="0" value={editCoupon.maxUses} onChange={(e) => updateField("maxUses", Number(e.target.value))} className="admin-input" placeholder="0 = unlimited" />
+                  <Field label="Maks. Pemakaian">
+                    <input type="number" min="0" value={editCoupon.maxUses} onChange={(e) => updateField("maxUses", Number(e.target.value))} className="admin-input" placeholder="0 = tanpa batas" />
                   </Field>
-                  <Field label="Start Date">
+                  <Field label="Tanggal Mulai">
                     <input type="date" value={editCoupon.startDate} onChange={(e) => updateField("startDate", e.target.value)} className="admin-input" />
                   </Field>
-                  <Field label="End Date">
+                  <Field label="Tanggal Berakhir">
                     <input type="date" value={editCoupon.endDate} onChange={(e) => updateField("endDate", e.target.value)} className="admin-input" />
                   </Field>
                 </div>
 
-                <Field label="Applies To">
-                  <select value={editCoupon.applicableTo} onChange={(e) => updateField("applicableTo", e.target.value as Coupon["applicableTo"])} className="admin-input">
-                    <option value="all">All Products</option>
-                    <option value="knives">Japanese Knives</option>
-                    <option value="accessories">Accessories</option>
-                    <option value="engravings">Engravings</option>
-                    <option value="sharpening">Sharpening Service</option>
-                  </select>
-                </Field>
-
-                <Field label="Description">
-                  <textarea rows={2} value={editCoupon.description} onChange={(e) => updateField("description", e.target.value)} className="admin-input resize-none" placeholder="Internal note about this coupon..." />
+                <Field label="Deskripsi">
+                  <textarea rows={2} value={editCoupon.description} onChange={(e) => updateField("description", e.target.value)} className="admin-input resize-none" placeholder="Catatan internal soal kupon ini..." />
                 </Field>
               </div>
             </div>
             <div className="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4">
-              <button type="button" onClick={() => setModal("closed")} className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
-              <button type="button" onClick={handleSave} disabled={!editCoupon.code.trim()} className="rounded-lg bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-40">
-                {modal === "add" ? "Create Coupon" : "Save Changes"}
+              <button type="button" onClick={() => setModal("closed")} className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">Batal</button>
+              <button type="button" onClick={handleSave} disabled={saving || !editCoupon.code.trim()} className="rounded-lg bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-40">
+                {saving ? "Menyimpan..." : modal === "add" ? "Buat Kupon" : "Simpan Perubahan"}
               </button>
             </div>
           </div>
@@ -503,13 +471,15 @@ export default function CouponsPage() {
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
               <TrashIcon className="text-red-500" />
             </div>
-            <h2 className="text-lg font-bold text-gray-800">Delete Coupon</h2>
+            <h2 className="text-lg font-bold text-gray-800">Hapus Kupon</h2>
             <p className="mt-2 text-sm text-gray-500">
-              Delete coupon <strong className="font-mono">{editCoupon.code}</strong>? This cannot be undone.
+              Hapus kupon <strong className="font-mono">{editCoupon.code}</strong>? Tindakan ini tidak bisa dibatalkan.
             </p>
             <div className="mt-6 flex items-center justify-end gap-3">
-              <button type="button" onClick={() => setModal("closed")} className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
-              <button type="button" onClick={handleDelete} className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600">Delete</button>
+              <button type="button" onClick={() => setModal("closed")} className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">Batal</button>
+              <button type="button" onClick={handleDelete} disabled={saving} className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-40">
+                {saving ? "Menghapus..." : "Hapus"}
+              </button>
             </div>
           </div>
         </ModalOverlay>
@@ -562,19 +532,19 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function CouponSuccessModal({ info, onClose }: { info: SuccessInfo; onClose: () => void }) {
   const configs: Record<SuccessInfo["type"], { title: string; bg: string; color: string; btnBg: string; icon: "check" | "trash" | "toggle" }> = {
-    created: { title: "Coupon Created!", bg: "bg-emerald-100", color: "text-emerald-600", btnBg: "bg-emerald-500 hover:bg-emerald-600", icon: "check" },
-    updated: { title: "Coupon Updated!", bg: "bg-blue-100", color: "text-blue-600", btnBg: "bg-blue-500 hover:bg-blue-600", icon: "check" },
-    deleted: { title: "Coupon Deleted!", bg: "bg-red-100", color: "text-red-500", btnBg: "bg-red-500 hover:bg-red-600", icon: "trash" },
-    enabled: { title: "Coupon Enabled!", bg: "bg-emerald-100", color: "text-emerald-600", btnBg: "bg-emerald-500 hover:bg-emerald-600", icon: "toggle" },
-    disabled: { title: "Coupon Disabled!", bg: "bg-amber-100", color: "text-amber-600", btnBg: "bg-amber-500 hover:bg-amber-600", icon: "toggle" },
+    created: { title: "Kupon Dibuat!", bg: "bg-emerald-100", color: "text-emerald-600", btnBg: "bg-emerald-500 hover:bg-emerald-600", icon: "check" },
+    updated: { title: "Kupon Diperbarui!", bg: "bg-blue-100", color: "text-blue-600", btnBg: "bg-blue-500 hover:bg-blue-600", icon: "check" },
+    deleted: { title: "Kupon Dihapus!", bg: "bg-red-100", color: "text-red-500", btnBg: "bg-red-500 hover:bg-red-600", icon: "trash" },
+    enabled: { title: "Kupon Diaktifkan!", bg: "bg-emerald-100", color: "text-emerald-600", btnBg: "bg-emerald-500 hover:bg-emerald-600", icon: "toggle" },
+    disabled: { title: "Kupon Dinonaktifkan!", bg: "bg-amber-100", color: "text-amber-600", btnBg: "bg-amber-500 hover:bg-amber-600", icon: "toggle" },
   };
   const c = configs[info.type];
   const messages: Record<SuccessInfo["type"], string> = {
-    created: `Coupon "${info.name}" has been created and is ready to use.`,
-    updated: `Coupon "${info.name}" has been updated successfully.`,
-    deleted: `Coupon "${info.name}" has been removed.`,
-    enabled: `Coupon "${info.name}" is now active and can be used by customers.`,
-    disabled: `Coupon "${info.name}" has been disabled and cannot be used.`,
+    created: `Kupon "${info.name}" berhasil dibuat dan siap dipakai.`,
+    updated: `Kupon "${info.name}" berhasil diperbarui.`,
+    deleted: `Kupon "${info.name}" telah dihapus.`,
+    enabled: `Kupon "${info.name}" sekarang aktif dan bisa dipakai customer.`,
+    disabled: `Kupon "${info.name}" dinonaktifkan dan tidak bisa dipakai.`,
   };
 
   return (

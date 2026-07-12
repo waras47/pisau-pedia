@@ -14,7 +14,7 @@ export function FeaturedCollection() {
           <img
             src="/dev-images/products/kuro-bunka-190.jpg"
             alt="Tanaka Forge Damascus bunka knife"
-            className="aspect-[4/3] w-full bg-muted object-contain"
+            className="aspect-[4/3] w-full object-cover"
           />
           <div className="flex flex-col items-start gap-4">
             <Badge variant="copper">20% Off — Until June 21</Badge>

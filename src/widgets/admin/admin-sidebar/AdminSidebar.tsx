@@ -44,27 +44,12 @@ const navSections: { title: string; items: NavItem[] }[] = [
     title: "Product Management",
     items: [
       {
-        label: "Products",
+        label: "Produk",
         href: "/admin/products",
         icon: <ProductIcon />,
-        children: [
-          { label: "All Products", href: "/admin/products" },
-          { label: "Add Product", href: "/admin/products/add" },
-          { label: "Inventory", href: "/admin/products/inventory" },
-        ],
       },
       {
-        label: "Collections",
-        href: "/admin/collections",
-        icon: <CollectionIcon />,
-        children: [
-          { label: "Japanese Knives", href: "/admin/collections/japanese-knives" },
-          { label: "Accessories", href: "/admin/collections/accessories" },
-          { label: "Engravings", href: "/admin/collections/engravings" },
-        ],
-      },
-      {
-        label: "Categories",
+        label: "Kategori",
         href: "/admin/categories",
         icon: <CategoryIcon />,
       },
@@ -79,7 +64,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
         icon: <SharpeningIcon />,
         children: [
           { label: "Requests", href: "/admin/sharpening" },
-          { label: "In Progress", href: "/admin/sharpening?status=progress" },
+          { label: "In Progress", href: "/admin/sharpening?status=in_progress" },
           { label: "Completed", href: "/admin/sharpening?status=completed" },
         ],
       },
@@ -278,13 +263,6 @@ function ProductIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
-    </svg>
-  );
-}
-function CollectionIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 7V5a2 2 0 0 1 2-2h2" /><path d="M17 3h2a2 2 0 0 1 2 2v2" /><path d="M21 17v2a2 2 0 0 1-2 2h-2" /><path d="M7 21H5a2 2 0 0 1-2-2v-2" /><rect width="7" height="5" x="7" y="7" rx="1" /><rect width="7" height="5" x="10" y="12" rx="1" />
     </svg>
   );
 }
