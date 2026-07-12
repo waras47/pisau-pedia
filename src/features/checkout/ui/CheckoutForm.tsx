@@ -7,6 +7,7 @@ import { Button } from "@/shared/ui/Button";
 
 import { validateCoupon, type ValidateCouponResult } from "@/entities/coupon/api/coupon.api";
 import { createOrder } from "@/entities/order/api/order.api";
+import { getPaymentMethods, type PaymentMethod } from "@/entities/payment/api/payment.api";
 import {
   calculateShippingCost,
   searchDestinations,
@@ -51,12 +52,23 @@ export function CheckoutForm() {
   const [shippingLoading, setShippingLoading] = useState(false);
   const [shippingError, setShippingError] = useState<string | null>(null);
 
+  // Payment methods
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  // selectedPayment holds "qris" or "va:<bankCode>"
+  const [selectedPayment, setSelectedPayment] = useState<string>("");
+
   const catalogItems = useMemo(() => items.filter((i) => !i.component), [items]);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(destQuery), 350);
     return () => clearTimeout(t);
   }, [destQuery]);
+
+  useEffect(() => {
+    getPaymentMethods()
+      .then(setPaymentMethods)
+      .catch(() => setPaymentMethods([]));
+  }, []);
 
   useEffect(() => {
     if (debouncedQuery.trim().length < 3) {
@@ -156,6 +168,19 @@ export function CheckoutForm() {
       setError("Pilih kurir pengiriman terlebih dahulu.");
       return;
     }
+    if (!selectedPayment) {
+      setError("Pilih metode pembayaran terlebih dahulu.");
+      return;
+    }
+
+    // selectedPayment is "qris" or "va:<bankCode>". Map to the backend's
+    // payment_type/payment_channel contract.
+    let paymentType = "qris";
+    let paymentChannel: string | undefined;
+    if (selectedPayment.startsWith("va:")) {
+      paymentType = "bank_transfer";
+      paymentChannel = selectedPayment.slice(3);
+    }
 
     const form = new FormData(e.currentTarget);
     setLoading(true);
@@ -172,6 +197,8 @@ export function CheckoutForm() {
         destination_id: String(destination.id),
         courier: shippingOption.code,
         service: shippingOption.service,
+        payment_type: paymentType,
+        payment_channel: paymentChannel,
         items: catalogItems.map((i) => ({ product_slug: i.slug, quantity: i.quantity })),
       });
 
