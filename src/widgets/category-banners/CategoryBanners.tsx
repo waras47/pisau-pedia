@@ -36,7 +36,7 @@ export function CategoryBanners() {
             <img
               src={banner.image}
               alt={banner.label}
-              className="aspect-[4/3] w-full bg-muted object-contain"
+              className="aspect-[4/3] w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/0 to-foreground/0" />
             <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-6 text-background">

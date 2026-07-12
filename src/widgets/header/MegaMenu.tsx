@@ -11,11 +11,11 @@ export function MegaMenu() {
 
   return (
     <nav
-      className="hidden lg:block"
+      className="hidden self-stretch lg:flex lg:items-center"
       onMouseLeave={() => setOpenLabel(null)}
       aria-label="Main"
     >
-      <ul className="flex items-center gap-8">
+      <ul className="flex h-full items-center gap-8">
         {mainNav.map((item) => (
           <li key={item.label} onMouseEnter={() => setOpenLabel(item.label)}>
             <Link

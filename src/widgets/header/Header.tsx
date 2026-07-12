@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { CartButton } from "@/features/cart";
+import { LocaleToggle } from "@/features/locale-currency";
 import { ThemeToggle } from "@/features/theme-toggle";
 import { siteConfig } from "@/shared/config/site.config";
 import { BladeMark } from "@/shared/icons";
@@ -19,7 +20,7 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="relative z-30 border-b border-border bg-surface">
+    <header className="sticky top-0 z-30 border-b border-border bg-surface">
       <AnnouncementBar />
 
       <Container className="flex h-20 items-center justify-between gap-6">
@@ -46,6 +47,7 @@ export function Header() {
           <IconButton label="Account" className="hidden sm:inline-flex">
             <User size={19} />
           </IconButton>
+          <LocaleToggle />
           <ThemeToggle />
           <CartButton />
         </div>

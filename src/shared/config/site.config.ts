@@ -10,5 +10,7 @@ export const siteConfig = {
     tiktok: "https://tiktok.com",
     youtube: "https://youtube.com",
     facebook: "https://facebook.com",
+    // TODO: ganti dengan nomor WhatsApp admin sungguhan (format: kode negara + nomor, tanpa "+" atau spasi)
+    whatsapp: "6281234567890",
   },
 } as const;

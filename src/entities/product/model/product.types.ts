@@ -15,6 +15,10 @@ export interface Product {
   badge?: "new" | "sale" | "sold-out";
   slug: string;
   maker?: string;
+  /** Jumlah stok — dipakai di admin panel untuk kelola inventory. */
+  stock?: number;
+  /** Berat produk dalam gram — dipakai untuk hitung ongkir. */
+  weight?: number;
   /** Local dev-only preview photo (not committed — see /public/dev-images). */
   image?: string;
 

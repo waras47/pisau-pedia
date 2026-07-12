@@ -3,8 +3,8 @@
 import { Minus, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 
-import { formatPrice } from "@/entities/product";
 import { useCart } from "@/features/cart";
+import { useLocaleCurrency } from "@/features/locale-currency";
 import { Button } from "@/shared/ui/Button";
 import { Container } from "@/shared/ui/Container";
 import { IconButton } from "@/shared/ui/IconButton";
@@ -12,6 +12,7 @@ import { SectionHeading } from "@/shared/ui/SectionHeading";
 
 export default function CartPage() {
   const { items, subtotal, totalItems, updateQuantity, removeItem } = useCart();
+  const { formatPrice, t } = useLocaleCurrency();
   const currency = items[0]?.currency ?? "EUR";
 
   return (
@@ -21,7 +22,7 @@ export default function CartPage() {
 
         {items.length === 0 ? (
           <div className="flex flex-col items-start gap-4 py-10">
-            <p className="text-muted-foreground">Your cart is empty.</p>
+            <p className="text-muted-foreground">{t("cart_empty")}</p>
             <Link href="/collections/japanese-knives">
               <Button>Browse knives</Button>
             </Link>
@@ -92,10 +93,10 @@ export default function CartPage() {
 
             <aside className="h-fit border border-border bg-surface p-6">
               <h3 className="font-display text-lg font-semibold tracking-tightest">
-                Order summary
+                {t("order_summary")}
               </h3>
               <div className="mt-6 flex items-center justify-between border-b border-border pb-4 text-sm">
-                <span className="text-muted-foreground">Subtotal</span>
+                <span className="text-muted-foreground">{t("subtotal")}</span>
                 <span className="font-semibold">
                   {formatPrice(subtotal, currency)}
                 </span>
@@ -105,7 +106,7 @@ export default function CartPage() {
               </p>
               <Link href="/checkout">
                 <Button size="lg" className="w-full">
-                  Checkout
+                  {t("checkout")}
                 </Button>
               </Link>
             </aside>

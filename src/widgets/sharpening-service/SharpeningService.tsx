@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { createServiceRequest } from "@/entities/service-request/api/service-request.api";
+import { HttpError } from "@/shared/api/http-error";
 import { Container } from "@/shared/ui/Container";
 import { Button } from "@/shared/ui/Button";
 
@@ -96,12 +98,28 @@ export function SharpeningService() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitted(true);
-  };
+    setError(null);
+    setSubmitting(true);
+    try {
+      await createServiceRequest({
+        type: "sharpening",
+        customer_name: formData.name,
+        customer_email: formData.email,
+        message: formData.message,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof HttpError ? err.message : "Gagal mengirim request, coba lagi.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <>
@@ -347,8 +365,9 @@ export function SharpeningService() {
                   placeholder="Describe your knives, their condition, and what service you need..."
                 />
               </div>
-              <Button type="submit" className="self-start">
-                Send Request
+              {error ? <p className="text-sm text-red-600">{error}</p> : null}
+              <Button type="submit" className="self-start" disabled={submitting}>
+                {submitting ? "Sending..." : "Send Request"}
               </Button>
             </form>
           )}

@@ -1,4 +1,3 @@
-export { formatPrice } from "./lib/format-price";
 export {
   allProducts,
   getProductBySlug,
@@ -6,7 +5,6 @@ export {
 } from "./lib/get-product";
 export {
   accessories,
-  engravings,
   featuredProducts,
   japaneseKnives,
   monthlyPick,

@@ -8,21 +8,23 @@ import { HeroImageSlider } from "./HeroImageSlider";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-surface">
-      <Container className="grid items-center gap-10 py-12 lg:grid-cols-2 lg:gap-16 lg:py-20">
-        <div className="flex flex-col gap-6 animate-fade-up">
+    <section className="relative flex min-h-[80vh] items-center overflow-hidden bg-black lg:min-h-[640px]">
+      <HeroImageSlider />
+
+      <Container className="relative z-10 py-16 lg:py-20">
+        <div className="flex max-w-xl flex-col gap-6 animate-fade-up">
           <span className="font-accent text-lg italic text-copper">
             The heart of your kitchen
           </span>
           <span className="h-px w-16 bg-gradient-to-r from-gold to-transparent" />
-          <h1 className="font-display text-4xl font-semibold leading-[1.05] tracking-tightest sm:text-5xl lg:text-6xl">
+          <h1 className="font-display text-4xl font-semibold leading-[1.05] tracking-tightest text-white sm:text-5xl lg:text-6xl">
             Japanese kitchen
             <br />
             knives, made to
             <br />
             last a lifetime
           </h1>
-          <p className="max-w-md text-muted-foreground">
+          <p className="max-w-md text-white/75">
             Hand-forged blades from Japan&apos;s finest workshops, selected for
             home cooks and professional chefs — and sharpened to a precision
             edge before they ever leave us.
@@ -33,20 +35,16 @@ export function Hero() {
             </Link>
             <Link
               href="/pages/configurator"
-              className="inline-flex items-center gap-1.5 text-sm font-medium uppercase tracking-widest2 text-foreground transition-colors hover:text-copper"
+              className="inline-flex items-center gap-1.5 text-sm font-medium uppercase tracking-widest2 text-white transition-colors hover:text-copper"
             >
               Build a Knife
               <ArrowRight size={14} />
             </Link>
           </div>
 
-          <p className="text-xs uppercase tracking-widest2 text-muted-foreground">
+          <p className="text-xs uppercase tracking-widest2 text-white/60">
             Hand-forged in Sakai, Japan — since 1998
           </p>
-        </div>
-
-        <div className="relative">
-          <HeroImageSlider />
         </div>
       </Container>
     </section>

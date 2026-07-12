@@ -1,6 +1,17 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { HttpError } from "@/shared/api/http-error";
+
+import {
+  deleteSubscriber,
+  listSubscribers,
+  subscribeNewsletter,
+  type SubscriberApiItem,
+  type SubscriberSource,
+  unsubscribeSubscriber,
+} from "@/entities/newsletter/api/newsletter.api";
 
 // --- Types ---
 
@@ -10,8 +21,7 @@ interface Subscriber {
   name: string;
   joinedDate: string;
   status: "active" | "unsubscribed";
-  source: "checkout" | "footer" | "popup" | "blog" | "manual";
-  tags: string[];
+  source: SubscriberSource;
 }
 
 interface Campaign {
@@ -33,25 +43,22 @@ interface SuccessInfo {
   name: string;
 }
 
-// --- Mock data ---
+const emptySubscriber: Subscriber = {
+  id: "", email: "", name: "", joinedDate: "", status: "active", source: "manual",
+};
 
-const initialSubscribers: Subscriber[] = [
-  { id: "s-1", email: "tanaka.kenji@gmail.com", name: "Kenji Tanaka", joinedDate: "2025-08-12", status: "active", source: "footer", tags: ["knives", "sharpening"] },
-  { id: "s-2", email: "chef.mueller@outlook.de", name: "Hans Müller", joinedDate: "2025-09-03", status: "active", source: "checkout", tags: ["knives"] },
-  { id: "s-3", email: "sarah.j.cook@yahoo.com", name: "Sarah Johnson", joinedDate: "2025-10-15", status: "active", source: "popup", tags: ["accessories", "knives"] },
-  { id: "s-4", email: "marco.rossi@libero.it", name: "Marco Rossi", joinedDate: "2025-11-22", status: "active", source: "blog", tags: ["sharpening"] },
-  { id: "s-5", email: "emma.dubois@orange.fr", name: "Emma Dubois", joinedDate: "2025-12-01", status: "unsubscribed", source: "footer", tags: ["knives"] },
-  { id: "s-6", email: "yamamoto.yuki@icloud.com", name: "Yuki Yamamoto", joinedDate: "2026-01-10", status: "active", source: "checkout", tags: ["engravings", "knives"] },
-  { id: "s-7", email: "peter.svensson@telia.se", name: "Peter Svensson", joinedDate: "2026-01-28", status: "active", source: "popup", tags: ["knives", "accessories"] },
-  { id: "s-8", email: "li.wei@163.com", name: "Wei Li", joinedDate: "2026-02-14", status: "active", source: "footer", tags: ["knives"] },
-  { id: "s-9", email: "anna.kowalski@wp.pl", name: "Anna Kowalski", joinedDate: "2026-03-05", status: "active", source: "blog", tags: ["sharpening", "knives"] },
-  { id: "s-10", email: "james.wilson@gmail.com", name: "James Wilson", joinedDate: "2026-03-20", status: "unsubscribed", source: "checkout", tags: ["accessories"] },
-  { id: "s-11", email: "sophie.laurent@gmail.com", name: "Sophie Laurent", joinedDate: "2026-04-02", status: "active", source: "popup", tags: ["knives", "engravings"] },
-  { id: "s-12", email: "takeshi.honda@yahoo.co.jp", name: "Takeshi Honda", joinedDate: "2026-04-18", status: "active", source: "manual", tags: ["knives", "sharpening", "accessories"] },
-  { id: "s-13", email: "maria.garcia@hotmail.es", name: "Maria Garcia", joinedDate: "2026-05-01", status: "active", source: "footer", tags: ["knives"] },
-  { id: "s-14", email: "david.kim@naver.com", name: "David Kim", joinedDate: "2026-05-15", status: "active", source: "blog", tags: ["knives", "accessories"] },
-  { id: "s-15", email: "lisa.andersson@gmail.com", name: "Lisa Andersson", joinedDate: "2026-06-01", status: "active", source: "checkout", tags: ["knives", "sharpening"] },
-];
+function toSubscriberVM(s: SubscriberApiItem): Subscriber {
+  return {
+    id: s.id,
+    email: s.email,
+    name: s.name ?? "",
+    joinedDate: s.created_at ? s.created_at.slice(0, 10) : "",
+    status: s.status,
+    source: s.source,
+  };
+}
+
+// --- Mock data (campaigns — email sending not yet implemented) ---
 
 const initialCampaigns: Campaign[] = [
   {
@@ -108,10 +115,6 @@ const initialCampaigns: Campaign[] = [
 
 // --- Helpers ---
 
-function generateId(prefix: string) {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`;
-}
-
 function formatDate(d: string) {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
@@ -119,35 +122,87 @@ function formatDate(d: string) {
 
 // --- Page ---
 
+const SUBSCRIBERS_PER_PAGE = 20;
+
 export default function NewsletterPage() {
   const [tab, setTab] = useState<Tab>("subscribers");
-  const [subscribers, setSubscribers] = useState<Subscriber[]>(initialSubscribers);
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
   const [modal, setModal] = useState<SubModal>("closed");
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [successInfo, setSuccessInfo] = useState<SuccessInfo | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [subStats, setSubStats] = useState({ total: 0, active: 0, unsubscribed: 0 });
 
   // Shared edit state
-  const [editSubscriber, setEditSubscriber] = useState<Subscriber>({
-    id: "", email: "", name: "", joinedDate: "", status: "active", source: "manual", tags: [],
-  });
+  const [editSubscriber, setEditSubscriber] = useState<Subscriber>(emptySubscriber);
   const [editCampaign, setEditCampaign] = useState<Campaign>({
     id: "", subject: "", status: "draft", sentDate: "", recipients: 0, openRate: 0, clickRate: 0, content: "",
   });
-  const [tagInput, setTagInput] = useState("");
+
+  // Debounce free-text search so we don't hit the API on every keystroke.
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  // Reset to page 1 whenever the active filter changes.
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, filterStatus]);
+
+  async function loadSubscribers() {
+    setLoading(true);
+    try {
+      const { items, meta } = await listSubscribers({
+        page,
+        perPage: SUBSCRIBERS_PER_PAGE,
+        status: filterStatus || undefined,
+        search: debouncedSearch || undefined,
+      });
+      setSubscribers(items.map(toSubscriberVM));
+      setTotalPages(Math.max(1, meta.total_pages));
+    } catch (err) {
+      alert(err instanceof HttpError ? err.message : "Gagal memuat subscriber");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Independent of the current search/filter/page — these three counts
+  // always describe the full subscriber base, not just what's on screen.
+  async function loadStats() {
+    try {
+      const [total, active, unsubscribed] = await Promise.all([
+        listSubscribers({ perPage: 1 }),
+        listSubscribers({ perPage: 1, status: "active" }),
+        listSubscribers({ perPage: 1, status: "unsubscribed" }),
+      ]);
+      setSubStats({ total: total.meta.total, active: active.meta.total, unsubscribed: unsubscribed.meta.total });
+    } catch {
+      // Stats are supplementary — a failure here shouldn't block the table.
+    }
+  }
+
+  useEffect(() => {
+    if (tab !== "subscribers") return;
+    loadSubscribers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, page, filterStatus, debouncedSearch]);
+
+  useEffect(() => {
+    loadStats();
+  }, []);
 
   const showSuccess = useCallback((type: SuccessInfo["type"], name: string) => {
     setSuccessInfo({ type, name });
     setTimeout(() => setSuccessInfo(null), 2500);
   }, []);
-
-  // Subscriber stats
-  const subStats = useMemo(() => {
-    const active = subscribers.filter((s) => s.status === "active").length;
-    const thisMonth = subscribers.filter((s) => s.joinedDate >= "2026-06-01" && s.status === "active").length;
-    return { total: subscribers.length, active, unsubscribed: subscribers.length - active, thisMonth };
-  }, [subscribers]);
 
   // Campaign stats
   const campStats = useMemo(() => {
@@ -156,17 +211,6 @@ export default function NewsletterPage() {
     const avgClick = sent.length > 0 ? sent.reduce((s, c) => s + c.clickRate, 0) / sent.length : 0;
     return { total: campaigns.length, sent: sent.length, drafts: campaigns.filter((c) => c.status === "draft").length, avgOpen, avgClick };
   }, [campaigns]);
-
-  // Filtered subscribers
-  const filteredSubs = useMemo(() => {
-    let result = subscribers;
-    if (search) {
-      const q = search.toLowerCase();
-      result = result.filter((s) => s.email.toLowerCase().includes(q) || s.name.toLowerCase().includes(q));
-    }
-    if (filterStatus) result = result.filter((s) => s.status === filterStatus);
-    return result;
-  }, [subscribers, search, filterStatus]);
 
   // Filtered campaigns
   const filteredCamps = useMemo(() => {
@@ -181,43 +225,63 @@ export default function NewsletterPage() {
 
   // Subscriber handlers
   const handleAddSubscriber = () => {
-    setEditSubscriber({ id: generateId("s"), email: "", name: "", joinedDate: new Date().toISOString().slice(0, 10), status: "active", source: "manual", tags: [] });
-    setTagInput("");
+    setEditSubscriber({ ...emptySubscriber, joinedDate: new Date().toISOString().slice(0, 10) });
     setModal("add-subscriber");
   };
 
-  const handleSaveSubscriber = () => {
+  async function handleSaveSubscriber() {
     if (!editSubscriber.email.trim()) return;
-    const tags = tagInput.split(",").map((t) => t.trim()).filter(Boolean);
-    const saved = { ...editSubscriber, tags };
-    setSubscribers((prev) => [saved, ...prev]);
-    showSuccess("added", saved.email);
-    setModal("closed");
-  };
+    setSaving(true);
+    try {
+      await subscribeNewsletter(editSubscriber.email.trim(), "manual", editSubscriber.name || undefined);
+      showSuccess("added", editSubscriber.email);
+      await Promise.all([loadSubscribers(), loadStats()]);
+      setModal("closed");
+    } catch (err) {
+      alert(err instanceof HttpError ? err.message : "Gagal menambah subscriber");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   const handleDeleteSubscriber = (s: Subscriber) => {
     setEditSubscriber(s);
     setModal("delete-subscriber");
   };
 
-  const confirmDeleteSubscriber = () => {
-    setSubscribers((prev) => prev.filter((s) => s.id !== editSubscriber.id));
-    showSuccess("removed", editSubscriber.email);
-    setModal("closed");
-  };
+  async function confirmDeleteSubscriber() {
+    setSaving(true);
+    try {
+      await deleteSubscriber(editSubscriber.id);
+      showSuccess("removed", editSubscriber.email);
+      await Promise.all([loadSubscribers(), loadStats()]);
+    } catch (err) {
+      alert(err instanceof HttpError ? err.message : "Gagal menghapus subscriber");
+    } finally {
+      setSaving(false);
+      setModal("closed");
+    }
+  }
 
-  const toggleSubscriberStatus = (sub: Subscriber) => {
-    const newStatus = sub.status === "active" ? "unsubscribed" : "active";
-    setSubscribers((prev) => prev.map((s) => (s.id === sub.id ? { ...s, status: newStatus } : s)));
-    showSuccess(newStatus === "active" ? "subscribed" : "unsubscribed", sub.email);
-  };
+  async function toggleSubscriberStatus(sub: Subscriber) {
+    setSaving(true);
+    try {
+      if (sub.status === "active") {
+        await unsubscribeSubscriber(sub.id);
+        showSuccess("unsubscribed", sub.email);
+      } else {
+        await subscribeNewsletter(sub.email, sub.source);
+        showSuccess("subscribed", sub.email);
+      }
+      await Promise.all([loadSubscribers(), loadStats()]);
+    } catch (err) {
+      alert(err instanceof HttpError ? err.message : "Gagal mengubah status subscriber");
+    } finally {
+      setSaving(false);
+    }
+  }
 
-  // Campaign handlers
-  const handleCompose = () => {
-    setEditCampaign({ id: generateId("cm"), subject: "", status: "draft", sentDate: "", recipients: 0, openRate: 0, clickRate: 0, content: "" });
-    setModal("compose");
-  };
-
+  // Campaign handlers (mock only — email sending isn't wired up yet)
   const handleViewCampaign = (c: Campaign) => {
     setEditCampaign(c);
     setModal("view-campaign");
@@ -226,25 +290,6 @@ export default function NewsletterPage() {
   const handleDeleteCampaign = (c: Campaign) => {
     setEditCampaign(c);
     setModal("delete-campaign");
-  };
-
-  const handleSaveCampaign = (asScheduled: boolean) => {
-    if (!editCampaign.subject.trim()) return;
-    const activeCount = subscribers.filter((s) => s.status === "active").length;
-    const saved: Campaign = {
-      ...editCampaign,
-      status: asScheduled ? "scheduled" : "draft",
-      recipients: asScheduled ? activeCount : 0,
-      sentDate: asScheduled ? new Date().toISOString().slice(0, 10) : "",
-    };
-    const existing = campaigns.find((c) => c.id === saved.id);
-    if (existing) {
-      setCampaigns((prev) => prev.map((c) => (c.id === saved.id ? saved : c)));
-    } else {
-      setCampaigns((prev) => [saved, ...prev]);
-    }
-    showSuccess(asScheduled ? "campaign-scheduled" : "campaign-saved", saved.subject);
-    setModal("closed");
   };
 
   const confirmDeleteCampaign = () => {
@@ -268,11 +313,11 @@ export default function NewsletterPage() {
         </div>
         <div className="flex gap-2">
           {tab === "subscribers" ? (
-            <button type="button" onClick={handleAddSubscriber} className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-600">
+            <button type="button" onClick={handleAddSubscriber} disabled={saving} className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-600 disabled:opacity-50">
               <PlusIcon /> Add Subscriber
             </button>
           ) : (
-            <button type="button" onClick={handleCompose} className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-600">
+            <button type="button" disabled title="Belum tersedia — perlu integrasi SMTP/email provider" className="flex cursor-not-allowed items-center gap-2 rounded-lg bg-gray-200 px-4 py-2.5 text-sm font-medium text-gray-400 shadow-sm">
               <PlusIcon /> Compose Campaign
             </button>
           )}
@@ -285,7 +330,7 @@ export default function NewsletterPage() {
           <button
             key={t}
             type="button"
-            onClick={() => { setTab(t); setSearch(""); setFilterStatus(""); }}
+            onClick={() => { setTab(t); setSearch(""); setFilterStatus(""); setPage(1); }}
             className={`flex-1 rounded-md px-4 py-2 text-sm font-medium capitalize transition-colors ${
               tab === t ? "bg-white text-gray-800 shadow-sm" : "text-gray-500 hover:text-gray-700"
             }`}
@@ -299,12 +344,11 @@ export default function NewsletterPage() {
       {tab === "subscribers" && (
         <>
           {/* Stats */}
-          <div className="grid gap-4 sm:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-3">
             {[
               { label: "Total Subscribers", value: String(subStats.total), bg: "bg-gray-50", text: "text-gray-600" },
               { label: "Active", value: String(subStats.active), bg: "bg-emerald-50", text: "text-emerald-600" },
               { label: "Unsubscribed", value: String(subStats.unsubscribed), bg: "bg-red-50", text: "text-red-500" },
-              { label: "New This Month", value: String(subStats.thisMonth), bg: "bg-blue-50", text: "text-blue-600" },
             ].map((s) => (
               <div key={s.label} className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm">
                 <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold ${s.bg} ${s.text}`}>{s.value}</div>
@@ -336,29 +380,23 @@ export default function NewsletterPage() {
                     <th className="px-4 py-4 font-medium">Name</th>
                     <th className="px-4 py-4 font-medium">Joined</th>
                     <th className="px-4 py-4 font-medium">Source</th>
-                    <th className="px-4 py-4 font-medium">Tags</th>
                     <th className="px-4 py-4 font-medium">Status</th>
                     <th className="px-4 py-4 text-right font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredSubs.length === 0 ? (
-                    <tr><td colSpan={7} className="px-4 py-12 text-center text-gray-400">No subscribers found.</td></tr>
+                  {loading ? (
+                    <tr><td colSpan={6} className="px-4 py-12 text-center text-gray-400">Loading...</td></tr>
+                  ) : subscribers.length === 0 ? (
+                    <tr><td colSpan={6} className="px-4 py-12 text-center text-gray-400">No subscribers found.</td></tr>
                   ) : (
-                    filteredSubs.map((s) => (
+                    subscribers.map((s) => (
                       <tr key={s.id} className="border-b border-gray-50 transition-colors hover:bg-gray-50/50">
                         <td className="px-4 py-3 font-medium text-gray-700">{s.email}</td>
                         <td className="px-4 py-3 text-gray-500">{s.name || "—"}</td>
                         <td className="px-4 py-3 text-xs text-gray-500">{formatDate(s.joinedDate)}</td>
                         <td className="px-4 py-3">
                           <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] capitalize text-gray-600">{s.source}</span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex flex-wrap gap-1">
-                            {s.tags.map((t) => (
-                              <span key={t} className="rounded bg-blue-50 px-1.5 py-0.5 text-[10px] text-blue-600">{t}</span>
-                            ))}
-                          </div>
                         </td>
                         <td className="px-4 py-3">
                           <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
@@ -369,10 +407,10 @@ export default function NewsletterPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1">
-                            <button type="button" onClick={() => toggleSubscriberStatus(s)} className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-amber-500" title={s.status === "active" ? "Unsubscribe" : "Resubscribe"}>
+                            <button type="button" onClick={() => toggleSubscriberStatus(s)} disabled={saving} className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-amber-500 disabled:opacity-50" title={s.status === "active" ? "Unsubscribe" : "Resubscribe"}>
                               {s.status === "active" ? <PauseIcon /> : <PlayIcon />}
                             </button>
-                            <button type="button" onClick={() => handleDeleteSubscriber(s)} className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-red-500" title="Remove">
+                            <button type="button" onClick={() => handleDeleteSubscriber(s)} disabled={saving} className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-red-500 disabled:opacity-50" title="Remove">
                               <TrashIcon />
                             </button>
                           </div>
@@ -384,12 +422,39 @@ export default function NewsletterPage() {
               </table>
             </div>
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1 || loading}
+                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-gray-500">Page {page} of {totalPages}</span>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages || loading}
+                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </>
       )}
 
       {/* ===== CAMPAIGNS TAB ===== */}
       {tab === "campaigns" && (
         <>
+          <div className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-700">
+            Pengiriman email kampanye belum tersedia — perlu integrasi SMTP/email provider. Data di bawah ini hanya contoh.
+          </div>
+
           {/* Stats */}
           <div className="grid gap-4 sm:grid-cols-4">
             {[
@@ -460,11 +525,6 @@ export default function NewsletterPage() {
                     <button type="button" onClick={() => handleViewCampaign(c)} className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-500" title="View">
                       <EyeIcon />
                     </button>
-                    {c.status === "draft" && (
-                      <button type="button" onClick={() => { setEditCampaign({ ...c }); setModal("compose"); }} className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-emerald-500" title="Edit">
-                        <EditIcon />
-                      </button>
-                    )}
                     <button type="button" onClick={() => handleDeleteCampaign(c)} className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-red-500" title="Delete">
                       <TrashIcon />
                     </button>
@@ -494,14 +554,11 @@ export default function NewsletterPage() {
                 <Field label="Name">
                   <input type="text" value={editSubscriber.name} onChange={(e) => setEditSubscriber((p) => ({ ...p, name: e.target.value }))} className="admin-input" placeholder="Full name" />
                 </Field>
-                <Field label="Tags (comma-separated)">
-                  <input type="text" value={tagInput} onChange={(e) => setTagInput(e.target.value)} className="admin-input" placeholder="knives, sharpening, accessories" />
-                </Field>
               </div>
             </div>
             <div className="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4">
               <button type="button" onClick={() => setModal("closed")} className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
-              <button type="button" onClick={handleSaveSubscriber} disabled={!editSubscriber.email.trim()} className="rounded-lg bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-40">
+              <button type="button" onClick={handleSaveSubscriber} disabled={!editSubscriber.email.trim() || saving} className="rounded-lg bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-40">
                 Add Subscriber
               </button>
             </div>
@@ -518,43 +575,7 @@ export default function NewsletterPage() {
             <p className="mt-2 text-sm text-gray-500">Remove <strong>{editSubscriber.email}</strong> from the newsletter list?</p>
             <div className="mt-6 flex items-center justify-end gap-3">
               <button type="button" onClick={() => setModal("closed")} className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
-              <button type="button" onClick={confirmDeleteSubscriber} className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600">Remove</button>
-            </div>
-          </div>
-        </ModalOverlay>
-      )}
-
-      {/* Compose / Edit Campaign */}
-      {modal === "compose" && (
-        <ModalOverlay onClose={() => setModal("closed")}>
-          <div className="w-full max-w-xl rounded-xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-              <h2 className="text-lg font-bold text-gray-800">
-                {editCampaign.subject ? "Edit Campaign" : "Compose Campaign"}
-              </h2>
-              <button type="button" onClick={() => setModal("closed")} className="text-gray-400 hover:text-gray-600">✕</button>
-            </div>
-            <div className="max-h-[70vh] overflow-y-auto p-6">
-              <div className="grid gap-5">
-                <Field label="Subject Line *">
-                  <input type="text" value={editCampaign.subject} onChange={(e) => setEditCampaign((p) => ({ ...p, subject: e.target.value }))} className="admin-input" placeholder="e.g. New Arrivals from Tanaka Forge" />
-                </Field>
-                <Field label="Email Content">
-                  <textarea rows={6} value={editCampaign.content} onChange={(e) => setEditCampaign((p) => ({ ...p, content: e.target.value }))} className="admin-input resize-none" placeholder="Write your email content here..." />
-                </Field>
-                <div className="rounded-lg bg-blue-50 p-3 text-xs text-blue-600">
-                  This will be sent to <strong>{subscribers.filter((s) => s.status === "active").length}</strong> active subscribers.
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4">
-              <button type="button" onClick={() => setModal("closed")} className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
-              <button type="button" onClick={() => handleSaveCampaign(false)} disabled={!editCampaign.subject.trim()} className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40">
-                Save Draft
-              </button>
-              <button type="button" onClick={() => handleSaveCampaign(true)} disabled={!editCampaign.subject.trim()} className="rounded-lg bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-40">
-                Schedule Send
-              </button>
+              <button type="button" onClick={confirmDeleteSubscriber} disabled={saving} className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50">Remove</button>
             </div>
           </div>
         </ModalOverlay>
@@ -696,9 +717,6 @@ function SearchIcon() {
 }
 function EyeIcon() {
   return <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" /></svg>;
-}
-function EditIcon() {
-  return <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /></svg>;
 }
 function TrashIcon({ className }: { className?: string }) {
   return <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>;

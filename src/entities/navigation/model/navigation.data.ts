@@ -65,7 +65,7 @@ export const mainNav: NavItem[] = [
         title: "Services",
         links: [
           { label: "Sharpening & Repairs", href: "/pages/sharpening-repairs" },
-          { label: "Knife Engravings", href: "/collections/knife-engravings" },
+          { label: "Knife Engravings", href: "/pages/engraving-request" },
         ],
       },
     ],

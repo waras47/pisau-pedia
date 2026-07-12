@@ -1,63 +1,76 @@
 import { type Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { accessories, engravings, japaneseKnives } from "@/entities/product";
+import { type ProductApiItem } from "@/entities/product/api/product.api";
+import { type Product } from "@/entities/product/model/product.types";
 import { CollectionListing } from "@/widgets/collection-listing";
+import { env } from "@/shared/config/env";
 
 interface CollectionPageProps {
   params: { handle: string };
 }
 
-// "Database" koleksi sederhana. Nanti ganti dengan fetch ke CMS/API.
-const collections = {
-  "japanese-knives": {
-    eyebrow: "Handcrafted in Japan",
-    title: "Japanese Knives",
-    description:
-      "Traditional carbon and stainless blades, forged by independent makers and finished by hand.",
-    products: japaneseKnives,
-  },
-  accessories: {
-    eyebrow: "Complete Your Kitchen",
-    title: "Accessories",
-    description:
-      "Cutting boards, knife rolls, magnetic holders, sheaths, mandoline slicers, and essential kitchen tools.",
-    products: accessories,
-  },
-  "knife-engravings": {
-    eyebrow: "Make It Yours",
-    title: "Knife Engravings",
-    description:
-      "Personalize any knife with custom text, initials, or iconic Japanese designs. Engraved knives are custom-made and not eligible for return.",
-    products: engravings,
-  },
-} as const;
+interface CategoryApiItem {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  image_url?: string;
+}
 
-type CollectionHandle = keyof typeof collections;
+async function getCategory(slug: string): Promise<CategoryApiItem | null> {
+  const res = await fetch(`${env.apiBaseUrl}/categories/${slug}`, { next: { revalidate: 60 } });
+  if (!res.ok) return null;
+  const json = await res.json();
+  return json.data as CategoryApiItem;
+}
 
-export function generateMetadata({ params }: CollectionPageProps): Metadata {
-  const collection = collections[params.handle as CollectionHandle];
-  if (!collection) return { title: "Collection not found" };
+async function getProductsInCategory(slug: string): Promise<ProductApiItem[]> {
+  const res = await fetch(`${env.apiBaseUrl}/products?category=${slug}&per_page=50`, {
+    next: { revalidate: 60 },
+  });
+  if (!res.ok) return [];
+  const json = await res.json();
+  return json.data as ProductApiItem[];
+}
+
+function toProduct(p: ProductApiItem): Product {
   return {
-    title: `${collection.title} — Kissaki Knives`,
-    description: collection.description,
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+    category: p.category ?? "",
+    price: p.price,
+    compareAtPrice: p.compare_at_price,
+    currency: p.currency,
+    rating: p.rating,
+    reviewCount: p.review_count,
+    maker: p.maker,
+    badge: p.badge as Product["badge"],
+    image: p.image,
   };
 }
 
-export function generateStaticParams() {
-  return Object.keys(collections).map((handle) => ({ handle }));
+export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
+  const category = await getCategory(params.handle);
+  if (!category) return { title: "Collection not found" };
+  return {
+    title: `${category.name} — Kissaki Knives`,
+    description: category.description,
+  };
 }
 
-export default function CollectionPage({ params }: CollectionPageProps) {
-  const collection = collections[params.handle as CollectionHandle];
-  if (!collection) notFound();
+export default async function CollectionPage({ params }: CollectionPageProps) {
+  const category = await getCategory(params.handle);
+  if (!category) notFound();
+
+  const products = await getProductsInCategory(params.handle);
 
   return (
     <CollectionListing
-      eyebrow={collection.eyebrow}
-      title={collection.title}
-      description={collection.description}
-      products={collection.products}
+      title={category.name}
+      description={category.description}
+      products={products.map(toProduct)}
     />
   );
 }
