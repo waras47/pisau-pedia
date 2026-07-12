@@ -306,6 +306,35 @@ export function CheckoutForm() {
         </fieldset>
       )}
 
+      {/* Payment method selection */}
+      {paymentMethods.length > 0 && (
+        <fieldset className="flex flex-col gap-3">
+          <legend className="mb-2 font-display text-lg font-semibold tracking-tightest">Metode Pembayaran</legend>
+          <div className="flex flex-col gap-2">
+            {paymentMethods.map((m) => {
+              const value = m.payment_type === "qris" ? "qris" : `va:${m.bank_code}`;
+              const active = selectedPayment === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setSelectedPayment(value)}
+                  className={`flex items-center gap-3 border px-3 py-2.5 text-left text-sm transition-colors ${
+                    active ? "border-accent bg-accent/5" : "border-border hover:bg-muted"
+                  }`}
+                >
+                  {m.logo_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={m.logo_url} alt="" className="h-6 w-auto flex-none" />
+                  ) : null}
+                  <span className="font-medium">{m.display_name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+      )}
+
       <fieldset className="flex flex-col gap-3">
         <legend className="mb-2 font-display text-lg font-semibold tracking-tightest">Coupon</legend>
         {appliedCoupon ? (

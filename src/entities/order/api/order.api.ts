@@ -19,6 +19,8 @@ export interface CreateOrderInput {
   destination_id?: string;
   courier?: string;
   service?: string;
+  payment_type?: string;
+  payment_channel?: string;
   items: CreateOrderItemInput[];
 }
 
@@ -49,6 +51,12 @@ export interface OrderResponse {
   shipping_courier?: string;
   shipping_service?: string;
   shipping_etd?: string;
+  payment_type?: string;
+  payment_channel?: string;
+  payment_va_number?: string;
+  payment_qr_string?: string;
+  payment_url?: string;
+  payment_expiry?: string;
   invoice_url?: string;
   created_at: string;
   items?: OrderItemResponse[];
