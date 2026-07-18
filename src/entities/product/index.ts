@@ -10,7 +10,11 @@ export {
   monthlyPick,
   newArrivals,
 } from "./model/product.data";
-export { type Product, type ProductSpec } from "./model/product.types";
+export {
+  type Product,
+  type ProductAngleImages,
+  type ProductSpec,
+} from "./model/product.types";
 export { ProductCard } from "./ui/ProductCard";
 export { ProductCarousel } from "./ui/ProductCarousel";
 export { ProductGrid } from "./ui/ProductGrid";

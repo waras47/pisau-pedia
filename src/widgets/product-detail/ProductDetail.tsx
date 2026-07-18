@@ -1,30 +1,71 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+
+import { Badge } from "@/shared/ui/Badge";
+import { Container } from "@/shared/ui/Container";
+import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
+import { SectionHeading } from "@/shared/ui/SectionHeading";
 
 import {
   type Product,
   ProductGrid,
   RatingStars,
 } from "@/entities/product";
-import { reviews, ReviewCard } from "@/entities/review";
+import { ReviewCard,reviews } from "@/entities/review";
+
 import { AddToCart } from "@/features/add-to-cart";
 import { useLocaleCurrency } from "@/features/locale-currency";
-import { Badge } from "@/shared/ui/Badge";
-import { Container } from "@/shared/ui/Container";
-import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
-import { SectionHeading } from "@/shared/ui/SectionHeading";
 
 interface ProductDetailProps {
   product: Product;
   related: Product[];
 }
 
+const ANGLE_ENTRIES: { key: "front" | "back" | "side" | "top"; label: string }[] = [
+  { key: "front", label: "Depan" },
+  { key: "back", label: "Belakang" },
+  { key: "side", label: "Samping" },
+  { key: "top", label: "Atas" },
+];
+
+// Shown when a product has no admin-provided care notes — general guidance
+// valid for any kitchen knife, not specific to one product.
+const DEFAULT_CARE_TIPS = [
+  "Cuci tangan dengan air hangat dan sabun segera setelah dipakai — jangan direndam, dan jangan dicuci di mesin cuci piring.",
+  "Keringkan segera dengan lap bersih sebelum disimpan untuk mencegah karat, terutama untuk pisau baja karbon.",
+  "Simpan di knife block, magnetic strip, atau sarung pisau — hindari menyimpan lepas di laci bersama alat lain.",
+  "Gunakan talenan kayu atau plastik yang lunak — hindari talenan kaca atau keramik yang bisa menumpulkan mata pisau.",
+  "Asah secara berkala dengan whetstone atau honing rod untuk menjaga ketajaman mata pisau.",
+];
+
 export function ProductDetail({ product, related }: ProductDetailProps) {
   const { formatPrice } = useLocaleCurrency();
   const galleryLabels =
     product.galleryLabels ?? [product.category, "Detail", "In use"];
+
+  const availableAngles = ANGLE_ENTRIES.filter(({ key }) => product.angleImages?.[key]);
+  const hasAngleImages = availableAngles.length > 0;
+  const [selectedAngle, setSelectedAngle] = useState(
+    availableAngles[0]?.key ?? ANGLE_ENTRIES[0]!.key,
+  );
+  const [activeTab, setActiveTab] = useState<"description" | "specification" | "care">(
+    "description",
+  );
+
+  const mainImage = hasAngleImages
+    ? product.angleImages?.[selectedAngle]
+    : product.image;
+
+  // Always show all 3 tabs, same as the reference layout — missing data
+  // gets a graceful fallback message instead of hiding the tab.
+  const tabs: { key: typeof activeTab; label: string }[] = [
+    { key: "description", label: "Description" },
+    { key: "specification", label: "Specification" },
+    { key: "care", label: "Knife Care" },
+  ];
 
   return (
     <article className="py-10">
@@ -48,31 +89,70 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
         {/* Galeri + Info */}
         <div className="grid gap-10 lg:grid-cols-2">
           <div className="flex flex-col gap-4">
-            {product.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={product.image}
-                alt={product.name}
-                className="aspect-square w-full object-cover"
-              />
+            {mainImage ? (
+              // Box ratio matches the product photo set's actual aspect
+              // ratio (~1.875:1 / 15:8) — object-cover on a square box was
+              // cropping the tip/handle off. object-contain + matching
+              // ratio shows the full knife with no letterboxing.
+              <div className="aspect-[15/8] w-full overflow-hidden bg-muted">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={mainImage}
+                  alt={product.name}
+                  className="h-full w-full object-contain"
+                />
+              </div>
             ) : (
-              <PlaceholderImage label={galleryLabels[0]} ratio="square" />
+              <PlaceholderImage
+                label={hasAngleImages ? ANGLE_ENTRIES.find((a) => a.key === selectedAngle)?.label : galleryLabels[0]}
+                ratio="video"
+              />
             )}
-            <div className="grid grid-cols-3 gap-4">
-              {galleryLabels.slice(1, 4).map((label) =>
-                product.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={label}
-                    src={product.image}
-                    alt={`${product.name} — ${label}`}
-                    className="aspect-square w-full object-cover"
-                  />
-                ) : (
-                  <PlaceholderImage key={label} label={label} ratio="square" />
-                ),
-              )}
-            </div>
+
+            {hasAngleImages ? (
+              <div className="grid grid-cols-4 gap-4">
+                {ANGLE_ENTRIES.map(({ key, label }) => {
+                  const url = product.angleImages?.[key];
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setSelectedAngle(key)}
+                      className={`relative aspect-[15/8] w-full overflow-hidden border bg-muted transition-colors ${
+                        selectedAngle === key ? "border-foreground" : "border-transparent"
+                      }`}
+                    >
+                      {url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={url} alt={`${product.name} — ${label}`} className="h-full w-full object-contain" />
+                      ) : (
+                        <PlaceholderImage label={label} ratio="video" />
+                      )}
+                      <span className="absolute inset-x-0 bottom-0 bg-background/80 py-0.5 text-center text-[10px] uppercase tracking-wide text-muted-foreground">
+                        {label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-4">
+                {galleryLabels.slice(1, 4).map((label) =>
+                  product.image ? (
+                    <div key={label} className="aspect-[15/8] w-full overflow-hidden bg-muted">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={product.image}
+                        alt={`${product.name} — ${label}`}
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <PlaceholderImage key={label} label={label} ratio="video" />
+                  ),
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-6 lg:pl-6">
@@ -132,23 +212,71 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
           </div>
         </div>
 
-        {/* Spesifikasi */}
-        {product.specs?.length ? (
-          <section className="grid gap-8 lg:grid-cols-3">
-            <SectionHeading title="Specifications" />
-            <dl className="divide-y divide-border border-y border-border lg:col-span-2">
-              {product.specs.map((spec) => (
-                <div
-                  key={spec.label}
-                  className="grid grid-cols-2 gap-4 py-3 text-sm"
-                >
-                  <dt className="text-muted-foreground">{spec.label}</dt>
-                  <dd className="text-foreground">{spec.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-        ) : null}
+        {/* Description / Specification / Knife Care */}
+        <section className="flex flex-col gap-8">
+          <div className="flex gap-8 border-b border-border">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setActiveTab(tab.key)}
+                className={`-mb-px border-b-2 pb-3 text-sm font-medium transition-colors ${
+                  activeTab === tab.key
+                    ? "border-foreground text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {activeTab === "description" ? (
+            <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
+              {product.description ?? "Deskripsi lengkap untuk produk ini akan segera ditambahkan."}
+            </p>
+          ) : null}
+
+          {activeTab === "specification" ? (
+            product.specs?.length ? (
+              <dl className="max-w-3xl divide-y divide-border border-y border-border">
+                {product.specs.map((spec) => (
+                  <div
+                    key={spec.label}
+                    className="grid grid-cols-2 gap-4 py-3 text-sm"
+                  >
+                    <dt className="text-muted-foreground">{spec.label}</dt>
+                    <dd className="text-foreground">{spec.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : (
+              <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
+                Spesifikasi lengkap untuk produk ini akan segera ditambahkan.
+              </p>
+            )
+          ) : null}
+
+          {activeTab === "care" ? (
+            product.careInstructions ? (
+              <p className="max-w-3xl whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                {product.careInstructions}
+              </p>
+            ) : (
+              <ul className="flex max-w-3xl flex-col gap-2.5">
+                {DEFAULT_CARE_TIPS.map((tip) => (
+                  <li
+                    key={tip}
+                    className="flex items-start gap-2 text-sm leading-relaxed text-muted-foreground"
+                  >
+                    <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-copper" />
+                    {tip}
+                  </li>
+                ))}
+              </ul>
+            )
+          ) : null}
+        </section>
 
         {/* Reviews */}
         {product.reviewCount > 0 ? (

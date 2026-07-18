@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 
-import { type Product } from "@/entities/product/model/product.types";
-import { RatingStars } from "@/entities/product/ui/RatingStars";
-import { useLocaleCurrency } from "@/features/locale-currency";
 import { Badge } from "@/shared/ui/Badge";
 import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
+
+import { type Product } from "@/entities/product/model/product.types";
+import { RatingStars } from "@/entities/product/ui/RatingStars";
+
+import { useLocaleCurrency } from "@/features/locale-currency";
 
 interface ProductCardProps {
   product: Product;
@@ -30,12 +32,18 @@ export function ProductCard({ product, className }: ProductCardProps) {
     >
       <div className="relative">
         {product.image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={product.image}
-            alt={product.name}
-            className="aspect-[4/3] w-full object-cover"
-          />
+          // Box ratio matches the product photo set's actual aspect ratio
+          // (~1.875:1 / 15:8, checked across all 44 dev-image files) —
+          // object-contain still guards against any future image that
+          // doesn't match, letterboxing instead of cropping it.
+          <div className="aspect-[15/8] w-full overflow-hidden bg-muted">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={product.image}
+              alt={product.name}
+              className="h-full w-full object-contain"
+            />
+          </div>
         ) : (
           <PlaceholderImage label={product.category} ratio="landscape" />
         )}

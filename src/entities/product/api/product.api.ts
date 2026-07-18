@@ -18,11 +18,27 @@ export interface ProductApiItem {
   image?: string;
 }
 
+export type ProductImageAngle = "front" | "back" | "side" | "top";
+
+export interface ProductAngleImages {
+  front?: string;
+  back?: string;
+  side?: string;
+  top?: string;
+}
+
 export interface ProductApiDetail extends ProductApiItem {
   description?: string;
+  care_instructions?: string;
   images: string[];
+  angle_images: ProductAngleImages;
   specs: { label: string; value: string }[];
   highlights: string[];
+}
+
+export interface ProductImageInput {
+  url: string;
+  angle?: ProductImageAngle;
 }
 
 export interface ProductInput {
@@ -30,6 +46,7 @@ export interface ProductInput {
   name: string;
   slug?: string;
   description?: string;
+  care_instructions?: string;
   price: number;
   compare_at_price?: number;
   maker?: string;
@@ -37,7 +54,7 @@ export interface ProductInput {
   stock?: number;
   weight?: number;
   is_active?: boolean;
-  images?: string[];
+  images?: ProductImageInput[];
   specs?: { label: string; value: string }[];
   highlights?: string[];
 }
@@ -45,12 +62,14 @@ export interface ProductInput {
 export interface ListProductsParams {
   perPage?: number;
   sort?: string;
+  search?: string;
 }
 
 export function listProducts(params: ListProductsParams = {}) {
-  const { perPage = 50, sort } = params;
+  const { perPage = 50, sort, search } = params;
   const query = new URLSearchParams({ per_page: String(perPage) });
   if (sort) query.set("sort", sort);
+  if (search) query.set("search", search);
   return apiFetch<ProductApiItem[]>(`/products?${query.toString()}`);
 }
 

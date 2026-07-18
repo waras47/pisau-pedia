@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -11,10 +11,16 @@ import {
   type NotificationApiItem,
   type NotificationModule,
 } from "@/entities/notification/api/notification.api";
+import { globalSearch, type GlobalSearchResult } from "@/entities/search/api/search.api";
 
 import { useAuth } from "@/features/auth/model/AuthProvider";
 
 const NOTIFICATION_POLL_MS = 30000;
+const SEARCH_DEBOUNCE_MS = 300;
+
+function formatRupiah(amount: number) {
+  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(amount);
+}
 
 const moduleIcons: Record<NotificationModule, string> = {
   order: "📦",
@@ -40,6 +46,10 @@ interface AdminHeaderProps {
 
 export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResult, setSearchResult] = useState<GlobalSearchResult | null>(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -47,6 +57,43 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
   const [notifLoading, setNotifLoading] = useState(false);
   const { user, logout } = useAuth();
   const router = useRouter();
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function handleSearchInput(value: string) {
+    setSearchQuery(value);
+    setSearchDropdownOpen(true);
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    if (!value.trim()) {
+      setSearchResult(null);
+      setSearchLoading(false);
+      return;
+    }
+    setSearchLoading(true);
+    searchDebounceRef.current = setTimeout(() => {
+      globalSearch(value)
+        .then(setSearchResult)
+        .catch(() => setSearchResult(null))
+        .finally(() => setSearchLoading(false));
+    }, SEARCH_DEBOUNCE_MS);
+  }
+
+  function goToProducts() {
+    setSearchDropdownOpen(false);
+    router.push(`/admin/products?q=${encodeURIComponent(searchQuery)}`);
+  }
+  function goToCustomers() {
+    setSearchDropdownOpen(false);
+    router.push(`/admin/customers?q=${encodeURIComponent(searchQuery)}`);
+  }
+  function goToOrders() {
+    setSearchDropdownOpen(false);
+    router.push(`/admin/orders?q=${encodeURIComponent(searchQuery)}`);
+  }
+
+  const searchProducts = searchResult?.products ?? [];
+  const searchCustomers = searchResult?.customers ?? [];
+  const searchOrders = searchResult?.orders ?? [];
+  const hasSearchResults = Boolean(searchProducts.length || searchCustomers.length || searchOrders.length);
 
   async function refreshUnreadCount() {
     try {
@@ -105,7 +152,7 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
   }
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-3 sm:h-16 sm:px-6">
+    <header className="relative flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-3 sm:h-16 sm:px-6">
       {/* Left side */}
       <div className="flex items-center gap-2">
         {/* Hamburger — mobile only */}
@@ -120,22 +167,48 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
         </button>
 
         {/* Search */}
-        <div className="hidden items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 sm:flex">
-          <SearchIcon />
-          <input
-            type="text"
-            placeholder="Type to search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-40 bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400 md:w-64"
-          />
+        <div className="relative hidden sm:block">
+          <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2">
+            <SearchIcon />
+            <input
+              type="text"
+              placeholder="Cari produk, customer, pesanan..."
+              value={searchQuery}
+              onChange={(e) => handleSearchInput(e.target.value)}
+              onFocus={() => searchQuery.trim() && setSearchDropdownOpen(true)}
+              className="w-40 bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400 md:w-64"
+            />
+          </div>
+
+          {searchDropdownOpen && searchQuery.trim() && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setSearchDropdownOpen(false)} />
+              <div className="absolute left-0 top-full z-20 mt-2 w-96 rounded-lg border border-gray-200 bg-white shadow-lg">
+                <SearchResultsPanel
+                  loading={searchLoading}
+                  hasResults={hasSearchResults}
+                  query={searchQuery}
+                  products={searchProducts}
+                  customers={searchCustomers}
+                  orders={searchOrders}
+                  onGoToProducts={goToProducts}
+                  onGoToCustomers={goToCustomers}
+                  onGoToOrders={goToOrders}
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
       {/* Right side */}
       <div className="flex items-center gap-2 sm:gap-4">
         {/* Mobile search button */}
-        <button type="button" className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 sm:hidden">
+        <button
+          type="button"
+          onClick={() => setMobileSearchOpen((o) => !o)}
+          className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 sm:hidden"
+        >
           <SearchIcon />
         </button>
 
@@ -240,7 +313,156 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
           )}
         </div>
       </div>
+
+      {/* Mobile search overlay */}
+      {mobileSearchOpen && (
+        <div className="absolute inset-x-0 top-full z-20 border-b border-gray-200 bg-white p-3 shadow-lg sm:hidden">
+          <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2">
+            <SearchIcon />
+            <input
+              type="text"
+              autoFocus
+              placeholder="Cari produk, customer, pesanan..."
+              value={searchQuery}
+              onChange={(e) => handleSearchInput(e.target.value)}
+              className="w-full bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
+            />
+          </div>
+          {searchQuery.trim() && (
+            <div className="mt-2 max-h-96 overflow-y-auto rounded-lg border border-gray-100">
+              <SearchResultsPanel
+                loading={searchLoading}
+                hasResults={hasSearchResults}
+                query={searchQuery}
+                products={searchProducts}
+                customers={searchCustomers}
+                orders={searchOrders}
+                onGoToProducts={() => { setMobileSearchOpen(false); goToProducts(); }}
+                onGoToCustomers={() => { setMobileSearchOpen(false); goToCustomers(); }}
+                onGoToOrders={() => { setMobileSearchOpen(false); goToOrders(); }}
+              />
+            </div>
+          )}
+        </div>
+      )}
     </header>
+  );
+}
+
+interface SearchResultsPanelProps {
+  loading: boolean;
+  hasResults: boolean;
+  query: string;
+  products: GlobalSearchResult["products"];
+  customers: GlobalSearchResult["customers"];
+  orders: GlobalSearchResult["orders"];
+  onGoToProducts: () => void;
+  onGoToCustomers: () => void;
+  onGoToOrders: () => void;
+}
+
+// Shared between the desktop dropdown and the mobile full-width overlay —
+// same result list, different containers around it.
+function SearchResultsPanel({
+  loading,
+  hasResults,
+  query,
+  products,
+  customers,
+  orders,
+  onGoToProducts,
+  onGoToCustomers,
+  onGoToOrders,
+}: SearchResultsPanelProps) {
+  if (loading) {
+    return <p className="px-3 py-8 text-center text-sm text-gray-400">Mencari...</p>;
+  }
+  if (!hasResults) {
+    return (
+      <p className="px-3 py-8 text-center text-sm text-gray-400">
+        Tidak ada hasil untuk &quot;{query}&quot;.
+      </p>
+    );
+  }
+
+  return (
+    <div className="max-h-96 overflow-y-auto py-1">
+      {products.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between px-3 pb-1 pt-2">
+            <p className="text-xs font-semibold uppercase text-gray-400">Produk</p>
+            <button type="button" onClick={onGoToProducts} className="text-xs text-emerald-500 hover:underline">
+              Lihat semua
+            </button>
+          </div>
+          {products.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={onGoToProducts}
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-gray-50"
+            >
+              {p.image ? (
+                <div className="h-8 w-8 shrink-0 overflow-hidden rounded bg-gray-100">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={p.image} alt="" className="h-full w-full object-contain" />
+                </div>
+              ) : (
+                <div className="h-8 w-8 shrink-0 rounded bg-gray-100" />
+              )}
+              <span className="min-w-0 flex-1 truncate text-gray-700">{p.name}</span>
+              <span className="shrink-0 text-xs text-gray-400">{formatRupiah(p.price)}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {customers.length > 0 && (
+        <div className="border-t border-gray-50">
+          <div className="flex items-center justify-between px-3 pb-1 pt-2">
+            <p className="text-xs font-semibold uppercase text-gray-400">Customer</p>
+            <button type="button" onClick={onGoToCustomers} className="text-xs text-emerald-500 hover:underline">
+              Lihat semua
+            </button>
+          </div>
+          {customers.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={onGoToCustomers}
+              className="flex w-full flex-col px-3 py-2 text-left text-sm hover:bg-gray-50"
+            >
+              <span className="truncate text-gray-700">{c.full_name}</span>
+              <span className="truncate text-xs text-gray-400">{c.email}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {orders.length > 0 && (
+        <div className="border-t border-gray-50">
+          <div className="flex items-center justify-between px-3 pb-1 pt-2">
+            <p className="text-xs font-semibold uppercase text-gray-400">Pesanan</p>
+            <button type="button" onClick={onGoToOrders} className="text-xs text-emerald-500 hover:underline">
+              Lihat semua
+            </button>
+          </div>
+          {orders.map((o) => (
+            <button
+              key={o.id}
+              type="button"
+              onClick={onGoToOrders}
+              className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-gray-50"
+            >
+              <span className="min-w-0 flex-1 truncate text-gray-700">
+                {o.customer_name} — #{o.id.slice(0, 8)}
+              </span>
+              <span className="shrink-0 text-xs text-gray-400">{formatRupiah(o.total)}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

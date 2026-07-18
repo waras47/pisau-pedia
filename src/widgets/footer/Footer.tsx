@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import { NewsletterForm } from "@/features/newsletter-signup";
 import { siteConfig } from "@/shared/config/site.config";
-import { BladeMark } from "@/shared/icons";
 import { Container } from "@/shared/ui/Container";
 
 const footerColumns = [
@@ -49,9 +48,9 @@ export function Footer() {
     <footer className="border-t border-border bg-surface">
       <Container className="grid gap-12 py-16 lg:grid-cols-[1.4fr_2fr_1.4fr]">
         <div className="flex flex-col gap-4">
-          <Link href="/" className="flex items-center gap-2 font-display text-xl font-semibold">
-            <BladeMark className="h-6 w-6 text-accent" />
-            {siteConfig.name}
+          <Link href="/" className="flex items-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo-pisaupedia.png" alt={siteConfig.name} className="h-9 w-auto" />
           </Link>
           <p className="max-w-xs text-sm text-muted-foreground">
             {siteConfig.description}

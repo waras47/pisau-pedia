@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { HttpError } from "@/shared/api/http-error";
 import { Button } from "@/shared/ui/Button";
@@ -58,6 +58,12 @@ export function CheckoutForm() {
   const [selectedPayment, setSelectedPayment] = useState<string>("");
 
   const catalogItems = useMemo(() => items.filter((i) => !i.component), [items]);
+
+  // Generated once per mount and reused across retries of the *same*
+  // checkout attempt (double-click, slow-network resubmit) so the backend
+  // can recognize a duplicate submission instead of creating a second order
+  // and billing the customer twice.
+  const idempotencyKeyRef = useRef<string>(crypto.randomUUID());
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(destQuery), 350);
@@ -186,6 +192,7 @@ export function CheckoutForm() {
     setLoading(true);
     try {
       const order = await createOrder({
+        idempotency_key: idempotencyKeyRef.current,
         customer_name: `${form.get("firstName")} ${form.get("lastName")}`.trim(),
         customer_email: String(form.get("email")),
         customer_phone: form.get("phone") ? String(form.get("phone")) : undefined,

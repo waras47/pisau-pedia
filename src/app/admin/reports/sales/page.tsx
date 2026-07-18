@@ -130,17 +130,17 @@ export default function SalesReportPage() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-xl bg-white p-5 shadow-sm">
-              <p className="text-xs text-gray-400">Total Revenue</p>
-              <p className="mt-1 text-2xl font-bold text-gray-800">{formatRupiah(report.total_revenue)}</p>
+            <div className="rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 p-5 shadow-sm">
+              <p className="text-xs text-white/80">Total Revenue</p>
+              <p className="mt-1 text-2xl font-bold text-white">{formatRupiah(report.total_revenue)}</p>
             </div>
-            <div className="rounded-xl bg-white p-5 shadow-sm">
-              <p className="text-xs text-gray-400">Total Orders</p>
-              <p className="mt-1 text-2xl font-bold text-gray-800">{report.total_orders}</p>
+            <div className="rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 p-5 shadow-sm">
+              <p className="text-xs text-white/80">Total Orders</p>
+              <p className="mt-1 text-2xl font-bold text-white">{report.total_orders}</p>
             </div>
-            <div className="rounded-xl bg-white p-5 shadow-sm">
-              <p className="text-xs text-gray-400">Rata-rata Nilai Order</p>
-              <p className="mt-1 text-2xl font-bold text-gray-800">{formatRupiah(avgOrderValue)}</p>
+            <div className="rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 p-5 shadow-sm">
+              <p className="text-xs text-white/80">Rata-rata Nilai Order</p>
+              <p className="mt-1 text-2xl font-bold text-white">{formatRupiah(avgOrderValue)}</p>
             </div>
           </div>
 

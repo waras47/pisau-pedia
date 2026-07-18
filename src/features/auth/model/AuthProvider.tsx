@@ -14,6 +14,8 @@ interface AuthContextValue {
   user: SessionUser | null;
   sessionExpired: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, fullName: string, phone?: string) => Promise<void>;
+  loginWithGoogle: (code: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -53,6 +55,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSessionExpired(false);
   }
 
+  async function register(email: string, password: string, fullName: string, phone?: string) {
+    const res = await authApi.register(email, password, fullName, phone);
+    tokenStorage.save(authApi.toTokenPair(res), res.user);
+    setUser(res.user);
+    setStatus("authenticated");
+    setSessionExpired(false);
+  }
+
+  async function loginWithGoogle(code: string) {
+    const res = await authApi.googleExchange(code);
+    tokenStorage.save(authApi.toTokenPair(res), res.user);
+    setUser(res.user);
+    setStatus("authenticated");
+    setSessionExpired(false);
+  }
+
   async function logout() {
     const refreshToken = tokenStorage.getRefreshToken();
     if (refreshToken) {
@@ -64,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ status, user, sessionExpired, login, logout }}>
+    <AuthContext.Provider value={{ status, user, sessionExpired, login, register, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );

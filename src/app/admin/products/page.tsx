@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { HttpError } from "@/shared/api/http-error";
 import { uploadImage } from "@/shared/api/upload.api";
 
 import { type CategoryApiItem,listCategories } from "@/entities/category/api/category.api";
-import { type Product, type ProductSpec } from "@/entities/product";
+import { type Product, type ProductAngleImages, type ProductSpec } from "@/entities/product";
 import {
   createProduct,
   deleteProduct,
@@ -15,6 +16,8 @@ import {
   type InventoryReportData,
   listProducts,
   type ProductApiItem,
+  type ProductImageAngle,
+  type ProductImageInput,
   updateProduct,
 } from "@/entities/product/api/product.api";
 
@@ -38,11 +41,20 @@ const emptyProduct: Product = {
   reviewCount: 0,
   maker: "",
   description: "",
+  careInstructions: "",
   badge: undefined,
   compareAtPrice: undefined,
   stock: 0,
   weight: 500,
+  angleImages: {},
 };
+
+const angleOptions: { key: keyof ProductAngleImages; label: string }[] = [
+  { key: "front", label: "Tampak Depan" },
+  { key: "back", label: "Tampak Belakang" },
+  { key: "side", label: "Tampak Samping" },
+  { key: "top", label: "Tampak Atas" },
+];
 
 function formatRupiah(amount: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(amount);
@@ -103,9 +115,11 @@ function getStatusLabel(badge: Product["badge"]) {
 // --- Main Component ---
 
 export default function ProductsPage() {
+  const searchParams = useSearchParams();
   const [modal, setModal] = useState<ModalMode>("closed");
   const [editProduct, setEditProduct] = useState<Product>(emptyProduct);
-  const [search, setSearch] = useState("");
+  // Seeded once from ?q= (e.g. arriving from the admin global search).
+  const [search, setSearch] = useState(() => searchParams.get("q") ?? "");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [sortKey, setSortKey] = useState<"name" | "price" | "rating" | "category">("name");
@@ -211,9 +225,11 @@ export default function ProductsPage() {
     setEditProduct({
       ...product,
       description: detail.description,
+      careInstructions: detail.care_instructions,
       specs: detail.specs,
       highlights: detail.highlights,
       image: detail.images[0],
+      angleImages: { ...detail.angle_images },
     });
     setModal("edit");
   }
@@ -233,6 +249,12 @@ export default function ProductsPage() {
     setSaving(true);
     try {
       const categoryId = categories.find((c) => c.name === editProduct.category)?.id;
+      const images: ProductImageInput[] = [];
+      if (editProduct.image) images.push({ url: editProduct.image });
+      for (const { key } of angleOptions) {
+        const url = editProduct.angleImages?.[key];
+        if (url) images.push({ url, angle: key as ProductImageAngle });
+      }
       const payload = {
         category_id: categoryId,
         name: editProduct.name,
@@ -243,9 +265,10 @@ export default function ProductsPage() {
         stock: editProduct.stock,
         weight: editProduct.weight,
         description: editProduct.description,
+        care_instructions: editProduct.careInstructions || undefined,
         specs: editProduct.specs,
         highlights: editProduct.highlights,
-        images: editProduct.image ? [editProduct.image] : undefined,
+        images: images.length > 0 ? images : undefined,
       };
       if (modal === "add") {
         await createProduct(payload);
@@ -323,18 +346,18 @@ export default function ProductsPage() {
       {inventory && (
         <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
           {[
-            { label: "Total Produk", value: inventory.total_products, icon: "🔪", bg: "bg-amber-50" },
-            { label: "Stok Tersedia", value: inventory.total_products - inventory.out_of_stock_count, icon: "✅", bg: "bg-green-50" },
-            { label: "Stok Menipis", value: inventory.low_stock_count, icon: "⚠️", bg: "bg-yellow-50" },
-            { label: "Stok Habis", value: inventory.out_of_stock_count, icon: "❌", bg: "bg-red-50" },
+            { label: "Total Produk", value: inventory.total_products, icon: "🔪", gradient: "from-slate-400 to-slate-600" },
+            { label: "Stok Tersedia", value: inventory.total_products - inventory.out_of_stock_count, icon: "✅", gradient: "from-emerald-400 to-emerald-600" },
+            { label: "Stok Menipis", value: inventory.low_stock_count, icon: "⚠️", gradient: "from-amber-400 to-orange-500" },
+            { label: "Stok Habis", value: inventory.out_of_stock_count, icon: "❌", gradient: "from-red-400 to-red-600" },
           ].map((s) => (
-            <div key={s.label} className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm sm:p-4">
-              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-lg ${s.bg}`}>
+            <div key={s.label} className={`flex items-center gap-3 rounded-xl bg-gradient-to-br p-3 shadow-sm sm:p-4 ${s.gradient}`}>
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/20 text-lg">
                 {s.icon}
               </div>
               <div>
-                <p className="text-lg font-bold text-gray-800">{s.value}</p>
-                <p className="text-[11px] text-gray-400">{s.label}</p>
+                <p className="text-lg font-bold text-white">{s.value}</p>
+                <p className="text-[11px] text-white/80">{s.label}</p>
               </div>
             </div>
           ))}
@@ -392,7 +415,70 @@ export default function ProductsPage() {
 
       {/* Product table */}
       <div className="rounded-xl bg-white shadow-sm">
-        <div className="overflow-x-auto">
+        {/* Mobile: cards with actions visible up front — the desktop
+            table's Actions column was scrolling off-screen with no visual
+            hint it existed. */}
+        <div className="divide-y divide-gray-50 md:hidden">
+          {paged.length === 0 ? (
+            <p className="px-4 py-12 text-center text-gray-400">No products found matching your criteria.</p>
+          ) : (
+            paged.map((p) => (
+              <div key={p.id} className="flex flex-col gap-3 p-4">
+                <div className="flex items-center gap-3">
+                  {p.image ? (
+                    <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={p.image} alt={p.name} className="h-full w-full object-contain" />
+                    </div>
+                  ) : (
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-[10px] text-gray-400">
+                      IMG
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium text-gray-700">{p.name}</p>
+                    <p className="truncate text-[11px] text-gray-400">{p.slug}</p>
+                  </div>
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${getStatusStyle(p.badge)}`}>
+                    {getStatusLabel(p.badge)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600">{p.category}</span>
+                  <div className="text-right">
+                    <p className="font-medium text-gray-700">{formatRupiah(p.price)}</p>
+                    {p.compareAtPrice ? (
+                      <p className="text-xs text-gray-400 line-through">{formatRupiah(p.compareAtPrice)}</p>
+                    ) : null}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between border-t border-gray-50 pt-3">
+                  <span className="text-xs text-gray-400">
+                    {p.reviewCount > 0 ? (
+                      <span className="text-amber-500">★ {p.rating} <span className="text-gray-400">({p.reviewCount})</span></span>
+                    ) : (
+                      "Belum ada rating"
+                    )}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button type="button" onClick={() => handleView(p)} className="rounded p-2 text-gray-400 hover:bg-gray-100 hover:text-blue-500" title="View">
+                      <EyeIcon />
+                    </button>
+                    <button type="button" onClick={() => handleEdit(p)} className="rounded p-2 text-gray-400 hover:bg-gray-100 hover:text-emerald-500" title="Edit">
+                      <EditIcon />
+                    </button>
+                    <button type="button" onClick={() => handleDeleteConfirm(p)} className="rounded p-2 text-gray-400 hover:bg-gray-100 hover:text-red-500" title="Delete">
+                      <TrashIcon />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop: full table */}
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 text-left text-xs text-gray-400">
@@ -433,12 +519,14 @@ export default function ProductsPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {p.image ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={p.image}
-                            alt={p.name}
-                            className="h-10 w-10 shrink-0 rounded-lg object-cover"
-                          />
+                          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={p.image}
+                              alt={p.name}
+                              className="h-full w-full object-contain"
+                            />
+                          </div>
                         ) : (
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-[10px] text-gray-400">
                             IMG
@@ -615,6 +703,25 @@ export default function ProductsPage() {
                   onChange={(url) => updateField("image", url)}
                 />
 
+                {/* Foto per-sudut (Depan/Belakang/Samping/Atas) */}
+                <Field label="Foto Produk per Sudut">
+                  <p className="mb-2 -mt-1 text-xs text-gray-400">
+                    Dipakai di halaman detail produk customer sebagai galeri 4 sudut.
+                  </p>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {angleOptions.map(({ key, label }) => (
+                      <AngleImageUploadField
+                        key={key}
+                        label={label}
+                        image={editProduct.angleImages?.[key]}
+                        onChange={(url) =>
+                          updateField("angleImages", { ...editProduct.angleImages, [key]: url })
+                        }
+                      />
+                    ))}
+                  </div>
+                </Field>
+
                 {/* Row 3 - Pricing & Stock */}
                 <div className="grid gap-4 sm:grid-cols-3">
                   <Field label="Harga (Rp) *">
@@ -672,6 +779,17 @@ export default function ProductsPage() {
                   />
                 </Field>
 
+                {/* Knife Care */}
+                <Field label="Knife Care (perawatan pisau)">
+                  <textarea
+                    rows={3}
+                    value={editProduct.careInstructions ?? ""}
+                    onChange={(e) => updateField("careInstructions", e.target.value)}
+                    className="admin-input resize-none"
+                    placeholder="Kosongkan untuk pakai panduan perawatan umum bawaan situs..."
+                  />
+                </Field>
+
                 {/* Specs */}
                 <SpecsEditor
                   specs={editProduct.specs ?? []}
@@ -718,12 +836,14 @@ export default function ProductsPage() {
             <div className="max-h-[70vh] overflow-y-auto p-6">
               <div className="mb-4 flex items-center gap-4">
                 {editProduct.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={editProduct.image}
-                    alt={editProduct.name}
-                    className="h-16 w-16 rounded-xl object-cover"
-                  />
+                  <div className="h-16 w-16 overflow-hidden rounded-xl bg-gray-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={editProduct.image}
+                      alt={editProduct.name}
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
                 ) : (
                   <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gray-100 text-xs text-gray-400">IMG</div>
                 )}
@@ -917,8 +1037,10 @@ function ImageUploadField({ image, onChange }: { image?: string; onChange: (url:
       <div className="flex items-center gap-3">
         {image ? (
           <div className="relative h-20 w-20 shrink-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={image} alt="" className="h-20 w-20 rounded-lg object-cover" />
+            <div className="h-full w-full overflow-hidden rounded-lg bg-gray-100">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={image} alt="" className="h-full w-full object-contain" />
+            </div>
             <button
               type="button"
               onClick={() => onChange(undefined)}
@@ -940,6 +1062,65 @@ function ImageUploadField({ image, onChange }: { image?: string; onChange: (url:
         </label>
       </div>
     </Field>
+  );
+}
+
+function AngleImageUploadField({
+  label,
+  image,
+  onChange,
+}: {
+  label: string;
+  image?: string;
+  onChange: (url: string | undefined) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      onChange(url);
+    } catch (err) {
+      alert(err instanceof HttpError ? err.message : "Gagal upload gambar");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      {image ? (
+        <div className="relative h-20 w-20">
+          <div className="h-full w-full overflow-hidden rounded-lg bg-gray-100">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={image} alt={label} className="h-full w-full object-contain" />
+          </div>
+          <button
+            type="button"
+            onClick={() => onChange(undefined)}
+            className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white"
+          >
+            ✕
+          </button>
+        </div>
+      ) : (
+        <label className="flex h-20 w-20 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-center text-xs text-gray-400 hover:border-emerald-400 hover:text-emerald-500">
+          {uploading ? "..." : "+ Upload"}
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            onChange={handleFile}
+            disabled={uploading}
+          />
+        </label>
+      )}
+      <span className="text-center text-[11px] text-gray-500">{label}</span>
+    </div>
   );
 }
 

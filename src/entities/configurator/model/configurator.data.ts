@@ -57,7 +57,7 @@ export const blades: KnifeBlade[] = [
   },
   {
     id: "kuro-bunka-190",
-    image: "/dev-images/products/kuro-bunka-190.jpg",
+    image: "/dev-images/configurator/bunka1.webp",
     shapeId: "bunka",
     name: "Kuro Bunka 190mm",
     steel: "Shirogami #2",
@@ -67,7 +67,7 @@ export const blades: KnifeBlade[] = [
   },
   {
     id: "hap40-bunka-190",
-    image: "/dev-images/configurator/hap40-bunka-190.jpg",
+    image: "/dev-images/configurator/bunka2.webp",
     shapeId: "bunka",
     name: "HAP-40 Bunka Black 190mm",
     steel: "HAP-40",

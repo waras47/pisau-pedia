@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 
+import { AuthProvider } from "@/features/auth/model/AuthProvider";
 import { CartProvider } from "@/features/cart";
 import { LocaleProvider } from "@/features/locale-currency";
 import { ThemeProvider } from "@/features/theme-toggle";
@@ -11,12 +12,14 @@ export default function StoreLayout({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider>
       <LocaleProvider>
-        <CartProvider>
-          <Header />
-          <main>{children}</main>
-          <Footer />
-          <WhatsAppButton />
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Header />
+            <main>{children}</main>
+            <Footer />
+            <WhatsAppButton />
+          </CartProvider>
+        </AuthProvider>
       </LocaleProvider>
     </ThemeProvider>
   );

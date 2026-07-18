@@ -4,8 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import { BladeMark } from "@/shared/icons";
-
 interface NavItem {
   label: string;
   href: string;
@@ -142,8 +140,10 @@ export function AdminSidebar({ onClose }: AdminSidebarProps) {
     <aside className="flex h-full w-64 shrink-0 flex-col bg-[#1a1d29] text-white">
       {/* Logo */}
       <div className="flex h-16 items-center gap-2.5 px-5">
-        <BladeMark className="h-6 w-6 text-emerald-400" />
-        <span className="text-lg font-bold tracking-tight">Kissaki</span>
+        <div className="rounded bg-white px-2 py-1">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-pisaupedia.png" alt="Pisau Pedia" className="h-6 w-auto" />
+        </div>
         <span className="ml-auto text-xs text-white/40 lg:block">Admin</span>
         {onClose && (
           <button type="button" onClick={onClose} className="ml-2 rounded p-1 text-white/40 hover:bg-white/10 hover:text-white lg:hidden">
