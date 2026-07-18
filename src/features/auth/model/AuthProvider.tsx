@@ -2,10 +2,12 @@
 
 import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 
+import { SESSION_EXPIRED_EVENT } from "@/shared/api/client";
+
 import type { SessionUser } from "@/entities/session/model/session.types";
 import { tokenStorage } from "@/entities/session/model/token-storage";
+
 import * as authApi from "@/features/auth/api/auth.api";
-import { SESSION_EXPIRED_EVENT } from "@/shared/api/client";
 
 type Status = "loading" | "authenticated" | "unauthenticated";
 
@@ -17,6 +19,7 @@ interface AuthContextValue {
   register: (email: string, password: string, fullName: string, phone?: string) => Promise<void>;
   loginWithGoogle: (code: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (user: SessionUser) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -81,8 +84,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus("unauthenticated");
   }
 
+  // Syncs context + localStorage with the server's response after a profile
+  // edit — without this, the header greeting/initial would keep showing
+  // stale data until the next full page load.
+  function updateUser(updated: SessionUser) {
+    tokenStorage.setUser(updated);
+    setUser(updated);
+  }
+
   return (
-    <AuthContext.Provider value={{ status, user, sessionExpired, login, register, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ status, user, sessionExpired, login, register, loginWithGoogle, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

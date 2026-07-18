@@ -5,7 +5,6 @@ import { FeaturedCollection } from "@/widgets/featured-collection";
 import { Hero } from "@/widgets/hero";
 import { MonthlyPick } from "@/widgets/monthly-pick";
 import { NewArrivals } from "@/widgets/new-arrivals";
-import { QuizBanner } from "@/widgets/quiz-banner";
 import { Testimonials } from "@/widgets/testimonials";
 import { TrustBadges } from "@/widgets/trust-badges";
 
@@ -18,7 +17,6 @@ export default function HomePage() {
       <TrustBadges />
       <MonthlyPick />
       <Testimonials />
-      <QuizBanner />
       <NewArrivals />
       <BrowseCategories />
       <ConfiguratorBanner />

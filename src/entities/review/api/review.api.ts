@@ -60,6 +60,14 @@ export function listReviews(status?: string, productSlug?: string) {
   return apiFetch<ReviewApiItem[]>(`/admin/reviews?${params.toString()}`);
 }
 
+// listPublicReviews hits the public /reviews endpoint — always
+// approved-only, no auth required. Omitting product_slug returns
+// reviews across every product, which is what the site-wide
+// /pages/reviews page needs.
+export function listPublicReviews(perPage = 50) {
+  return apiFetch<ReviewApiItem[]>(`/reviews?per_page=${perPage}`);
+}
+
 // updateReview accepts any subset of fields — pass just `status` for a
 // quick approve/reject, or the full set when editing content.
 export function updateReview(id: string, input: UpdateReviewInput) {

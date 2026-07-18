@@ -23,6 +23,9 @@ export const tokenStorage = {
   setAccessToken(token: string) {
     localStorage.setItem(ACCESS_KEY, token);
   },
+  setUser(user: SessionUser) {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+  },
   clear() {
     localStorage.removeItem(ACCESS_KEY);
     localStorage.removeItem(REFRESH_KEY);
