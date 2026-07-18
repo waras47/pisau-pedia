@@ -1,19 +1,24 @@
 "use client";
 
-import { ChevronDown, X } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
+import Link from "next/link";
+import { ChevronDown, Search, X } from "lucide-react";
 
-import { mainNav } from "@/entities/navigation";
 import { cn } from "@/shared/lib/utils";
 import { IconButton } from "@/shared/ui/IconButton";
+
+import { mainNav } from "@/entities/navigation";
+
+import { LocaleToggle } from "@/features/locale-currency";
+import { ThemeToggle } from "@/features/theme-toggle";
 
 interface MobileMenuProps {
   open: boolean;
   onClose: () => void;
+  onSearchClick: () => void;
 }
 
-export function MobileMenu({ open, onClose }: MobileMenuProps) {
+export function MobileMenu({ open, onClose, onSearchClick }: MobileMenuProps) {
   const [expanded, setExpanded] = useState<string | null>(null);
 
   return (
@@ -105,6 +110,21 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
             ))}
           </ul>
         </nav>
+
+        <div className="border-t border-border px-5 py-4">
+          <button
+            type="button"
+            onClick={onSearchClick}
+            className="flex w-full items-center gap-3 py-2 text-sm font-medium uppercase tracking-widest2 text-foreground"
+          >
+            <Search size={18} />
+            Cari
+          </button>
+          <div className="mt-2 flex items-center justify-between">
+            <LocaleToggle />
+            <ThemeToggle />
+          </div>
+        </div>
       </div>
     </div>
   );

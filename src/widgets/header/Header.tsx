@@ -25,7 +25,7 @@ export function Header() {
   const { status, user, logout } = useAuth();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-surface">
+    <header className="sticky top-0 z-50 border-b border-border bg-surface">
       <AnnouncementBar />
 
       <Container className="flex h-20 items-center justify-between gap-6">
@@ -51,7 +51,7 @@ export function Header() {
             <Search size={19} />
           </IconButton>
           {status === "authenticated" ? (
-            <div className="relative hidden sm:inline-flex">
+            <div className="relative inline-flex">
               <button
                 type="button"
                 aria-label={user?.full_name ?? "Account"}
@@ -66,6 +66,20 @@ export function Header() {
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setAccountMenuOpen(false)} />
                   <div className="absolute right-0 top-full z-20 mt-2 w-48 border border-border bg-background py-1 shadow-lg">
+                    <Link
+                      href="/account/profile"
+                      onClick={() => setAccountMenuOpen(false)}
+                      className="block px-4 py-2 text-sm text-foreground hover:bg-muted"
+                    >
+                      Pengaturan Akun
+                    </Link>
+                    <Link
+                      href="/account/addresses"
+                      onClick={() => setAccountMenuOpen(false)}
+                      className="block px-4 py-2 text-sm text-foreground hover:bg-muted"
+                    >
+                      Alamat Saya
+                    </Link>
                     <Link
                       href="/account/orders"
                       onClick={() => setAccountMenuOpen(false)}
@@ -91,18 +105,27 @@ export function Header() {
             <Link
               href="/account/login"
               aria-label="Account"
-              className="hidden h-10 w-10 items-center justify-center rounded-full text-foreground transition-colors duration-200 hover:bg-muted sm:inline-flex"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-colors duration-200 hover:bg-muted"
             >
               <User size={19} />
             </Link>
           )}
-          <LocaleToggle />
-          <ThemeToggle />
+          <div className="hidden items-center sm:flex">
+            <LocaleToggle />
+            <ThemeToggle />
+          </div>
           <CartButton />
         </div>
       </Container>
 
-      <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+      <MobileMenu
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        onSearchClick={() => {
+          setMobileMenuOpen(false);
+          setSearchOpen(true);
+        }}
+      />
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   );
