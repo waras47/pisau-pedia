@@ -8,6 +8,7 @@ export interface CreateOrderItemInput {
 }
 
 export interface CreateOrderInput {
+  idempotency_key?: string;
   customer_name: string;
   customer_email: string;
   customer_phone?: string;
@@ -58,6 +59,10 @@ export interface OrderResponse {
   payment_url?: string;
   payment_expiry?: string;
   invoice_url?: string;
+  // Set once the customer self-confirms the package arrived — separate
+  // from `status`, which stays under admin control. See
+  // docs/16-plan-konfirmasi-pesanan-diterima-review.md (backend repo).
+  customer_confirmed_at?: string;
   created_at: string;
   items?: OrderItemResponse[];
 }
@@ -69,17 +74,37 @@ export function createOrder(input: CreateOrderInput) {
   });
 }
 
+// getMyOrders/getMyOrder/confirmOrderReceived are the customer-facing "my
+// orders" endpoints — always the caller's own orders (enforced server-side
+// by the access token), never guest orders. See
+// docs/16-plan-konfirmasi-pesanan-diterima-review.md (backend repo).
+export function getMyOrders(perPage = 50) {
+  return apiFetch<OrderResponse[]>(`/users/me/orders?per_page=${perPage}`);
+}
+
+export function getMyOrder(id: string) {
+  return apiFetch<OrderResponse>(`/users/me/orders/${id}`);
+}
+
+export function confirmOrderReceived(id: string) {
+  return apiFetch<OrderResponse>(`/users/me/orders/${id}/confirm-received`, {
+    method: "POST",
+  });
+}
+
 export interface ListOrdersParams {
   status?: string;
   customerEmail?: string;
+  search?: string;
   perPage?: number;
 }
 
 export function listOrders(params: ListOrdersParams = {}) {
-  const { status, customerEmail, perPage = 50 } = params;
+  const { status, customerEmail, search, perPage = 50 } = params;
   const query = new URLSearchParams({ per_page: String(perPage) });
   if (status) query.set("status", status);
   if (customerEmail) query.set("customer_email", customerEmail);
+  if (search) query.set("search", search);
   return apiFetch<OrderResponse[]>(`/admin/orders?${query.toString()}`);
 }
 
@@ -99,6 +124,9 @@ export interface SalesReportData {
   to: string;
   total_revenue: number;
   total_orders: number;
+  // How many of total_orders are actually paid — the subset that backs
+  // total_revenue/daily_revenue/top_products, which are all paid-only.
+  paid_orders: number;
   status_counts: Record<string, number>;
   daily_revenue: DailyRevenuePoint[];
   top_products: TopProductPoint[];
@@ -132,6 +160,15 @@ export function updateOrderStatus(id: string, status: string) {
   return apiFetch<null>(`/admin/orders/${id}/status`, {
     method: "PATCH",
     body: JSON.stringify({ status }),
+  });
+}
+
+// checkPaymentStatus asks Komerce directly for the current payment status
+// instead of waiting for the webhook — useful in local dev (Komerce can't
+// reach a localhost webhook) or when a webhook delivery was missed.
+export function checkPaymentStatus(id: string) {
+  return apiFetch<OrderResponse>(`/admin/orders/${id}/check-payment-status`, {
+    method: "POST",
   });
 }
 

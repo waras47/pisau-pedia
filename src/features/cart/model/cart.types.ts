@@ -8,6 +8,7 @@ export interface CartItem {
   price: number;
   currency: string;
   quantity: number;
+  image?: string;
   // diisi untuk komponen configurator → dipakai server saat checkout
   component?: {
     kind: "blade" | "handle" | "accessory";

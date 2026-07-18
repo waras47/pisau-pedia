@@ -79,21 +79,21 @@ export default function InventoryReportPage() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl bg-white p-5 shadow-sm">
-              <p className="text-xs text-gray-400">Total Produk</p>
-              <p className="mt-1 text-2xl font-bold text-gray-800">{report.total_products}</p>
+            <div className="rounded-xl bg-gradient-to-br from-slate-400 to-slate-600 p-5 shadow-sm">
+              <p className="text-xs text-white/80">Total Produk</p>
+              <p className="mt-1 text-2xl font-bold text-white">{report.total_products}</p>
             </div>
-            <div className="rounded-xl bg-white p-5 shadow-sm">
-              <p className="text-xs text-gray-400">Nilai Total Stok</p>
-              <p className="mt-1 text-2xl font-bold text-gray-800">{formatRupiah(report.total_stock_value)}</p>
+            <div className="rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 p-5 shadow-sm">
+              <p className="text-xs text-white/80">Nilai Total Stok</p>
+              <p className="mt-1 text-2xl font-bold text-white">{formatRupiah(report.total_stock_value)}</p>
             </div>
-            <div className="rounded-xl bg-white p-5 shadow-sm">
-              <p className="text-xs text-gray-400">Stok Menipis</p>
-              <p className="mt-1 text-2xl font-bold text-amber-600">{report.low_stock_count}</p>
+            <div className="rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 p-5 shadow-sm">
+              <p className="text-xs text-white/80">Stok Menipis</p>
+              <p className="mt-1 text-2xl font-bold text-white">{report.low_stock_count}</p>
             </div>
-            <div className="rounded-xl bg-white p-5 shadow-sm">
-              <p className="text-xs text-gray-400">Stok Habis</p>
-              <p className="mt-1 text-2xl font-bold text-red-500">{report.out_of_stock_count}</p>
+            <div className="rounded-xl bg-gradient-to-br from-red-400 to-red-600 p-5 shadow-sm">
+              <p className="text-xs text-white/80">Stok Habis</p>
+              <p className="mt-1 text-2xl font-bold text-white">{report.out_of_stock_count}</p>
             </div>
           </div>
 

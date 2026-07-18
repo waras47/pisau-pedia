@@ -1,14 +1,15 @@
 "use client";
 
-import { Minus, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { Minus, Plus, Trash2 } from "lucide-react";
 
-import { useCart } from "@/features/cart";
-import { useLocaleCurrency } from "@/features/locale-currency";
 import { Button } from "@/shared/ui/Button";
 import { Container } from "@/shared/ui/Container";
 import { IconButton } from "@/shared/ui/IconButton";
 import { SectionHeading } from "@/shared/ui/SectionHeading";
+
+import { useCart } from "@/features/cart";
+import { useLocaleCurrency } from "@/features/locale-currency";
 
 export default function CartPage() {
   const { items, subtotal, totalItems, updateQuantity, removeItem } = useCart();
@@ -33,7 +34,14 @@ export default function CartPage() {
               <div className="divide-y divide-border border-y border-border">
                 {items.map((item) => (
                   <div key={item.slug} className="flex gap-5 py-6">
-                    <div className="h-24 w-24 flex-none bg-muted" />
+                    {item.image ? (
+                      <div className="h-24 w-24 flex-none overflow-hidden bg-muted">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={item.image} alt={item.name} className="h-full w-full object-contain" />
+                      </div>
+                    ) : (
+                      <div className="h-24 w-24 flex-none bg-muted" />
+                    )}
                     <div className="flex flex-1 flex-col gap-2">
                       <div className="flex justify-between gap-4">
                         <div>

@@ -278,16 +278,16 @@ export default function CouponsPage() {
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-4">
         {[
-          { label: "Total Kupon", value: stats.total, bg: "bg-gray-50", text: "text-gray-600" },
-          { label: "Aktif", value: stats.active, bg: "bg-emerald-50", text: "text-emerald-600" },
-          { label: "Terjadwal", value: stats.scheduled, bg: "bg-blue-50", text: "text-blue-600" },
-          { label: "Total Terpakai", value: stats.totalUsed, bg: "bg-amber-50", text: "text-amber-600" },
+          { label: "Total Kupon", value: stats.total, gradient: "from-slate-400 to-slate-600" },
+          { label: "Aktif", value: stats.active, gradient: "from-emerald-400 to-emerald-600" },
+          { label: "Terjadwal", value: stats.scheduled, gradient: "from-blue-400 to-blue-600" },
+          { label: "Total Terpakai", value: stats.totalUsed, gradient: "from-amber-400 to-orange-500" },
         ].map((s) => (
-          <div key={s.label} className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold ${s.bg} ${s.text}`}>
+          <div key={s.label} className={`flex items-center gap-4 rounded-xl bg-gradient-to-br p-4 shadow-sm ${s.gradient}`}>
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 text-sm font-bold text-white">
               {s.value}
             </div>
-            <span className="text-sm text-gray-500">{s.label}</span>
+            <span className="text-sm text-white/90">{s.label}</span>
           </div>
         ))}
       </div>

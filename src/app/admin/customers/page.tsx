@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { HttpError } from "@/shared/api/http-error";
 
@@ -24,8 +25,10 @@ function formatDate(iso: string) {
 }
 
 export default function CustomersPage() {
+  const searchParams = useSearchParams();
   const [customers, setCustomers] = useState<CustomerResponse[]>([]);
-  const [search, setSearch] = useState("");
+  // Seeded once from ?q= (e.g. arriving from the admin global search).
+  const [search, setSearch] = useState(() => searchParams.get("q") ?? "");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [detail, setDetail] = useState<CustomerResponse | null>(null);

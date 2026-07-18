@@ -1,7 +1,13 @@
 "use client";
 
-import { Check, ChevronDown, Info } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Check, ChevronDown, Info } from "lucide-react";
+
+import { KnifeOutline, KnifeShapeIcon,type KnifeShapeId } from "@/shared/icons";
+import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui/Button";
+import { Container } from "@/shared/ui/Container";
+import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
 
 import {
   accessories,
@@ -11,12 +17,24 @@ import {
   shapes,
 } from "@/entities/configurator";
 import { type Product } from "@/entities/product";
+
 import { useCart } from "@/features/cart";
 import { useLocaleCurrency } from "@/features/locale-currency";
-import { Button } from "@/shared/ui/Button";
-import { Container } from "@/shared/ui/Container";
-import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
-import { cn } from "@/shared/lib/utils";
+
+// The handle photos (handle-*.jpg) are each a composite showing 3 size
+// variants stacked in one frame — built for the Step 3 option grid, not for
+// a single-handle preview. These crop each one down to just the top variant,
+// measured directly from the source pixels (not eyeballed) so the preview
+// badge shows one handle instead of three. background-size/position values
+// assume the container matches PREVIEW_ASPECT — changing that ratio without
+// recomputing these will visibly stretch the image.
+const PREVIEW_ASPECT = "87 / 20";
+const HANDLE_PREVIEW_CROP: Record<string, { size: string; position: string }> = {
+  magnolia: { size: "295.6% 701.8%", position: "45.6% 27.3%" },
+  walnut: { size: "331.1% 754.7%", position: "46.1% 28.3%" },
+  horn: { size: "330.0% 769.2%", position: "45.2% 28.1%" },
+  ebony: { size: "329.9% 759.0%", position: "45.2% 28.1%" },
+};
 
 export function KnifeConfigurator() {
   const { addItem } = useCart();
@@ -85,6 +103,7 @@ export function KnifeConfigurator() {
     name: string,
     category: string,
     price: number,
+    image?: string,
   ): Product {
     const slug = `${kind}-${refId}`;
     return {
@@ -96,6 +115,7 @@ export function KnifeConfigurator() {
       currency: CURRENCY,
       rating: 0,
       reviewCount: 0,
+      image,
       component: { kind, refId },
     };
   }
@@ -105,7 +125,7 @@ export function KnifeConfigurator() {
 
     // Tiap komponen masuk cart sebagai item TERPISAH
     addItem(
-      componentProduct("blade", blade.id, blade.name, "Blade", blade.price),
+      componentProduct("blade", blade.id, blade.name, "Blade", blade.price, blade.image),
       1,
     );
     addItem(
@@ -115,12 +135,13 @@ export function KnifeConfigurator() {
         `${handle.name} Handle`,
         "Handle",
         handle.priceDelta,
+        handle.image,
       ),
       1,
     );
     chosenAccessories.forEach((a) => {
       addItem(
-        componentProduct("accessory", a.id, a.name, "Accessory", a.price),
+        componentProduct("accessory", a.id, a.name, "Accessory", a.price, a.image),
         1,
       );
     });
@@ -138,19 +159,46 @@ export function KnifeConfigurator() {
 
           <div className="relative mt-3">
             {blade?.image || shape?.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={blade?.image ?? shape?.image}
-                alt={blade ? blade.name : shape?.name ?? "Selected knife"}
-                className="aspect-[16/7] max-h-[30vh] w-full object-cover"
-              />
+              <div className="aspect-[16/7] max-h-[30vh] w-full overflow-hidden bg-muted">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={blade?.image ?? shape?.image}
+                  alt={blade ? blade.name : shape?.name ?? "Selected knife"}
+                  className="h-full w-full object-contain"
+                />
+              </div>
             ) : (
-              <PlaceholderImage
-                ratio="wide"
-                label="Select a shape to start"
-                className="max-h-[30vh]"
-              />
+              <div className="flex aspect-[16/7] max-h-[30vh] w-full items-center justify-center">
+                <KnifeOutline className="h-20 w-auto text-foreground/70 sm:h-28" />
+              </div>
             )}
+
+            {/* Handle badge — cropped to just the top variant from the
+                composite photo (see HANDLE_PREVIEW_CROP), overlaid instead
+                of placed inline so it doesn't force the layout to reserve
+                dead space when its natural height is much shorter than the
+                blade image. */}
+            {handle ? (
+              <div className="absolute bottom-3 left-3 w-32 overflow-hidden rounded shadow-md ring-1 ring-border sm:w-40">
+                {handle.image ? (
+                  <div
+                    className="w-full bg-background bg-no-repeat"
+                    style={{
+                      aspectRatio: PREVIEW_ASPECT,
+                      backgroundImage: `url(${handle.image})`,
+                      backgroundSize: HANDLE_PREVIEW_CROP[handle.id]?.size,
+                      backgroundPosition: HANDLE_PREVIEW_CROP[handle.id]?.position,
+                    }}
+                    role="img"
+                    aria-label={handle.name}
+                  />
+                ) : null}
+                <div className="bg-background/90 px-2 py-1 text-center text-[10px] text-muted-foreground">
+                  {handle.name} Handle
+                </div>
+              </div>
+            ) : null}
+
             <div className="mt-2 flex items-center justify-end gap-4">
               {blade ? (
                 <span className="text-sm font-semibold">
@@ -193,7 +241,7 @@ export function KnifeConfigurator() {
                 key={s.id}
                 label={`${s.name} [${s.category}]`}
                 previewLabel={s.name}
-                image={s.image}
+                icon={<KnifeShapeIcon shape={s.id as KnifeShapeId} className="h-14 w-auto text-foreground/80" />}
                 active={shapeId === s.id}
                 onClick={() => selectShape(s.id)}
               />
@@ -375,6 +423,7 @@ interface OptionCardProps {
   label: string;
   previewLabel: string;
   image?: string;
+  icon?: React.ReactNode;
   price?: number;
   compareAtPrice?: number;
   priceIsDelta?: boolean;
@@ -386,6 +435,7 @@ function OptionCard({
   label,
   previewLabel,
   image,
+  icon,
   price,
   compareAtPrice,
   priceIsDelta,
@@ -409,13 +459,19 @@ function OptionCard({
         size={16}
         className="absolute right-3 top-3 text-muted-foreground/60"
       />
-      {image ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={image}
-          alt={previewLabel}
-          className="aspect-[4/3] w-full object-cover"
-        />
+      {icon ? (
+        <div className="flex aspect-[4/3] w-full items-center justify-center bg-muted/40">
+          {icon}
+        </div>
+      ) : image ? (
+        <div className="aspect-[4/3] w-full overflow-hidden bg-muted/40">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={image}
+            alt={previewLabel}
+            className="h-full w-full object-contain"
+          />
+        </div>
       ) : (
         <PlaceholderImage ratio="landscape" label={previewLabel} />
       )}

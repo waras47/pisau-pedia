@@ -1,12 +1,13 @@
 "use client";
 
-import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
-import Link from "next/link";
 import { useEffect } from "react";
+import Link from "next/link";
+import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 
-import { useLocaleCurrency } from "@/features/locale-currency";
 import { Button } from "@/shared/ui/Button";
 import { IconButton } from "@/shared/ui/IconButton";
+
+import { useLocaleCurrency } from "@/features/locale-currency";
 
 import { useCart } from "../model/CartProvider";
 
@@ -75,7 +76,14 @@ export function CartDrawer() {
           <div className="flex-1 divide-y divide-border overflow-y-auto px-6">
             {items.map((item) => (
               <div key={item.slug} className="flex gap-4 py-5">
-                <div className="h-20 w-20 flex-none bg-muted" />
+                {item.image ? (
+                  <div className="h-20 w-20 flex-none overflow-hidden bg-muted">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={item.image} alt={item.name} className="h-full w-full object-contain" />
+                  </div>
+                ) : (
+                  <div className="h-20 w-20 flex-none bg-muted" />
+                )}
                 <div className="flex flex-1 flex-col gap-2">
                   <div className="flex justify-between gap-2">
                     <Link

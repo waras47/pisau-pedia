@@ -1,3 +1,4 @@
+import { env } from "@/shared/config/env";
 import { apiFetch } from "@/shared/api/client";
 import type { SessionUser, TokenPair } from "@/entities/session/model/session.types";
 
@@ -12,6 +13,32 @@ export function login(email: string, password: string) {
   return apiFetch<AuthResponse>("/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
+  });
+}
+
+export function register(email: string, password: string, fullName: string, phone?: string) {
+  return apiFetch<AuthResponse>("/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ email, password, full_name: fullName, phone }),
+  });
+}
+
+// googleLoginUrl is a full-page navigation target (not a fetch) — the
+// browser needs to actually leave the app to reach Google's consent screen.
+export function googleLoginUrl() {
+  return `${env.apiBaseUrl}/auth/google`;
+}
+
+export function googleStatus() {
+  return apiFetch<{ enabled: boolean }>("/auth/google/status");
+}
+
+// googleExchange trades the single-use code from the /account/callback
+// redirect for real tokens — same response shape as login()/register().
+export function googleExchange(code: string) {
+  return apiFetch<AuthResponse>("/auth/google/exchange", {
+    method: "POST",
+    body: JSON.stringify({ code }),
   });
 }
 

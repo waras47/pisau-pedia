@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { HttpError } from "@/shared/api/http-error";
 
 import {
+  checkPaymentStatus,
   getOrder,
   getOrderStatusCounts,
   listOrders,
@@ -38,6 +39,14 @@ const statusIcons: Record<string, string> = {
   cancelled: "❌",
 };
 
+const statusCardGradient: Record<string, string> = {
+  pending: "from-slate-400 to-slate-600",
+  processing: "from-amber-400 to-orange-500",
+  ready_for_delivery: "from-blue-400 to-blue-600",
+  delivered: "from-emerald-400 to-emerald-600",
+  cancelled: "from-red-400 to-red-600",
+};
+
 export default function OrdersPage() {
   const searchParams = useSearchParams();
   const statusFilter = searchParams.get("status") ?? "";
@@ -47,11 +56,15 @@ export default function OrdersPage() {
   const [saving, setSaving] = useState(false);
   const [detail, setDetail] = useState<OrderResponse | null>(null);
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  // Seeded once from ?q= (e.g. arriving from the admin global search) —
+  // typed edits afterward stay local until Enter, same as Customers.
+  const [search, setSearch] = useState(() => searchParams.get("q") ?? "");
 
   async function loadOrders() {
     setLoading(true);
     try {
-      const items = await listOrders({ status: statusFilter || undefined });
+      const items = await listOrders({ status: statusFilter || undefined, search: search || undefined });
       setOrders(items);
     } catch (err) {
       alert(err instanceof HttpError ? err.message : "Gagal memuat pesanan");
@@ -99,6 +112,24 @@ export default function OrdersPage() {
     }
   }
 
+  async function handleCheckPaymentStatus(id: string) {
+    setCheckingStatus(true);
+    try {
+      const updated = await checkPaymentStatus(id);
+      setDetail(updated);
+      await loadOrders();
+      if (updated.payment_status === "paid") {
+        alert("Status pembayaran sudah PAID — order diperbarui.");
+      } else {
+        alert(`Belum ada pembayaran diterima Komerce untuk order ini (status: ${updated.payment_status}).`);
+      }
+    } catch (err) {
+      alert(err instanceof HttpError ? err.message : "Gagal mengecek status pembayaran");
+    } finally {
+      setCheckingStatus(false);
+    }
+  }
+
   async function handlePaymentStatusChange(id: string, paymentStatus: string) {
     setSaving(true);
     try {
@@ -123,29 +154,87 @@ export default function OrdersPage() {
         </p>
       </div>
 
+      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow-sm">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && loadOrders()}
+          placeholder="Cari ID pesanan, nama, atau email customer..."
+          className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+        />
+        <button
+          type="button"
+          onClick={loadOrders}
+          className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600"
+        >
+          Cari
+        </button>
+      </div>
+
       {/* Status stat cards */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
         {orderStatusOptions.map((o) => (
           <Link
             key={o.value}
             href={`/admin/orders?status=${o.value}`}
-            className={`flex items-center gap-3 rounded-xl bg-white p-4 shadow-sm transition-colors hover:bg-gray-50 ${
-              statusFilter === o.value ? "ring-2 ring-emerald-400" : ""
-            }`}
+            className={`flex items-center gap-3 rounded-xl bg-gradient-to-br p-4 shadow-sm transition-transform hover:scale-[1.02] ${
+              statusCardGradient[o.value] ?? "from-gray-400 to-gray-600"
+            } ${statusFilter === o.value ? "ring-2 ring-offset-2 ring-emerald-400" : ""}`}
           >
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-lg ${statusStyle(o.value)}`}>
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 text-lg">
               {statusIcons[o.value] ?? "●"}
             </div>
             <div>
-              <p className="text-lg font-bold text-gray-800">{statusCounts[o.value] ?? "—"}</p>
-              <p className="text-[11px] text-gray-400">{o.label}</p>
+              <p className="text-lg font-bold text-white">{statusCounts[o.value] ?? "—"}</p>
+              <p className="text-[11px] text-white/80">{o.label}</p>
             </div>
           </Link>
         ))}
       </div>
 
       <div className="rounded-xl bg-white shadow-sm">
-        <div className="overflow-x-auto">
+        {/* Mobile: tap-through cards — the desktop table's "Aksi" column was
+            scrolling off-screen with no visual hint it existed. */}
+        <div className="divide-y divide-gray-50 md:hidden">
+          {loading ? (
+            <p className="px-4 py-12 text-center text-gray-400">Memuat...</p>
+          ) : orders.length === 0 ? (
+            <p className="px-4 py-12 text-center text-gray-400">Belum ada pesanan.</p>
+          ) : (
+            orders.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => openDetail(o.id)}
+                className="flex w-full flex-col gap-2 p-4 text-left transition-colors hover:bg-gray-50/50"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs text-gray-500">{o.id.slice(0, 8)}</span>
+                  <span className="text-xs text-gray-400">{formatDate(o.created_at)}</span>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-700">{o.customer_name}</p>
+                  <p className="text-[11px] text-gray-400">{o.customer_email}</p>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-gray-800">{formatRupiah(o.total)}</span>
+                  <div className="flex gap-1.5">
+                    <span className={`rounded-full px-2 py-1 text-[10px] font-medium ${paymentStyle(o.payment_status)}`}>
+                      {paymentStatusOptions.find((p) => p.value === o.payment_status)?.label ?? o.payment_status}
+                    </span>
+                    <span className={`rounded-full px-2 py-1 text-[10px] font-medium ${statusStyle(o.status)}`}>
+                      {statusLabel(o.status)}
+                    </span>
+                  </div>
+                </div>
+              </button>
+            ))
+          )}
+        </div>
+
+        {/* Desktop: full table */}
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 text-left text-xs text-gray-400">
@@ -261,8 +350,24 @@ export default function OrdersPage() {
                       <option key={p.value} value={p.value}>{p.label}</option>
                     ))}
                   </select>
+                  {detail.payment_status !== "paid" && (
+                    <button
+                      type="button"
+                      onClick={() => handleCheckPaymentStatus(detail.id)}
+                      disabled={checkingStatus}
+                      className="mt-1 self-start text-xs font-medium text-emerald-600 hover:underline disabled:opacity-50"
+                    >
+                      {checkingStatus ? "Mengecek..." : "🔄 Cek Status Pembayaran ke Komerce"}
+                    </button>
+                  )}
                 </div>
               </div>
+
+              {detail.customer_confirmed_at ? (
+                <div className="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                  ✅ Dikonfirmasi diterima customer, {formatDate(detail.customer_confirmed_at)}
+                </div>
+              ) : null}
 
               <div className="mt-6 border-t border-gray-100 pt-4">
                 <p className="mb-2 text-xs font-semibold uppercase text-gray-400">Item Pesanan</p>

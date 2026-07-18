@@ -3,6 +3,14 @@ export interface ProductSpec {
   value: string;
 }
 
+/** Foto per-sudut yang diambil admin — Depan/Belakang/Samping/Atas. */
+export interface ProductAngleImages {
+  front?: string;
+  back?: string;
+  side?: string;
+  top?: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -24,9 +32,13 @@ export interface Product {
 
   // — field opsional untuk halaman detail —
   description?: string;
+  careInstructions?: string;
   highlights?: string[];
   specs?: ProductSpec[];
   galleryLabels?: string[];
+  /** Diisi dari admin panel — kalau ada, dipakai untuk gallery detail
+   * (Depan/Belakang/Samping/Atas) menggantikan galleryLabels generik. */
+  angleImages?: ProductAngleImages;
 
   // — diisi hanya untuk komponen dari configurator (blade/handle/accessory) —
   component?: {

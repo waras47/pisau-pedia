@@ -181,37 +181,40 @@ export function AdminDashboard() {
 
       {/* KPI cards */}
       <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-3">
-        <div className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm sm:gap-4 sm:p-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-lg sm:h-12 sm:w-12 sm:rounded-xl sm:text-xl">
+        <div className="flex items-center gap-3 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 p-3 shadow-sm sm:gap-4 sm:p-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/20 text-lg sm:h-12 sm:w-12 sm:rounded-xl sm:text-xl">
             💰
           </div>
           <div className="min-w-0">
-            <p className="truncate text-lg font-bold text-gray-800 sm:text-xl">
+            <p className="truncate text-lg font-bold text-white sm:text-xl">
               {salesReport ? formatRupiah(salesReport.total_revenue) : "…"}
             </p>
-            <p className="truncate text-[10px] text-gray-400 sm:text-xs">Total Pendapatan</p>
+            <p className="truncate text-[10px] text-white/80 sm:text-xs">Total Pendapatan (lunas)</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm sm:gap-4 sm:p-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-lg sm:h-12 sm:w-12 sm:rounded-xl sm:text-xl">
+        <div className="flex items-center gap-3 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 p-3 shadow-sm sm:gap-4 sm:p-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/20 text-lg sm:h-12 sm:w-12 sm:rounded-xl sm:text-xl">
             📦
           </div>
           <div className="min-w-0">
-            <p className="truncate text-lg font-bold text-gray-800 sm:text-xl">
+            <p className="truncate text-lg font-bold text-white sm:text-xl">
               {salesReport ? salesReport.total_orders : "…"}
             </p>
-            <p className="truncate text-[10px] text-gray-400 sm:text-xs">Total Orders</p>
+            <p className="truncate text-[10px] text-white/80 sm:text-xs">
+              Total Orders
+              {salesReport ? ` (${salesReport.paid_orders} lunas)` : ""}
+            </p>
           </div>
         </div>
-        <div className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm sm:gap-4 sm:p-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-lg sm:h-12 sm:w-12 sm:rounded-xl sm:text-xl">
+        <div className="flex items-center gap-3 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 p-3 shadow-sm sm:gap-4 sm:p-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/20 text-lg sm:h-12 sm:w-12 sm:rounded-xl sm:text-xl">
             🔪
           </div>
           <div className="min-w-0">
-            <p className="truncate text-lg font-bold text-gray-800 sm:text-xl">
+            <p className="truncate text-lg font-bold text-white sm:text-xl">
               {totalProducts ?? "…"}
             </p>
-            <p className="truncate text-[10px] text-gray-400 sm:text-xs">Products</p>
+            <p className="truncate text-[10px] text-white/80 sm:text-xs">Products</p>
           </div>
         </div>
       </div>
@@ -294,8 +297,10 @@ export function AdminDashboard() {
                       <td className="py-3">
                         <div className="flex items-center gap-3">
                           {product.image ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={product.image} alt={product.name} className="h-9 w-9 rounded-lg object-cover" />
+                            <div className="h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={product.image} alt={product.name} className="h-full w-full object-contain" />
+                            </div>
                           ) : (
                             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-[10px] text-gray-400">
                               IMG

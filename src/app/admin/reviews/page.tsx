@@ -2,14 +2,40 @@
 
 import { useEffect, useState } from "react";
 
+import { HttpError } from "@/shared/api/http-error";
+
+import { listProducts, type ProductApiItem } from "@/entities/product/api/product.api";
 import {
+  createReviewAdmin,
   deleteReview,
   listReviews,
-  updateReviewStatus,
   type ReviewApiItem,
   type ReviewStatus,
+  updateReview,
+  updateReviewStatus,
 } from "@/entities/review/api/review.api";
-import { HttpError } from "@/shared/api/http-error";
+
+type ModalMode = "closed" | "add" | "edit";
+
+interface ReviewForm {
+  id: string;
+  productSlug: string;
+  customerName: string;
+  customerEmail: string;
+  rating: number;
+  content: string;
+  status: ReviewStatus;
+}
+
+const emptyForm: ReviewForm = {
+  id: "",
+  productSlug: "",
+  customerName: "",
+  customerEmail: "",
+  rating: 5,
+  content: "",
+  status: "pending",
+};
 
 const statusOptions: { value: ReviewStatus; label: string }[] = [
   { value: "pending", label: "Menunggu" },
@@ -47,9 +73,13 @@ function Stars({ rating }: { rating: number }) {
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState<ReviewApiItem[]>([]);
+  const [products, setProducts] = useState<ProductApiItem[]>([]);
   const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
+  const [modal, setModal] = useState<ModalMode>("closed");
+  const [form, setForm] = useState<ReviewForm>(emptyForm);
+  const [modalSaving, setModalSaving] = useState(false);
 
   async function loadReviews() {
     setLoading(true);
@@ -67,6 +97,65 @@ export default function ReviewsPage() {
     loadReviews();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter]);
+
+  useEffect(() => {
+    listProducts({ perPage: 200 })
+      .then(setProducts)
+      .catch(() => {
+        // Product dropdown is a convenience for the add form — silently
+        // leave it empty rather than blocking the review list on it.
+      });
+  }, []);
+
+  function handleAdd() {
+    setForm({ ...emptyForm, productSlug: products[0]?.slug ?? "" });
+    setModal("add");
+  }
+
+  function handleEdit(r: ReviewApiItem) {
+    setForm({
+      id: r.id,
+      productSlug: r.product_slug ?? "",
+      customerName: r.customer_name,
+      customerEmail: r.customer_email ?? "",
+      rating: r.rating,
+      content: r.content,
+      status: r.status,
+    });
+    setModal("edit");
+  }
+
+  async function handleModalSave() {
+    if (!form.customerName.trim() || !form.content.trim()) return;
+    if (modal === "add" && !form.productSlug) return;
+    setModalSaving(true);
+    try {
+      if (modal === "add") {
+        await createReviewAdmin({
+          product_slug: form.productSlug,
+          customer_name: form.customerName,
+          customer_email: form.customerEmail || undefined,
+          rating: form.rating,
+          content: form.content,
+          status: form.status,
+        });
+      } else {
+        await updateReview(form.id, {
+          customer_name: form.customerName,
+          customer_email: form.customerEmail || undefined,
+          rating: form.rating,
+          content: form.content,
+          status: form.status,
+        });
+      }
+      await loadReviews();
+      setModal("closed");
+    } catch (err) {
+      alert(err instanceof HttpError ? err.message : "Gagal menyimpan review");
+    } finally {
+      setModalSaving(false);
+    }
+  }
 
   async function handleStatusChange(id: string, status: ReviewStatus) {
     setSaving(id);
@@ -100,16 +189,25 @@ export default function ReviewsPage() {
           <h1 className="text-2xl font-bold text-gray-800">Reviews</h1>
           <p className="text-sm text-gray-400">Moderasi review produk dari customer</p>
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600"
-        >
-          <option value="">Semua Status</option>
-          {statusOptions.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+        <div className="flex items-center gap-3">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600"
+          >
+            <option value="">Semua Status</option>
+            {statusOptions.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={handleAdd}
+            className="rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-600"
+          >
+            + Tambah Review
+          </button>
+        </div>
       </div>
 
       <div className="rounded-xl bg-white shadow-sm">
@@ -181,6 +279,14 @@ export default function ReviewsPage() {
                         )}
                         <button
                           type="button"
+                          onClick={() => handleEdit(r)}
+                          disabled={saving === r.id}
+                          className="rounded px-2 py-1.5 text-xs font-medium text-blue-500 hover:underline disabled:opacity-40"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => handleDelete(r.id)}
                           disabled={saving === r.id}
                           className="rounded px-2 py-1.5 text-xs font-medium text-red-500 hover:underline disabled:opacity-40"
@@ -196,6 +302,125 @@ export default function ReviewsPage() {
           </table>
         </div>
       </div>
+
+      {(modal === "add" || modal === "edit") && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setModal("closed")}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg rounded-xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+              <h2 className="text-lg font-bold text-gray-800">
+                {modal === "add" ? "Tambah Review" : "Edit Review"}
+              </h2>
+              <button type="button" onClick={() => setModal("closed")} className="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <div className="max-h-[70vh] overflow-y-auto p-6">
+              <div className="grid gap-4">
+                {modal === "add" && (
+                  <ReviewField label="Produk *">
+                    <select
+                      value={form.productSlug}
+                      onChange={(e) => setForm((f) => ({ ...f, productSlug: e.target.value }))}
+                      className="review-input"
+                    >
+                      <option value="" disabled>Pilih produk...</option>
+                      {products.map((p) => (
+                        <option key={p.slug} value={p.slug}>{p.name}</option>
+                      ))}
+                    </select>
+                  </ReviewField>
+                )}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <ReviewField label="Nama Customer *">
+                    <input
+                      type="text"
+                      value={form.customerName}
+                      onChange={(e) => setForm((f) => ({ ...f, customerName: e.target.value }))}
+                      className="review-input"
+                    />
+                  </ReviewField>
+                  <ReviewField label="Email Customer">
+                    <input
+                      type="email"
+                      value={form.customerEmail}
+                      onChange={(e) => setForm((f) => ({ ...f, customerEmail: e.target.value }))}
+                      className="review-input"
+                      placeholder="opsional"
+                    />
+                  </ReviewField>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <ReviewField label="Rating *">
+                    <select
+                      value={form.rating}
+                      onChange={(e) => setForm((f) => ({ ...f, rating: Number(e.target.value) }))}
+                      className="review-input"
+                    >
+                      {[5, 4, 3, 2, 1].map((n) => (
+                        <option key={n} value={n}>{n} ★</option>
+                      ))}
+                    </select>
+                  </ReviewField>
+                  <ReviewField label="Status">
+                    <select
+                      value={form.status}
+                      onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as ReviewStatus }))}
+                      className="review-input"
+                    >
+                      {statusOptions.map((o) => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
+                    </select>
+                  </ReviewField>
+                </div>
+                <ReviewField label="Isi Review *">
+                  <textarea
+                    rows={4}
+                    value={form.content}
+                    onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
+                    className="review-input resize-none"
+                  />
+                </ReviewField>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4">
+              <button type="button" onClick={() => setModal("closed")} className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">Batal</button>
+              <button
+                type="button"
+                onClick={handleModalSave}
+                disabled={modalSaving || !form.customerName.trim() || !form.content.trim() || (modal === "add" && !form.productSlug)}
+                className="rounded-lg bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-40"
+              >
+                {modalSaving ? "Menyimpan..." : modal === "add" ? "Tambah Review" : "Simpan Perubahan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style jsx global>{`
+        .review-input {
+          width: 100%;
+          border: 1px solid #e5e7eb;
+          border-radius: 0.5rem;
+          padding: 0.5rem 0.75rem;
+          font-size: 0.875rem;
+          color: #374151;
+          outline: none;
+          transition: border-color 0.15s;
+        }
+        .review-input:focus {
+          border-color: #10b981;
+          box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function ReviewField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</label>
+      {children}
     </div>
   );
 }
