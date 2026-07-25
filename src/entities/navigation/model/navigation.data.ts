@@ -31,6 +31,13 @@ export const mainNav: NavItem[] = [
         ],
       },
       {
+        title: "Components",
+        links: [
+          { label: "Knife Blades", href: "/collections/knife-blades" },
+          { label: "Knife Handles", href: "/collections/knife-handles" },
+        ],
+      },
+      {
         title: "Collections",
         links: [
           { label: "Bestsellers", href: "/collections/bestsellers" },

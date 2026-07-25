@@ -6,6 +6,7 @@ import { LocaleProvider } from "@/features/locale-currency";
 import { ThemeProvider } from "@/features/theme-toggle";
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
+import { PromoPopup } from "@/widgets/promo-popup/PromoPopup";
 import { WhatsAppButton } from "@/widgets/whatsapp-button";
 
 export default function StoreLayout({ children }: { children: ReactNode }) {
@@ -18,6 +19,7 @@ export default function StoreLayout({ children }: { children: ReactNode }) {
             <main>{children}</main>
             <Footer />
             <WhatsAppButton />
+            <PromoPopup />
           </CartProvider>
         </AuthProvider>
       </LocaleProvider>

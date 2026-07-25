@@ -2,7 +2,7 @@ import { siteConfig } from "@/shared/config/site.config";
 
 export function WhatsAppButton() {
   const message = encodeURIComponent(
-    `Hi ${siteConfig.name}, I'd like to ask about your knives.`,
+    `Halo ${siteConfig.name}, saya mau tanya soal pisau.`,
   );
 
   return (

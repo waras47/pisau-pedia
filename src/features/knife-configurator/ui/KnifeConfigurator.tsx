@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Check, ChevronDown, Info } from "lucide-react";
+import { useMemo, useState, useCallback } from "react";
+import { Check, ChevronDown, Info, X } from "lucide-react";
+
+import { useTheme } from "next-themes";
 
 import { KnifeOutline, KnifeShapeIcon,type KnifeShapeId } from "@/shared/icons";
 import { cn } from "@/shared/lib/utils";
@@ -10,48 +12,57 @@ import { Container } from "@/shared/ui/Container";
 import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
 
 import {
-  accessories,
+  accessories as staticAccessories,
   CURRENCY,
-  getBladesByShape,
-  handles,
-  shapes,
+  getBladesByShape as staticGetBladesByShape,
+  handles as staticHandles,
+  shapes as staticShapes,
+  type KnifeAccessory,
+  type KnifeBlade,
+  type KnifeHandle,
+  type KnifeShape,
 } from "@/entities/configurator";
 import { type Product } from "@/entities/product";
 
 import { useCart } from "@/features/cart";
 import { useLocaleCurrency } from "@/features/locale-currency";
 
-// The handle photos (handle-*.jpg) are each a composite showing 3 size
-// variants stacked in one frame — built for the Step 3 option grid, not for
-// a single-handle preview. These crop each one down to just the top variant,
-// measured directly from the source pixels (not eyeballed) so the preview
-// badge shows one handle instead of three. background-size/position values
-// assume the container matches PREVIEW_ASPECT — changing that ratio without
-// recomputing these will visibly stretch the image.
-const PREVIEW_ASPECT = "87 / 20";
-const HANDLE_PREVIEW_CROP: Record<string, { size: string; position: string }> = {
-  magnolia: { size: "295.6% 701.8%", position: "45.6% 27.3%" },
-  walnut: { size: "331.1% 754.7%", position: "46.1% 28.3%" },
-  horn: { size: "330.0% 769.2%", position: "45.2% 28.1%" },
-  ebony: { size: "329.9% 759.0%", position: "45.2% 28.1%" },
-};
+interface KnifeConfiguratorProps {
+  apiShapes?: KnifeShape[];
+  apiBlades?: KnifeBlade[];
+  apiHandles?: KnifeHandle[];
+  apiAccessories?: KnifeAccessory[];
+}
 
-export function KnifeConfigurator() {
+export function KnifeConfigurator({
+  apiShapes,
+  apiBlades,
+  apiHandles,
+  apiAccessories,
+}: KnifeConfiguratorProps = {}) {
   const { addItem } = useCart();
   const { formatPrice } = useLocaleCurrency();
+  const { resolvedTheme } = useTheme();
 
   const [shapeId, setShapeId] = useState<string | null>(null);
   const [bladeId, setBladeId] = useState<string | null>(null);
   const [handleId, setHandleId] = useState<string | null>(null);
   const [accessoryIds, setAccessoryIds] = useState<string[]>([]);
   const [openStep, setOpenStep] = useState(1);
+  const [infoBlade, setInfoBlade] = useState<KnifeBlade | null>(null);
 
-  // Objek terpilih
-  const shape = shapes.find((s) => s.id === shapeId) ?? null;
-  const availableBlades = shapeId ? getBladesByShape(shapeId) : [];
+  const allShapes = apiShapes?.length ? apiShapes : staticShapes;
+  const allBlades = apiBlades ?? [];
+  const allHandles = apiHandles?.length ? apiHandles : staticHandles;
+  const allAccessories = apiAccessories?.length ? apiAccessories : staticAccessories;
+
+  const shape = allShapes.find((s) => s.id === shapeId) ?? null;
+  const availableBlades = shapeId
+    ? (allBlades.length ? allBlades.filter((b) => b.shapeId === shapeId) : staticGetBladesByShape(shapeId))
+    : [];
   const blade = availableBlades.find((b) => b.id === bladeId) ?? null;
-  const handle = handles.find((h) => h.id === handleId) ?? null;
-  const chosenAccessories = accessories.filter((a) =>
+  const handle = allHandles.find((h) => h.id === handleId) ?? null;
+  const chosenAccessories = allAccessories.filter((a) =>
     accessoryIds.includes(a.id),
   );
 
@@ -151,53 +162,14 @@ export function KnifeConfigurator() {
     <div className="pb-20">
       {/* ── Preview sticky ── */}
       <div className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
-        <Container className="py-4">
-          <p className="text-center text-sm font-medium uppercase tracking-widest2 text-muted-foreground">
+        <Container className="py-2 sm:py-4">
+          <p className="text-center text-xs font-medium uppercase tracking-widest2 text-muted-foreground sm:text-sm">
             Knife Configurator — Build Your Own Knife
           </p>
-          <div className="mx-auto mt-2 h-px w-10 bg-border" />
+          <div className="mx-auto mt-1 h-px w-10 bg-border sm:mt-2" />
 
           <div className="relative mt-3">
-            {blade?.image || shape?.image ? (
-              <div className="aspect-[16/7] max-h-[30vh] w-full overflow-hidden bg-muted">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={blade?.image ?? shape?.image}
-                  alt={blade ? blade.name : shape?.name ?? "Selected knife"}
-                  className="h-full w-full object-contain"
-                />
-              </div>
-            ) : (
-              <div className="flex aspect-[16/7] max-h-[30vh] w-full items-center justify-center">
-                <KnifeOutline className="h-20 w-auto text-foreground/70 sm:h-28" />
-              </div>
-            )}
-
-            {/* Handle badge — cropped to just the top variant from the
-                composite photo (see HANDLE_PREVIEW_CROP), overlaid instead
-                of placed inline so it doesn't force the layout to reserve
-                dead space when its natural height is much shorter than the
-                blade image. */}
-            {handle ? (
-              <div className="absolute bottom-3 left-3 w-32 overflow-hidden rounded shadow-md ring-1 ring-border sm:w-40">
-                {handle.image ? (
-                  <div
-                    className="w-full bg-background bg-no-repeat"
-                    style={{
-                      aspectRatio: PREVIEW_ASPECT,
-                      backgroundImage: `url(${handle.image})`,
-                      backgroundSize: HANDLE_PREVIEW_CROP[handle.id]?.size,
-                      backgroundPosition: HANDLE_PREVIEW_CROP[handle.id]?.position,
-                    }}
-                    role="img"
-                    aria-label={handle.name}
-                  />
-                ) : null}
-                <div className="bg-background/90 px-2 py-1 text-center text-[10px] text-muted-foreground">
-                  {handle.name} Handle
-                </div>
-              </div>
-            ) : null}
+            <PreviewBox shape={shape} blade={blade} handle={handle} />
 
             <div className="mt-2 flex items-center justify-end gap-4">
               {blade ? (
@@ -225,7 +197,7 @@ export function KnifeConfigurator() {
       </div>
 
       {/* ── Langkah-langkah ── */}
-      <Container className="mt-10 flex flex-col gap-4">
+      <Container className="mt-6 flex flex-col gap-3 sm:mt-10 sm:gap-4">
         {/* Step 1 — Shape */}
         <StepSection
           step={1}
@@ -236,12 +208,21 @@ export function KnifeConfigurator() {
           onToggle={() => toggleStep(1)}
         >
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            {shapes.map((s) => (
+            {allShapes.map((s) => (
               <OptionCard
                 key={s.id}
                 label={`${s.name} [${s.category}]`}
                 previewLabel={s.name}
-                icon={<KnifeShapeIcon shape={s.id as KnifeShapeId} className="h-14 w-auto text-foreground/80" />}
+                image={
+                  resolvedTheme === "dark"
+                    ? (s.silhouetteDark ?? undefined)
+                    : (s.silhouetteLight ?? undefined)
+                }
+                icon={
+                  !s.silhouetteLight
+                    ? <KnifeShapeIcon shape={s.id as KnifeShapeId} className="h-14 w-auto text-foreground/80" />
+                    : undefined
+                }
                 active={shapeId === s.id}
                 onClick={() => selectShape(s.id)}
               />
@@ -270,6 +251,7 @@ export function KnifeConfigurator() {
                   compareAtPrice={b.compareAtPrice}
                   active={bladeId === b.id}
                   onClick={() => selectBlade(b.id)}
+                  onInfo={b.description ? () => setInfoBlade(b) : undefined}
                 />
               ))}
             </div>
@@ -287,7 +269,7 @@ export function KnifeConfigurator() {
             onToggle={() => toggleStep(3)}
           >
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-              {handles.map((h) => (
+              {allHandles.map((h) => (
                 <OptionCard
                   key={h.id}
                   label={h.name}
@@ -318,7 +300,7 @@ export function KnifeConfigurator() {
             onToggle={() => toggleStep(4)}
           >
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              {accessories.map((a) => (
+              {allAccessories.map((a) => (
                 <OptionCard
                   key={a.id}
                   label={a.name}
@@ -335,7 +317,7 @@ export function KnifeConfigurator() {
         ) : null}
 
         {/* CTA akhir */}
-        <div className="mt-6 flex flex-col items-center gap-3 border-t border-border pt-8 sm:flex-row sm:justify-between">
+        <div className="mt-4 flex flex-col items-center gap-3 border-t border-border pt-6 sm:mt-6 sm:flex-row sm:justify-between sm:pt-8">
           <div>
             <span className="text-xs uppercase tracking-widest2 text-muted-foreground">
               Total
@@ -354,11 +336,88 @@ export function KnifeConfigurator() {
           </Button>
         </div>
       </Container>
+
+      {/* ── Blade Info Modal ── */}
+      {infoBlade ? (
+        <BladeInfoModal blade={infoBlade} onClose={() => setInfoBlade(null)} formatPrice={formatPrice} />
+      ) : null}
     </div>
   );
 }
 
 /* ───────────── sub-komponen ───────────── */
+
+function PreviewBox({
+  shape,
+  blade,
+  handle,
+}: {
+  shape: KnifeShape | null;
+  blade: KnifeBlade | null;
+  handle: KnifeHandle | null;
+}) {
+  return (
+    <>
+      <style>{`
+        .configurator-preview {
+          height: 170px;
+          overflow: hidden;
+        }
+        .configurator-preview .knife-img {
+          width: calc(100% - 32px);
+          left: 16px;
+          top: 2px;
+        }
+        @media (min-width: 640px) {
+          .configurator-preview {
+            height: 270px;
+          }
+          .configurator-preview .knife-img {
+            width: auto;
+            height: 600px;
+            top: -180px;
+            left: 74px;
+          }
+        }
+      `}</style>
+      <div className="configurator-preview relative w-full overflow-hidden bg-muted">
+        {!shape ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src="http://localhost:9000/pisaupedia/configurator/shapes/preview-outline.png"
+            alt="Knife outline"
+            className="knife-img absolute opacity-60"
+          />
+        ) : !blade ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={shape.previewImage ?? "/dev-images/configurator/preview-outline.png"}
+            alt={`${shape.name} outline`}
+            className="knife-img absolute opacity-50"
+          />
+        ) : (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={blade.previewImage ?? blade.image ?? ""}
+              alt={blade.name}
+              className="knife-img absolute"
+            />
+            {handle?.previewImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={handle.previewImage}
+                alt={handle.name}
+                className="knife-img absolute"
+                style={{ zIndex: 1 }}
+              />
+            ) : null}
+          </>
+        )}
+      </div>
+    </>
+  );
+}
 
 interface StepSectionProps {
   step: number;
@@ -385,12 +444,12 @@ function StepSection({
         type="button"
         onClick={onToggle}
         disabled={!reachable}
-        className="flex w-full items-center justify-between py-4 text-left"
+        className="flex w-full items-center justify-between gap-2 py-3 text-left sm:py-4"
       >
-        <span className="flex items-center gap-3">
+        <span className="flex min-w-0 items-center gap-2 sm:gap-3">
           <span
             className={cn(
-              "flex h-6 w-6 items-center justify-center rounded-full text-xs",
+              "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs",
               summary
                 ? "bg-accent text-accent-foreground"
                 : "border border-border text-muted-foreground",
@@ -398,11 +457,11 @@ function StepSection({
           >
             {summary ? <Check size={14} /> : step}
           </span>
-          <span className="text-sm font-medium uppercase tracking-widest2">
+          <span className="shrink-0 text-xs font-medium uppercase tracking-widest2 sm:text-sm">
             {step}. {title}
           </span>
           {summary && !open ? (
-            <span className="text-sm text-muted-foreground">— {summary}</span>
+            <span className="truncate text-xs text-muted-foreground sm:text-sm">— {summary}</span>
           ) : null}
         </span>
         <ChevronDown
@@ -429,6 +488,7 @@ interface OptionCardProps {
   priceIsDelta?: boolean;
   active: boolean;
   onClick: () => void;
+  onInfo?: () => void;
 }
 
 function OptionCard({
@@ -441,6 +501,7 @@ function OptionCard({
   priceIsDelta,
   active,
   onClick,
+  onInfo,
 }: OptionCardProps) {
   const { formatPrice } = useLocaleCurrency();
   return (
@@ -449,16 +510,25 @@ function OptionCard({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "group relative flex flex-col gap-2 border p-3 text-left transition-colors",
+        "group relative flex flex-col gap-1.5 border p-2 text-left transition-colors sm:gap-2 sm:p-3",
         active
           ? "border-accent ring-1 ring-accent"
           : "border-border hover:border-foreground/40",
       )}
     >
-      <Info
-        size={16}
-        className="absolute right-3 top-3 text-muted-foreground/60"
-      />
+      {onInfo ? (
+        <span
+          role="button"
+          tabIndex={0}
+          onClick={(e) => { e.stopPropagation(); onInfo(); }}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); onInfo(); } }}
+          className="absolute right-2 top-2 z-10 cursor-pointer text-muted-foreground/60 transition-colors hover:text-foreground sm:right-3 sm:top-3"
+        >
+          <Info size={14} className="sm:h-4 sm:w-4" />
+        </span>
+      ) : (
+        <Info size={14} className="absolute right-2 top-2 text-muted-foreground/60 sm:right-3 sm:top-3 sm:h-4 sm:w-4" />
+      )}
       {icon ? (
         <div className="flex aspect-[4/3] w-full items-center justify-center bg-muted/40">
           {icon}
@@ -475,22 +545,145 @@ function OptionCard({
       ) : (
         <PlaceholderImage ratio="landscape" label={previewLabel} />
       )}
-      <span className="text-xs font-medium uppercase tracking-widest2">
+      <span className="text-[10px] font-medium uppercase leading-tight tracking-widest2 sm:text-xs">
         {label}
       </span>
       {price !== undefined ? (
-        <span className="flex items-center gap-2 text-sm">
+        <span className="flex flex-wrap items-center gap-1 text-xs sm:gap-2 sm:text-sm">
           <span className="font-semibold text-accent">
             {priceIsDelta ? "+" : ""}
             {formatPrice(price, CURRENCY)}
           </span>
           {compareAtPrice ? (
-            <span className="text-xs text-muted-foreground line-through">
+            <span className="text-[10px] text-muted-foreground line-through sm:text-xs">
               {formatPrice(compareAtPrice, CURRENCY)}
             </span>
           ) : null}
         </span>
       ) : null}
     </button>
+  );
+}
+
+/* ───────────── Blade Info Modal ───────────── */
+
+function BladeInfoModal({
+  blade,
+  onClose,
+  formatPrice,
+}: {
+  blade: KnifeBlade;
+  onClose: () => void;
+  formatPrice: (price: number, currency: string) => string;
+}) {
+  const [tab, setTab] = useState<"description" | "specifications">("description");
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center sm:p-4" onClick={onClose}>
+      <div
+        className="relative max-h-[85vh] w-full overflow-y-auto bg-background sm:max-h-[90vh] sm:max-w-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 z-10 text-muted-foreground hover:text-foreground"
+        >
+          <X size={20} />
+        </button>
+
+        {/* Image */}
+        {blade.image ? (
+          <div className="aspect-[16/9] w-full bg-muted">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={blade.image}
+              alt={blade.name}
+              className="h-full w-full object-contain"
+            />
+          </div>
+        ) : null}
+
+        {/* Content */}
+        <div className="p-6">
+          <h3 className="text-sm font-medium uppercase tracking-widest2">
+            {blade.name} — Blade
+          </h3>
+
+          {/* Tabs */}
+          <div className="mt-4 flex gap-6 border-b border-border">
+            <button
+              type="button"
+              onClick={() => setTab("description")}
+              className={cn(
+                "pb-2 text-sm font-medium uppercase tracking-widest2",
+                tab === "description"
+                  ? "border-b-2 border-foreground text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              Description
+            </button>
+            {blade.specifications ? (
+              <button
+                type="button"
+                onClick={() => setTab("specifications")}
+                className={cn(
+                  "pb-2 text-sm font-medium uppercase tracking-widest2",
+                  tab === "specifications"
+                    ? "border-b-2 border-foreground text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                Specifications
+              </button>
+            ) : null}
+          </div>
+
+          {/* Tab content */}
+          <div className="mt-4">
+            {tab === "description" ? (
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                {blade.description ?? "No description available."}
+              </p>
+            ) : blade.specifications ? (
+              <table className="w-full text-sm">
+                <tbody>
+                  {Object.entries(blade.specifications).map(([key, val]) => (
+                    <tr key={key} className="border-b border-border/50">
+                      <td className="py-2 pr-4 font-medium text-muted-foreground">{key}</td>
+                      <td className="py-2">{val}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : null}
+          </div>
+
+          {/* Price + MORE button */}
+          <div className="mt-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-lg font-semibold text-accent">
+                {formatPrice(blade.price, CURRENCY)}
+              </span>
+              {blade.compareAtPrice ? (
+                <span className="text-sm text-muted-foreground line-through">
+                  {formatPrice(blade.compareAtPrice, CURRENCY)}
+                </span>
+              ) : null}
+            </div>
+            {blade.slug ? (
+              <a
+                href={`/products/${blade.slug}`}
+                className="border border-border px-6 py-2 text-sm font-medium uppercase tracking-widest2 transition-colors hover:bg-foreground hover:text-background"
+              >
+                More
+              </a>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

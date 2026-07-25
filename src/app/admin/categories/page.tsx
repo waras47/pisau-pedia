@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { ImageUploadField } from "@/shared/ui/ImageUploadField";
 import {
   type CategoryApiItem,
   createCategory,
@@ -230,16 +231,11 @@ export default function CategoriesPage() {
                   placeholder="Deskripsi singkat untuk halaman koleksi..."
                 />
               </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">URL Gambar</label>
-                <input
-                  type="text"
-                  value={form.image_url}
-                  onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))}
-                  className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
-                  placeholder="https://..."
-                />
-              </div>
+              <ImageUploadField
+                label="Gambar Kategori"
+                image={form.image_url || undefined}
+                onChange={(url) => setForm((f) => ({ ...f, image_url: url ?? "" }))}
+              />
             </div>
             <div className="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4">
               <button

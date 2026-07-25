@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 import { Button } from "@/shared/ui/Button";
@@ -5,56 +7,35 @@ import { Container } from "@/shared/ui/Container";
 import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
 import { SectionHeading } from "@/shared/ui/SectionHeading";
 
-const values = [
-  {
-    icon: <HammerIcon />,
-    title: "Hand-Forged, Not Mass-Produced",
-    description:
-      "Every blade passes through a blacksmith's hands — hammered, ground, and hand-finished on whetstones. No two edges are ever quite the same.",
-  },
-  {
-    icon: <MapPinIcon />,
-    title: "Sourced Directly From Sakai",
-    description:
-      "We work directly with small workshops in Sakai, Japan's centuries-old cutlery district, cutting out the layers of resale that usually sit between forge and kitchen.",
-  },
-  {
-    icon: <LeafIcon />,
-    title: "Materials That Last",
-    description:
-      "From high-carbon steels to hand-selected magnolia and ebony for handles, we choose materials for how they perform after ten years, not just on day one.",
-  },
-  {
-    icon: <HeartIcon />,
-    title: "A Team That Actually Cooks",
-    description:
-      "Everyone who answers your questions has used the knives we sell — in a home kitchen, not just behind a desk. Ask us anything before you buy.",
-  },
-];
-
-const milestones = [
-  { year: "1998", label: "Founded in Sakai, Japan" },
-  { year: "2011", label: "First worldwide shipping" },
-  { year: "2019", label: "Mail-in sharpening service launched" },
-  { year: "Today", label: "Thousands of kitchens, one edge at a time" },
-];
+import { useLocaleCurrency } from "@/features/locale-currency";
 
 export function About() {
+  const { t } = useLocaleCurrency();
+
+  const values = [
+    { icon: <LeafIcon />, title: t("about_value1_title"), description: t("about_value1_desc") },
+    { icon: <MapPinIcon />, title: t("about_value2_title"), description: t("about_value2_desc") },
+    { icon: <HammerIcon />, title: t("about_value3_title"), description: t("about_value3_desc") },
+    { icon: <HeartIcon />, title: t("about_value4_title"), description: t("about_value4_desc") },
+  ];
+
+  const services = [
+    { number: "01", title: t("about_service1_title"), description: t("about_service1_desc") },
+    { number: "02", title: t("about_service2_title"), description: t("about_service2_desc") },
+    { number: "03", title: t("about_service3_title"), description: t("about_service3_desc") },
+    { number: "04", title: t("about_service4_title"), description: t("about_service4_desc") },
+  ];
+
   return (
     <>
       {/* Hero */}
       <section className="bg-surface py-16 sm:py-24">
         <Container className="flex flex-col items-center gap-6 text-center">
-          <span className="font-accent text-base italic text-copper">Our Story</span>
+          <span className="font-accent text-base italic text-copper">{t("about_hero_eyebrow")}</span>
           <h1 className="max-w-3xl font-display text-4xl font-semibold tracking-tightest sm:text-5xl lg:text-6xl">
-            Hand-forged in Sakai, made for your kitchen
+            {t("about_hero_title")}
           </h1>
-          <p className="max-w-2xl text-lg text-muted-foreground">
-            KISSAKI started as a small effort to bring genuine, hand-forged
-            Japanese kitchen knives to cooks outside Japan — without the
-            markups and guesswork that usually come with buying blades from
-            overseas. We&apos;re still doing exactly that.
-          </p>
+          <p className="max-w-2xl text-lg text-muted-foreground">{t("about_hero_subtitle")}</p>
         </Container>
       </section>
 
@@ -62,25 +43,18 @@ export function About() {
       <section className="py-16">
         <Container className="grid gap-10 lg:grid-cols-2 lg:items-center">
           <div className="flex flex-col gap-5">
-            <SectionHeading
-              eyebrow="Since 1998"
-              title="Started in a small workshop, still run the same way"
-            />
-            <p className="text-muted-foreground">
-              KISSAKI began with a handful of relationships built directly
-              with blacksmiths in Sakai — a city that has shaped Japanese
-              cutlery for hundreds of years. Rather than buying through
-              distributors, we visit the workshops, learn how each maker
-              forges and finishes their blades, and bring that knowledge back
-              to how we describe and care for every knife we sell.
-            </p>
-            <p className="text-muted-foreground">
-              That hasn&apos;t changed as we&apos;ve grown. Every knife in our
-              catalog is still chosen because someone on our team has used
-              it, sharpened it, and would put it in their own kitchen drawer.
-            </p>
+            <SectionHeading eyebrow={t("about_story_eyebrow")} title={t("about_story_title")} />
+            <p className="text-muted-foreground">{t("about_story_p1")}</p>
+            <p className="text-muted-foreground">{t("about_story_p2")}</p>
           </div>
-          <PlaceholderImage label="Workshop in Sakai" ratio="landscape" />
+          <div className="aspect-square w-full overflow-hidden bg-muted">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/dev-images/image_about_us.webp"
+              alt={t("about_story_image_label")}
+              className="h-full w-full object-cover"
+            />
+          </div>
         </Container>
       </section>
 
@@ -89,8 +63,8 @@ export function About() {
         <Container className="flex flex-col gap-12">
           <SectionHeading
             align="center"
-            eyebrow="What we stand for"
-            title="Craftsmanship over shortcuts"
+            eyebrow={t("about_values_eyebrow")}
+            title={t("about_values_title")}
             className="mx-auto"
           />
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -107,34 +81,40 @@ export function About() {
         </Container>
       </section>
 
-      {/* Milestones */}
+      {/* Services */}
       <section className="py-16">
         <Container>
-          <SectionHeading align="center" title="Along the way" className="mx-auto mb-12" />
+          <SectionHeading
+            align="center"
+            eyebrow={t("about_services_eyebrow")}
+            title={t("about_services_title")}
+            className="mx-auto mb-12"
+          />
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {milestones.map((m) => (
-              <div key={m.label} className="flex flex-col gap-2 border-t-2 border-copper pt-4 text-center">
-                <span className="font-display text-2xl font-bold text-copper">{m.year}</span>
-                <p className="text-sm text-muted-foreground">{m.label}</p>
+            {services.map((s) => (
+              <div key={s.number} className="flex flex-col gap-2 border-t-2 border-copper pt-4">
+                <span className="font-display text-2xl font-bold text-copper">{s.number}</span>
+                <h3 className="font-display text-base font-semibold">{s.title}</h3>
+                <p className="text-sm text-muted-foreground">{s.description}</p>
               </div>
             ))}
           </div>
         </Container>
       </section>
 
-      {/* Workshop gallery */}
+      {/* Process gallery */}
       <section className="bg-surface py-16">
         <Container className="flex flex-col gap-10">
           <SectionHeading
             align="center"
-            eyebrow="Behind the blade"
-            title="From forge to your kitchen"
+            eyebrow={t("about_gallery_eyebrow")}
+            title={t("about_gallery_title")}
             className="mx-auto"
           />
           <div className="grid gap-6 sm:grid-cols-3">
-            <PlaceholderImage label="Forging the blade" ratio="portrait" />
-            <PlaceholderImage label="Hand-sharpening" ratio="portrait" />
-            <PlaceholderImage label="Final inspection" ratio="portrait" />
+            <PlaceholderImage label={t("about_gallery1_label")} ratio="portrait" />
+            <PlaceholderImage label={t("about_gallery2_label")} ratio="portrait" />
+            <PlaceholderImage label={t("about_gallery3_label")} ratio="portrait" />
           </div>
         </Container>
       </section>
@@ -143,14 +123,11 @@ export function About() {
       <section className="py-16">
         <Container className="flex flex-col items-center gap-6 text-center">
           <h2 className="font-display text-2xl font-semibold tracking-tightest sm:text-3xl">
-            Ready to find your knife?
+            {t("about_cta_title")}
           </h2>
-          <p className="max-w-xl text-muted-foreground">
-            Browse the full collection, or message us on WhatsApp if
-            you&apos;re not sure which blade fits how you cook.
-          </p>
+          <p className="max-w-xl text-muted-foreground">{t("about_cta_subtitle")}</p>
           <Link href="/collections/knives">
-            <Button size="lg">Shop All Knives</Button>
+            <Button size="lg">{t("about_cta_button")}</Button>
           </Link>
         </Container>
       </section>

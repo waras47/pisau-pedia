@@ -17,7 +17,7 @@ export function generateMetadata({ params }: CategoryPageProps): Metadata {
   const category = getCategoryBySlug(params.category);
   if (!category) return { title: "Not found" };
   return {
-    title: `${category.name} — Kissaki Knives`,
+    title: `${category.name} — Pisau Pedia`,
     description: category.description,
   };
 }

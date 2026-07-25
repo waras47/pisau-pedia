@@ -1,9 +1,11 @@
-import { Facebook, Instagram, Youtube } from "lucide-react";
 import Link from "next/link";
+import { Facebook, Instagram, Youtube } from "lucide-react";
 
-import { NewsletterForm } from "@/features/newsletter-signup";
 import { siteConfig } from "@/shared/config/site.config";
 import { Container } from "@/shared/ui/Container";
+import { Logo } from "@/shared/ui/Logo";
+
+import { NewsletterForm } from "@/features/newsletter-signup";
 
 const footerColumns = [
   {
@@ -49,8 +51,7 @@ export function Footer() {
       <Container className="grid gap-12 py-16 lg:grid-cols-[1.4fr_2fr_1.4fr]">
         <div className="flex flex-col gap-4">
           <Link href="/" className="flex items-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-pisaupedia.png" alt={siteConfig.name} className="h-9 w-auto" />
+            <Logo className="h-9 w-auto" />
           </Link>
           <p className="max-w-xs text-sm text-muted-foreground">
             {siteConfig.description}

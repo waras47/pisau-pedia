@@ -9,6 +9,7 @@ import {
 } from "@/entities/product";
 import { type ProductApiDetail, type ProductApiItem } from "@/entities/product/api/product.api";
 import { type Product } from "@/entities/product/model/product.types";
+import { type Review } from "@/entities/review";
 
 import { ProductDetail } from "@/widgets/product-detail";
 
@@ -26,6 +27,32 @@ async function getApiProduct(slug: string): Promise<ProductApiDetail | null> {
   if (!res.ok) return null;
   const json = await res.json();
   return json.data as ProductApiDetail;
+}
+
+async function getApiReviews(slug: string): Promise<Review[]> {
+  try {
+    const res = await fetch(`${env.apiBaseUrl}/products/${slug}/reviews`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    const items = (json.data ?? []) as Array<{
+      id: string;
+      author: string;
+      rating: number;
+      comment: string;
+      created_at: string;
+    }>;
+    return items.map((r) => ({
+      id: r.id,
+      author: r.author,
+      rating: r.rating,
+      content: r.comment,
+      date: r.created_at,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 async function getApiRelated(category: string, slug: string): Promise<Product[]> {
@@ -75,9 +102,45 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const product = apiProduct ? toProduct(apiProduct) : getStaticProductBySlug(params.slug);
   if (!product) return { title: "Product not found" };
   return {
-    title: `${product.name} — Kissaki Knives`,
+    title: `${product.name} — Pisau Pedia`,
     description: product.description ?? product.category,
   };
+}
+
+function ProductJsonLd({ product }: { product: Product }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description ?? product.category,
+    image: product.image,
+    brand: { "@type": "Brand", name: "Pisau Pedia" },
+    ...(product.rating && product.reviewCount
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: product.rating,
+            reviewCount: product.reviewCount,
+          },
+        }
+      : {}),
+    offers: {
+      "@type": "Offer",
+      priceCurrency: product.currency,
+      price: product.price,
+      availability:
+        product.badge === "sold-out"
+          ? "https://schema.org/OutOfStock"
+          : "https://schema.org/InStock",
+    },
+  };
+  return (
+    <script
+      type="application/ld+json"
+      // eslint-disable-next-line react/no-danger
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
@@ -85,13 +148,29 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   if (apiProduct) {
     const product = toProduct(apiProduct);
-    const related = await getApiRelated(product.category, product.slug);
-    return <ProductDetail product={product} related={related} />;
+    const [related, reviews] = await Promise.all([
+      getApiRelated(product.category, product.slug),
+      getApiReviews(params.slug),
+    ]);
+    return (
+      <>
+        <ProductJsonLd product={product} />
+        <ProductDetail product={product} related={related} reviews={reviews} />
+      </>
+    );
   }
 
   const product = getStaticProductBySlug(params.slug);
   if (!product) notFound();
 
-  const related = getStaticRelatedProducts(product);
-  return <ProductDetail product={product} related={related} />;
+  const [related, reviews] = await Promise.all([
+    Promise.resolve(getStaticRelatedProducts(product)),
+    getApiReviews(params.slug),
+  ]);
+  return (
+    <>
+      <ProductJsonLd product={product} />
+      <ProductDetail product={product} related={related} reviews={reviews} />
+    </>
+  );
 }

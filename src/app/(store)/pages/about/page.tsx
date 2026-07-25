@@ -3,9 +3,9 @@ import { type Metadata } from "next";
 import { About } from "@/widgets/about";
 
 export const metadata: Metadata = {
-  title: "About Us — Kissaki Knives",
+  title: "Tentang Kami — Pisau Pedia",
   description:
-    "Hand-forged Japanese kitchen knives, sourced directly from small workshops in Sakai, Japan since 1998.",
+    "Pisaupedia adalah produk asli Indonesia: pisau dapur berkualitas dengan material yang bisa disesuaikan, pesanan khusus perorangan & restoran, serta layanan penggantian handle, pembuatan sarung, dan perbaikan pisau.",
 };
 
 export default function AboutPage() {

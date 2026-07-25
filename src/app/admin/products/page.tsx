@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 
 import { HttpError } from "@/shared/api/http-error";
 import { uploadImage } from "@/shared/api/upload.api";
+import { ImageUploadField as SharedImageUploadField } from "@/shared/ui/ImageUploadField";
 
 import { type CategoryApiItem,listCategories } from "@/entities/category/api/category.api";
 import { type Product, type ProductAngleImages, type ProductSpec } from "@/entities/product";
@@ -698,7 +699,8 @@ export default function ProductsPage() {
                 </div>
 
                 {/* Image */}
-                <ImageUploadField
+                <SharedImageUploadField
+                  label="Gambar Produk"
                   image={editProduct.image}
                   onChange={(url) => updateField("image", url)}
                 />
@@ -1011,57 +1013,6 @@ function DetailRow({ label, value }: { label: string; value: string }) {
       <p className="text-xs text-gray-400">{label}</p>
       <p className="font-medium text-gray-700">{value}</p>
     </div>
-  );
-}
-
-function ImageUploadField({ image, onChange }: { image?: string; onChange: (url: string | undefined) => void }) {
-  const [uploading, setUploading] = useState(false);
-
-  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const url = await uploadImage(file);
-      onChange(url);
-    } catch (err) {
-      alert(err instanceof HttpError ? err.message : "Gagal upload gambar");
-    } finally {
-      setUploading(false);
-      e.target.value = "";
-    }
-  }
-
-  return (
-    <Field label="Gambar Produk">
-      <div className="flex items-center gap-3">
-        {image ? (
-          <div className="relative h-20 w-20 shrink-0">
-            <div className="h-full w-full overflow-hidden rounded-lg bg-gray-100">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={image} alt="" className="h-full w-full object-contain" />
-            </div>
-            <button
-              type="button"
-              onClick={() => onChange(undefined)}
-              className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white"
-            >
-              ✕
-            </button>
-          </div>
-        ) : null}
-        <label className="flex h-20 w-20 shrink-0 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-center text-xs text-gray-400 hover:border-emerald-400 hover:text-emerald-500">
-          {uploading ? "..." : image ? "Ganti" : "+ Upload"}
-          <input
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            className="hidden"
-            onChange={handleFile}
-            disabled={uploading}
-          />
-        </label>
-      </div>
-    </Field>
   );
 }
 

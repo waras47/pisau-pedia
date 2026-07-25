@@ -14,7 +14,7 @@ import {
   ProductGrid,
   RatingStars,
 } from "@/entities/product";
-import { ReviewCard,reviews } from "@/entities/review";
+import { type Review, ReviewCard } from "@/entities/review";
 
 import { AddToCart } from "@/features/add-to-cart";
 import { useLocaleCurrency } from "@/features/locale-currency";
@@ -22,6 +22,7 @@ import { useLocaleCurrency } from "@/features/locale-currency";
 interface ProductDetailProps {
   product: Product;
   related: Product[];
+  reviews?: Review[];
 }
 
 const ANGLE_ENTRIES: { key: "front" | "back" | "side" | "top"; label: string }[] = [
@@ -41,7 +42,7 @@ const DEFAULT_CARE_TIPS = [
   "Asah secara berkala dengan whetstone atau honing rod untuk menjaga ketajaman mata pisau.",
 ];
 
-export function ProductDetail({ product, related }: ProductDetailProps) {
+export function ProductDetail({ product, related, reviews = [] }: ProductDetailProps) {
   const { formatPrice } = useLocaleCurrency();
   const galleryLabels =
     product.galleryLabels ?? [product.category, "Detail", "In use"];

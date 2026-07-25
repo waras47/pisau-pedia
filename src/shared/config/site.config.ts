@@ -1,8 +1,10 @@
 export const siteConfig = {
-  name: "KISSAKI",
-  tagline: "Japanese Kitchen Knives",
+  name: "Pisau Pedia",
+  tagline: "Pisau Dapur Berkualitas, Asli Indonesia",
   description:
-    "Hand-forged Japanese kitchen knives and sharpening tools, selected for home cooks and professional chefs.",
+    "Pisaupedia menghadirkan pisau dapur berkualitas asli Indonesia dengan pilihan material sesuai kebutuhan Anda. Melayani pesanan khusus perorangan & restoran, penggantian handle, pembuatan sarung pisau (saya), dan perbaikan pisau.",
+  // TODO: ganti dengan domain production sungguhan begitu sudah di-deploy.
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "https://pisaupedia.com",
   freeShippingThreshold: 300,
   currency: "EUR",
   social: {

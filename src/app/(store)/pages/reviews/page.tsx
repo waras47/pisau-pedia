@@ -7,12 +7,12 @@ import { type ReviewApiItem } from "@/entities/review/api/review.api";
 import { Reviews } from "@/widgets/reviews";
 
 export const metadata: Metadata = {
-  title: "Customer Reviews — Kissaki Knives",
+  title: "Customer Reviews — Pisau Pedia",
   description: "Real reviews from customers who bought our knives and accessories.",
 };
 
-async function getReviews(): Promise<ReviewApiItem[]> {
-  const res = await fetch(`${env.apiBaseUrl}/reviews?per_page=50`, {
+async function getReviews(scope: "product" | "shop"): Promise<ReviewApiItem[]> {
+  const res = await fetch(`${env.apiBaseUrl}/reviews?scope=${scope}&per_page=50`, {
     next: { revalidate: 60 },
   });
   if (!res.ok) return [];
@@ -21,6 +21,9 @@ async function getReviews(): Promise<ReviewApiItem[]> {
 }
 
 export default async function ReviewsPage() {
-  const reviews = await getReviews();
-  return <Reviews reviews={reviews} />;
+  const [productReviews, shopReviews] = await Promise.all([
+    getReviews("product"),
+    getReviews("shop"),
+  ]);
+  return <Reviews productReviews={productReviews} shopReviews={shopReviews} />;
 }

@@ -108,7 +108,7 @@ export default function ReviewsPage() {
   }, []);
 
   function handleAdd() {
-    setForm({ ...emptyForm, productSlug: products[0]?.slug ?? "" });
+    setForm(emptyForm);
     setModal("add");
   }
 
@@ -127,12 +127,11 @@ export default function ReviewsPage() {
 
   async function handleModalSave() {
     if (!form.customerName.trim() || !form.content.trim()) return;
-    if (modal === "add" && !form.productSlug) return;
     setModalSaving(true);
     try {
       if (modal === "add") {
         await createReviewAdmin({
-          product_slug: form.productSlug,
+          product_slug: form.productSlug || undefined,
           customer_name: form.customerName,
           customer_email: form.customerEmail || undefined,
           rating: form.rating,
@@ -315,13 +314,13 @@ export default function ReviewsPage() {
             <div className="max-h-[70vh] overflow-y-auto p-6">
               <div className="grid gap-4">
                 {modal === "add" && (
-                  <ReviewField label="Produk *">
+                  <ReviewField label="Produk">
                     <select
                       value={form.productSlug}
                       onChange={(e) => setForm((f) => ({ ...f, productSlug: e.target.value }))}
                       className="review-input"
                     >
-                      <option value="" disabled>Pilih produk...</option>
+                      <option value="">— Tidak ada produk (Shop Review) —</option>
                       {products.map((p) => (
                         <option key={p.slug} value={p.slug}>{p.name}</option>
                       ))}

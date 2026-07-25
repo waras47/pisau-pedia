@@ -37,6 +37,10 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+
+  useEffect(() => {
     fetch(`${env.apiBaseUrl}/exchange-rate`)
       .then((res) => (res.ok ? res.json() : null))
       .then((json) => {

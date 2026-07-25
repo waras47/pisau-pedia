@@ -43,7 +43,7 @@ function toProduct(p: ProductApiItem): Product {
 
 export function generateMetadata({ searchParams }: SearchPageProps): Metadata {
   const q = searchParams.q ?? "";
-  return { title: q ? `Hasil pencarian "${q}" — Kissaki Knives` : "Cari — Kissaki Knives" };
+  return { title: q ? `Hasil pencarian "${q}" — Pisau Pedia` : "Cari — Pisau Pedia" };
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {

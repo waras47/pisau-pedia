@@ -130,8 +130,8 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
   if (params.handle === "sharpening") return { title: "Sharpening & Repairs — Pisau Pedia" };
   if (params.handle === "knives") {
     return {
-      title: "Japanese Knives — Pisau Pedia",
-      description: "Semua tipe pisau dapur Jepang — Gyuto, Santoku, Bunka, Nakiri, dan Petty.",
+      title: "Pisau Bergaya Jepang — Pisau Pedia",
+      description: "Semua tipe pisau dapur bergaya Jepang buatan Pisau Pedia — Gyuto, Santoku, Bunka, Nakiri, dan Petty.",
     };
   }
   if (params.handle === "accessories") {

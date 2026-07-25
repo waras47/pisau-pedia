@@ -4,6 +4,9 @@ export interface KnifeShape {
   category: string; // mis. "Multi-Purpose", "Vegetable"
   description?: string;
   image?: string;
+  previewImage?: string;
+  silhouetteLight?: string;
+  silhouetteDark?: string;
 }
 
 export interface KnifeBlade {
@@ -15,6 +18,10 @@ export interface KnifeBlade {
   price: number;
   compareAtPrice?: number;
   image?: string;
+  previewImage?: string;
+  description?: string;
+  specifications?: Record<string, string>;
+  slug?: string;
 }
 
 export interface KnifeHandle {
@@ -23,6 +30,8 @@ export interface KnifeHandle {
   material: string;
   priceDelta: number;
   image?: string;
+  previewImage?: string;
+  previewColor?: string;
 }
 
 export interface KnifeAccessory {

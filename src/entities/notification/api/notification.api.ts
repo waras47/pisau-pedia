@@ -45,3 +45,7 @@ export function markAsRead(id: string) {
 export function markAllAsRead() {
   return apiFetch<null>("/admin/notifications/read-all", { method: "PATCH" });
 }
+
+export function deleteNotification(id: string) {
+  return apiFetch<null>(`/admin/notifications/${id}`, { method: "DELETE" });
+}

@@ -25,6 +25,7 @@ interface Coupon {
   startDate: string;
   endDate: string;
   isActive: boolean;
+  showPopup: boolean;
   description: string;
 }
 
@@ -48,6 +49,7 @@ const emptyCoupon: Coupon = {
   startDate: "",
   endDate: "",
   isActive: true,
+  showPopup: false,
   description: "",
 };
 
@@ -63,6 +65,7 @@ function toCouponVM(c: CouponApiItem): Coupon {
     startDate: c.starts_at ?? "",
     endDate: c.ends_at ?? "",
     isActive: c.is_active,
+    showPopup: c.show_popup,
     description: c.description ?? "",
   };
 }
@@ -194,6 +197,7 @@ export default function CouponsPage() {
         starts_at: editCoupon.startDate || undefined,
         ends_at: editCoupon.endDate || undefined,
         is_active: editCoupon.isActive,
+        show_popup: editCoupon.showPopup,
         description: editCoupon.description || undefined,
       };
       if (modal === "add") {
@@ -238,6 +242,7 @@ export default function CouponsPage() {
         starts_at: coupon.startDate || undefined,
         ends_at: coupon.endDate || undefined,
         is_active: !coupon.isActive,
+        show_popup: coupon.showPopup,
         description: coupon.description || undefined,
       });
       showSuccess(coupon.isActive ? "disabled" : "enabled", coupon.code);
@@ -363,7 +368,10 @@ export default function CouponsPage() {
                         {formatDate(c.startDate)} — {formatDate(c.endDate)}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium capitalize ${statusStyle(status)}`}>{status}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium capitalize ${statusStyle(status)}`}>{status}</span>
+                          {c.showPopup && <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-medium text-purple-600">Popup</span>}
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
@@ -418,6 +426,19 @@ export default function CouponsPage() {
                     </select>
                   </Field>
                 </div>
+
+                <label className="flex items-center gap-3 rounded-lg border border-gray-200 p-3 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={editCoupon.showPopup}
+                    onChange={(e) => updateField("showPopup", e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-emerald-500 accent-emerald-500"
+                  />
+                  <div>
+                    <span className="text-sm font-medium text-gray-700">Tampilkan di Popup</span>
+                    <p className="text-xs text-gray-400">Kupon ini akan muncul sebagai popup promo di frontstore</p>
+                  </div>
+                </label>
 
                 <div className="grid gap-4 sm:grid-cols-3">
                   <Field label="Tipe Diskon">

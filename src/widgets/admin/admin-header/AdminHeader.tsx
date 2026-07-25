@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
+  deleteNotification,
   getUnreadCount,
   listNotifications,
   markAllAsRead,
@@ -145,6 +146,17 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
     }
   }
 
+  async function handleDeleteNotification(e: React.MouseEvent, n: NotificationApiItem) {
+    e.stopPropagation();
+    setNotifications((items) => items.filter((i) => i.id !== n.id));
+    if (!n.is_read) setUnreadCount((c) => Math.max(0, c - 1));
+    try {
+      await deleteNotification(n.id);
+    } catch {
+      // Best-effort
+    }
+  }
+
   async function handleLogout() {
     setMenuOpen(false);
     await logout();
@@ -249,24 +261,12 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
                     <p className="px-3 py-8 text-center text-sm text-gray-400">Belum ada notifikasi.</p>
                   ) : (
                     notifications.map((n) => (
-                      <button
+                      <NotificationItem
                         key={n.id}
-                        type="button"
+                        notification={n}
                         onClick={() => handleNotificationClick(n)}
-                        className={`flex w-full items-start gap-2.5 border-b border-gray-50 px-3 py-2.5 text-left text-sm hover:bg-gray-50 ${
-                          n.is_read ? "" : "bg-emerald-50/40"
-                        }`}
-                      >
-                        <span className="mt-0.5 text-base">{moduleIcons[n.module] ?? "🔔"}</span>
-                        <span className="min-w-0 flex-1">
-                          <span className="flex items-center gap-1.5">
-                            <span className="font-medium text-gray-800">{n.title}</span>
-                            {!n.is_read && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />}
-                          </span>
-                          <span className="block truncate text-xs text-gray-500">{n.message}</span>
-                          <span className="text-[10px] text-gray-400">{formatRelativeTime(n.created_at)}</span>
-                        </span>
-                      </button>
+                        onDelete={(e) => handleDeleteNotification(e, n)}
+                      />
                     ))
                   )}
                 </div>
@@ -487,5 +487,99 @@ function BellIcon() {
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
     </svg>
+  );
+}
+
+function NotificationItem({
+  notification: n,
+  onClick,
+  onDelete,
+}: {
+  notification: NotificationApiItem;
+  onClick: () => void;
+  onDelete: (e: React.MouseEvent) => void;
+}) {
+  const startX = useRef(0);
+  const currentX = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [swiped, setSwiped] = useState(false);
+
+  function handleTouchStart(e: React.TouchEvent) {
+    startX.current = e.touches[0]?.clientX ?? 0;
+    currentX.current = startX.current;
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    currentX.current = e.touches[0]?.clientX ?? 0;
+    const dx = startX.current - currentX.current;
+    if (containerRef.current && dx > 0) {
+      containerRef.current.style.transform = `translateX(-${Math.min(dx, 80)}px)`;
+    }
+  }
+
+  function handleTouchEnd() {
+    const dx = startX.current - currentX.current;
+    if (dx > 60) {
+      setSwiped(true);
+      if (containerRef.current) containerRef.current.style.transform = "translateX(-80px)";
+    } else {
+      setSwiped(false);
+      if (containerRef.current) containerRef.current.style.transform = "translateX(0)";
+    }
+  }
+
+  return (
+    <div className="relative overflow-hidden">
+      {/* Delete background revealed on swipe */}
+      <div className="absolute inset-y-0 right-0 flex w-20 items-center justify-center bg-red-500">
+        <button
+          type="button"
+          onClick={onDelete}
+          className="text-xs font-medium text-white"
+        >
+          Hapus
+        </button>
+      </div>
+
+      {/* Swipeable content */}
+      <div
+        ref={containerRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="relative bg-white transition-transform duration-150 ease-out"
+        style={{ transform: swiped ? "translateX(-80px)" : undefined }}
+      >
+        <button
+          type="button"
+          onClick={onClick}
+          className={`flex w-full items-start gap-2.5 border-b border-gray-50 px-3 py-2.5 text-left text-sm hover:bg-gray-50 ${
+            n.is_read ? "" : "bg-emerald-50/40"
+          }`}
+        >
+          <span className="mt-0.5 text-base">{moduleIcons[n.module] ?? "🔔"}</span>
+          <span className="min-w-0 flex-1">
+            <span className="flex items-center gap-1.5">
+              <span className="font-medium text-gray-800">{n.title}</span>
+              {!n.is_read && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />}
+            </span>
+            <span className="block truncate text-xs text-gray-500">{n.message}</span>
+            <span className="text-[10px] text-gray-400">{formatRelativeTime(n.created_at)}</span>
+          </span>
+          {/* X button — desktop */}
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={onDelete}
+            onKeyDown={(e) => { if (e.key === "Enter") onDelete(e as unknown as React.MouseEvent); }}
+            className="mt-1 hidden shrink-0 rounded p-0.5 text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500 sm:block"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </span>
+        </button>
+      </div>
+    </div>
   );
 }

@@ -4,9 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { Menu, Search, User } from "lucide-react";
 
-import { siteConfig } from "@/shared/config/site.config";
 import { Container } from "@/shared/ui/Container";
 import { IconButton } from "@/shared/ui/IconButton";
+import { Logo } from "@/shared/ui/Logo";
 
 import { useAuth } from "@/features/auth/model/AuthProvider";
 import { CartButton } from "@/features/cart";
@@ -36,8 +36,7 @@ export function Header() {
         </div>
 
         <Link href="/" className="flex items-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-pisaupedia.png" alt={siteConfig.name} className="h-16 w-auto" />
+          <Logo className="h-16 w-auto" />
         </Link>
 
         <MegaMenu />

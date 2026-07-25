@@ -5,8 +5,8 @@ import { categories, posts } from "@/entities/blog";
 import { BlogIndex } from "@/widgets/blog-index";
 
 export const metadata: Metadata = {
-  title: "The Journal — Kissaki Knives",
-  description: "Guides on knife types, sharpening, and steel care from Kissaki Knives.",
+  title: "The Journal — Pisau Pedia",
+  description: "Panduan seputar jenis pisau, pengasahan, dan perawatan baja dari Pisau Pedia.",
 };
 
 export default function JournalPage() {

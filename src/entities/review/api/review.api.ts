@@ -15,7 +15,9 @@ export interface ReviewApiItem {
 }
 
 export interface CreateReviewInput {
-  product_slug: string;
+  // Omit for a "shop review" about the store itself, not tied to a
+  // specific product.
+  product_slug?: string;
   customer_name: string;
   customer_email?: string;
   rating: number;
@@ -61,11 +63,13 @@ export function listReviews(status?: string, productSlug?: string) {
 }
 
 // listPublicReviews hits the public /reviews endpoint — always
-// approved-only, no auth required. Omitting product_slug returns
-// reviews across every product, which is what the site-wide
-// /pages/reviews page needs.
-export function listPublicReviews(perPage = 50) {
-  return apiFetch<ReviewApiItem[]>(`/reviews?per_page=${perPage}`);
+// approved-only, no auth required. `scope` narrows to "product" (tied to
+// an item someone bought) or "shop" (feedback about the store itself,
+// not any one product) — omit it to get both.
+export function listPublicReviews(perPage = 50, scope?: "product" | "shop") {
+  const params = new URLSearchParams({ per_page: String(perPage) });
+  if (scope) params.set("scope", scope);
+  return apiFetch<ReviewApiItem[]>(`/reviews?${params.toString()}`);
 }
 
 // updateReview accepts any subset of fields — pass just `status` for a

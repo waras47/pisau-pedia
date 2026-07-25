@@ -13,6 +13,7 @@ export interface CouponApiItem {
   starts_at?: string;
   ends_at?: string;
   is_active: boolean;
+  show_popup: boolean;
   description?: string;
 }
 
@@ -25,7 +26,19 @@ export interface CouponInput {
   starts_at?: string;
   ends_at?: string;
   is_active?: boolean;
+  show_popup?: boolean;
   description?: string;
+}
+
+export interface PromoPopup {
+  type: CouponApiType;
+  value: number;
+  code: string;
+  description?: string;
+}
+
+export function getPromoPopup() {
+  return apiFetch<PromoPopup | null>("/coupons/promo-popup");
 }
 
 export function listCoupons() {
