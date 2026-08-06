@@ -6,34 +6,27 @@ import { createServiceRequest } from "@/entities/service-request/api/service-req
 import { HttpError } from "@/shared/api/http-error";
 import { Button } from "@/shared/ui/Button";
 import { Container } from "@/shared/ui/Container";
-
-const motifs = [
-  { title: "Sakura", description: "Cherry blossom branch, hand-etched along the spine." },
-  { title: "Mt. Fuji", description: "Minimalist mountain silhouette across the blade face." },
-  { title: "Dragon", description: "Traditional Japanese dragon motif, full-blade coverage." },
-  { title: "Kanji Name", description: "Your name or a chosen word rendered in kanji." },
-];
-
-const faqs = [
-  {
-    q: "Berapa lama proses engraving?",
-    a: "Setelah desain disetujui, biasanya 2 hari kerja sebelum pisau dikirim balik.",
-  },
-  {
-    q: "Bisa custom desain sendiri?",
-    a: "Bisa — ceritakan desain/teks yang kamu mau di form di bawah, tim kami akan kirim preview digital dulu sebelum proses ukir.",
-  },
-  {
-    q: "Berapa harganya?",
-    a: "Harga tergantung kerumitan desain dan jenis pisau. Kirim detail lewat form, kami balas dengan penawaran harga dalam 1 hari kerja.",
-  },
-];
+import { useLocaleCurrency } from "@/features/locale-currency";
 
 export function EngravingService() {
+  const { t } = useLocaleCurrency();
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const motifs = [
+    { title: t("engrave_motif1_title"), description: t("engrave_motif1_desc") },
+    { title: t("engrave_motif2_title"), description: t("engrave_motif2_desc") },
+    { title: t("engrave_motif3_title"), description: t("engrave_motif3_desc") },
+    { title: t("engrave_motif4_title"), description: t("engrave_motif4_desc") },
+  ];
+
+  const faqs = [
+    { q: t("engrave_faq1_q"), a: t("engrave_faq1_a") },
+    { q: t("engrave_faq2_q"), a: t("engrave_faq2_a") },
+    { q: t("engrave_faq3_q"), a: t("engrave_faq3_a") },
+  ];
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -48,7 +41,7 @@ export function EngravingService() {
       });
       setSubmitted(true);
     } catch (err) {
-      setError(err instanceof HttpError ? err.message : "Gagal mengirim request, coba lagi.");
+      setError(err instanceof HttpError ? err.message : t("engrave_form_error"));
     } finally {
       setSubmitting(false);
     }
@@ -58,13 +51,12 @@ export function EngravingService() {
     <>
       <section className="bg-surface py-16 sm:py-24">
         <Container className="flex flex-col items-center gap-6 text-center">
-          <span className="font-accent text-base italic text-copper">Custom Engraving</span>
+          <span className="font-accent text-base italic text-copper">{t("engrave_hero_eyebrow")}</span>
           <h1 className="max-w-3xl font-display text-4xl font-semibold tracking-tightest sm:text-5xl">
-            Personalize Your Knife
+            {t("engrave_hero_title")}
           </h1>
           <p className="max-w-2xl text-lg text-muted-foreground">
-            Kirim detail desain atau teks yang kamu inginkan — kami kirim preview
-            digital dulu sebelum diukir ke bilah pisaumu.
+            {t("engrave_hero_desc")}
           </p>
         </Container>
       </section>
@@ -72,7 +64,7 @@ export function EngravingService() {
       <section className="py-16">
         <Container>
           <h2 className="mb-12 text-center font-display text-3xl font-semibold tracking-tightest sm:text-4xl">
-            Motif Populer
+            {t("engrave_motifs_title")}
           </h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {motifs.map((m) => (
@@ -88,7 +80,7 @@ export function EngravingService() {
       <section className="bg-surface py-16">
         <Container className="max-w-3xl">
           <h2 className="mb-12 text-center font-display text-3xl font-semibold tracking-tightest sm:text-4xl">
-            FAQ
+            {t("engrave_faq_title")}
           </h2>
           <div className="flex flex-col divide-y divide-border">
             {faqs.map((faq) => (
@@ -104,26 +96,23 @@ export function EngravingService() {
       <section className="py-16">
         <Container className="max-w-2xl">
           <h2 className="mb-4 text-center font-display text-3xl font-semibold tracking-tightest sm:text-4xl">
-            Request a Quote
+            {t("engrave_form_title")}
           </h2>
           <p className="mb-10 text-center text-muted-foreground">
-            Ceritakan desain yang kamu mau, kami balas dengan penawaran harga
-            dalam 1 hari kerja.
+            {t("engrave_form_desc")}
           </p>
 
           {submitted ? (
             <div className="flex flex-col items-center gap-4 py-12 text-center">
-              <h3 className="font-display text-xl font-semibold">Request Received</h3>
-              <p className="text-muted-foreground">
-                Terima kasih! Tim kami akan review dan balas dalam 1 hari kerja.
-              </p>
+              <h3 className="font-display text-xl font-semibold">{t("engrave_form_success_title")}</h3>
+              <p className="text-muted-foreground">{t("engrave_form_success_desc")}</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="name" className="text-xs font-semibold uppercase tracking-widest2 text-foreground">
-                    Nama
+                    {t("engrave_form_name")}
                   </label>
                   <input
                     id="name"
@@ -132,12 +121,12 @@ export function EngravingService() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
-                    placeholder="Nama kamu"
+                    placeholder={t("engrave_form_name_placeholder")}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="email" className="text-xs font-semibold uppercase tracking-widest2 text-foreground">
-                    Email
+                    {t("engrave_form_email")}
                   </label>
                   <input
                     id="email"
@@ -146,13 +135,13 @@ export function EngravingService() {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
-                    placeholder="you@example.com"
+                    placeholder={t("engrave_form_email_placeholder")}
                   />
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="message" className="text-xs font-semibold uppercase tracking-widest2 text-foreground">
-                  Detail Desain
+                  {t("engrave_form_design")}
                 </label>
                 <textarea
                   id="message"
@@ -161,12 +150,12 @@ export function EngravingService() {
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   className="border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
-                  placeholder="Jenis pisau, teks/motif yang diinginkan, posisi ukiran, dll..."
+                  placeholder={t("engrave_form_design_placeholder")}
                 />
               </div>
               {error ? <p className="text-sm text-red-600">{error}</p> : null}
               <Button type="submit" className="self-start" disabled={submitting}>
-                {submitting ? "Mengirim..." : "Send Request"}
+                {submitting ? t("engrave_form_sending") : t("engrave_form_submit")}
               </Button>
             </form>
           )}

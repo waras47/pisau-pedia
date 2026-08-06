@@ -1,13 +1,10 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-
 import {
   newArrivals as staticNewArrivals,
   ProductCarousel,
 } from "@/entities/product";
 import { env } from "@/shared/config/env";
 import { Container } from "@/shared/ui/Container";
-import { SectionHeading } from "@/shared/ui/SectionHeading";
+import { NewArrivalsHeading } from "./NewArrivalsHeading";
 
 async function getNewArrivals() {
   try {
@@ -36,7 +33,7 @@ async function getNewArrivals() {
       slug: p.slug,
       price: p.price,
       compareAtPrice: p.compare_at_price,
-      currency: "EUR" as const,
+      currency: "IDR" as const,
       category: p.category_name ?? "",
       rating: p.rating,
       reviewCount: p.review_count,
@@ -55,16 +52,7 @@ export async function NewArrivals() {
   return (
     <section className="bg-surface py-16">
       <Container className="flex flex-col gap-10">
-        <div className="flex items-end justify-between gap-4">
-          <SectionHeading title="Shop New Arrivals" />
-          <Link
-            href="/collections/new-arrivals"
-            className="hidden shrink-0 items-center gap-1.5 text-sm font-medium uppercase tracking-widest2 text-accent sm:inline-flex"
-          >
-            View all
-            <ArrowRight size={14} />
-          </Link>
-        </div>
+        <NewArrivalsHeading />
 
         <ProductCarousel products={products} />
       </Container>

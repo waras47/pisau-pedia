@@ -45,7 +45,7 @@ function computeRange(days: number) {
 // Backend only returns days that had at least one paid order (GROUP BY) —
 // fill the gaps with 0 so the chart reflects the full selected range.
 function buildDailySeries(dailyRevenue: SalesReportData["daily_revenue"], from: string, to: string) {
-  const byDate = new Map(dailyRevenue.map((d) => [d.date, d.revenue]));
+  const byDate = new Map((dailyRevenue ?? []).map((d) => [d.date, d.revenue]));
   const series: { date: string; revenue: number }[] = [];
   const cursor = new Date(from);
   const end = new Date(to);
@@ -252,10 +252,10 @@ export function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {(salesReport?.top_products.length ?? 0) === 0 ? (
+                {(salesReport?.top_products?.length ?? 0) === 0 ? (
                   <tr><td colSpan={3} className="py-8 text-center text-gray-400">Belum ada data.</td></tr>
                 ) : (
-                  salesReport!.top_products.map((product) => (
+                  (salesReport!.top_products ?? []).map((product) => (
                     <tr key={product.product_name} className="border-b border-gray-50">
                       <td className="py-3">
                         <div className="flex items-center gap-3">

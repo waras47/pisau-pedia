@@ -49,8 +49,7 @@ export function MonthlyPick() {
             <Badge variant="copper">{t("save")} 20%</Badge>
           </div>
           <p className="max-w-md text-muted-foreground">
-            A balanced, everyday santoku with a nashiji-finished blade —
-            handpicked each month for the value it brings to a home kitchen.
+            {t("monthly_desc")}
           </p>
           <Link href={`/products/${monthlyPick.slug}`}>
             <Button size="lg" className="mt-2">

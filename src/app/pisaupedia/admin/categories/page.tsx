@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ImageUploadField } from "@/shared/ui/ImageUploadField";
 import {
@@ -28,6 +28,15 @@ export default function CategoriesPage() {
   const [modal, setModal] = useState<ModalMode>("closed");
   const [active, setActive] = useState<CategoryRow | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [search, setSearch] = useState("");
+
+  const filtered = useMemo(() => {
+    if (!search) return categories;
+    const q = search.toLowerCase();
+    return categories.filter(
+      (c) => c.name.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q),
+    );
+  }, [categories, search]);
 
   async function loadCategories() {
     setLoading(true);
@@ -111,7 +120,7 @@ export default function CategoriesPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Kategori</h1>
           <p className="text-sm text-gray-400">
-            Kelola kategori produk — halaman ini juga menampilkan tampilan koleksi di storefront.
+            {categories.length} total{search ? ` · ${filtered.length} ditemukan` : ""}
           </p>
         </div>
         <button
@@ -121,6 +130,26 @@ export default function CategoriesPage() {
         >
           + Tambah Kategori
         </button>
+      </div>
+
+      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow-sm">
+        <div className="flex flex-1 items-center gap-2 rounded-lg bg-gray-50 px-3 py-2">
+          <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Cari kategori..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
+          />
+          {search && (
+            <button type="button" onClick={() => setSearch("")} className="text-gray-400 hover:text-gray-600">
+              ✕
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="rounded-xl bg-white shadow-sm">
@@ -141,14 +170,14 @@ export default function CategoriesPage() {
                     Memuat...
                   </td>
                 </tr>
-              ) : categories.length === 0 ? (
+              ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-4 py-12 text-center text-gray-400">
-                    Belum ada kategori.
+                    {search ? "Tidak ada kategori yang cocok." : "Belum ada kategori."}
                   </td>
                 </tr>
               ) : (
-                categories.map((cat) => (
+                filtered.map((cat) => (
                   <tr key={cat.id} className="border-b border-gray-50 hover:bg-gray-50/50">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">

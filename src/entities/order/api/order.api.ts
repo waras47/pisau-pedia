@@ -1,4 +1,6 @@
 import { apiFetch, apiFetchPaginated } from "@/shared/api/client";
+import { HttpError } from "@/shared/api/http-error";
+import { env } from "@/shared/config/env";
 
 import { orderStatusOptions } from "@/entities/order/model/order-status";
 
@@ -58,6 +60,9 @@ export interface OrderResponse {
   payment_qr_string?: string;
   payment_url?: string;
   payment_expiry?: string;
+  // Set once the customer uploads a receipt/screenshot at checkout-success —
+  // part of the manual/static payment flow (no automated gateway).
+  payment_proof_url?: string;
   invoice_url?: string;
   // Set once the customer self-confirms the package arrived — separate
   // from `status`, which stays under admin control. See
@@ -72,6 +77,30 @@ export function createOrder(input: CreateOrderInput) {
     method: "POST",
     body: JSON.stringify(input),
   });
+}
+
+// getPublicOrder is used right after checkout (checkout/success) — the order
+// might belong to a guest (no login), so this hits the public GET /orders/:id
+// endpoint rather than the authenticated /users/me/orders/:id one below.
+export function getPublicOrder(id: string) {
+  return apiFetch<OrderResponse>(`/orders/${id}`);
+}
+
+// uploadPaymentProof lets a customer attach a receipt/screenshot to their own
+// order at checkout-success. Public (no admin token) and multipart, so it
+// bypasses apiFetch (which hardcodes a JSON Content-Type) the same way
+// shared/api/upload.api.ts's admin uploadImage() does.
+export async function uploadPaymentProof(orderId: string, file: File) {
+  const form = new FormData();
+  form.append("image", file);
+
+  const res = await fetch(`${env.apiBaseUrl}/orders/${orderId}/payment-proof`, {
+    method: "POST",
+    body: form,
+  });
+  const json = await res.json().catch(() => null);
+  if (!res.ok) throw new HttpError(res.status, json?.message ?? "Upload failed");
+  return json.data as OrderResponse;
 }
 
 // getMyOrders/getMyOrder/confirmOrderReceived are the customer-facing "my

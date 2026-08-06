@@ -59,11 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function register(email: string, password: string, fullName: string, phone?: string) {
-    const res = await authApi.register(email, password, fullName, phone);
-    tokenStorage.save(authApi.toTokenPair(res), res.user);
-    setUser(res.user);
-    setStatus("authenticated");
-    setSessionExpired(false);
+    await authApi.register(email, password, fullName, phone);
   }
 
   async function loginWithGoogle(code: string) {

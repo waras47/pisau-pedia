@@ -14,15 +14,13 @@ const footerColumns = [
       { label: "Japanese Knives", href: "/collections/knives" },
       { label: "Sharpening Tools", href: "/collections/sharpening" },
       { label: "Kitchen Accessories", href: "/collections/accessories" },
-      { label: "Gift Cards", href: "/products/gift-card" },
     ],
   },
   {
     title: "Support",
     links: [
       { label: "FAQ", href: "/pages/faq" },
-      { label: "Shipping & Returns", href: "/pages/shipping" },
-      { label: "Sharpening Service", href: "/pages/sharpening-service" },
+      { label: "Sharpening Service", href: "/pages/sharpening-repairs" },
       { label: "Contact Us", href: "/pages/contact" },
     ],
   },
@@ -31,8 +29,6 @@ const footerColumns = [
     links: [
       { label: "About Us", href: "/pages/about" },
       { label: "Reviews", href: "/pages/reviews" },
-      { label: "Become a Reseller", href: "/pages/reseller" },
-      { label: "Affiliate Program", href: "/pages/affiliate" },
     ],
   },
 ];

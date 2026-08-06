@@ -1,8 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 
 interface NavItem {
   label: string;
@@ -17,7 +17,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       {
         label: "Dashboard",
-        href: "/admin",
+        href: "/pisaupedia/admin",
         icon: <DashboardIcon />,
       },
     ],
@@ -27,13 +27,13 @@ const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       {
         label: "Orders",
-        href: "/admin/orders",
+        href: "/pisaupedia/admin/orders",
         icon: <OrderIcon />,
         children: [
-          { label: "All Orders", href: "/admin/orders" },
-          { label: "Pending", href: "/admin/orders?status=pending" },
-          { label: "Processing", href: "/admin/orders?status=processing" },
-          { label: "Delivered", href: "/admin/orders?status=delivered" },
+          { label: "All Orders", href: "/pisaupedia/admin/orders" },
+          { label: "Pending", href: "/pisaupedia/admin/orders?status=pending" },
+          { label: "Processing", href: "/pisaupedia/admin/orders?status=processing" },
+          { label: "Delivered", href: "/pisaupedia/admin/orders?status=delivered" },
         ],
       },
     ],
@@ -43,13 +43,23 @@ const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       {
         label: "Produk",
-        href: "/admin/products",
+        href: "/pisaupedia/admin/products",
         icon: <ProductIcon />,
       },
       {
         label: "Kategori",
-        href: "/admin/categories",
+        href: "/pisaupedia/admin/categories",
         icon: <CategoryIcon />,
+      },
+      {
+        label: "Koleksi",
+        href: "/pisaupedia/admin/collections",
+        icon: <CategoryIcon />,
+      },
+      {
+        label: "Configurator",
+        href: "/pisaupedia/admin/configurator",
+        icon: <ProductIcon />,
       },
     ],
   },
@@ -58,21 +68,21 @@ const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       {
         label: "Sharpening",
-        href: "/admin/sharpening",
+        href: "/pisaupedia/admin/sharpening",
         icon: <SharpeningIcon />,
         children: [
-          { label: "Requests", href: "/admin/sharpening" },
-          { label: "In Progress", href: "/admin/sharpening?status=in_progress" },
-          { label: "Completed", href: "/admin/sharpening?status=completed" },
+          { label: "Requests", href: "/pisaupedia/admin/sharpening" },
+          { label: "In Progress", href: "/pisaupedia/admin/sharpening?status=in_progress" },
+          { label: "Completed", href: "/pisaupedia/admin/sharpening?status=completed" },
         ],
       },
       {
         label: "Engravings",
-        href: "/admin/engravings",
+        href: "/pisaupedia/admin/engravings",
         icon: <EngravingIcon />,
         children: [
-          { label: "Orders", href: "/admin/engravings" },
-          { label: "Pending Approval", href: "/admin/engravings?status=pending" },
+          { label: "Orders", href: "/pisaupedia/admin/engravings" },
+          { label: "Pending Approval", href: "/pisaupedia/admin/engravings?status=pending" },
         ],
       },
     ],
@@ -82,12 +92,12 @@ const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       {
         label: "Customers",
-        href: "/admin/customers",
+        href: "/pisaupedia/admin/customers",
         icon: <CustomerIcon />,
       },
       {
         label: "Reviews",
-        href: "/admin/reviews",
+        href: "/pisaupedia/admin/reviews",
         icon: <ReviewIcon />,
       },
     ],
@@ -97,12 +107,12 @@ const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       {
         label: "Coupons",
-        href: "/admin/coupons",
+        href: "/pisaupedia/admin/coupons",
         icon: <CouponIcon />,
       },
       {
         label: "Newsletter",
-        href: "/admin/newsletter",
+        href: "/pisaupedia/admin/newsletter",
         icon: <NewsletterIcon />,
       },
     ],
@@ -112,12 +122,12 @@ const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       {
         label: "Sales Report",
-        href: "/admin/reports/sales",
+        href: "/pisaupedia/admin/reports/sales",
         icon: <ReportIcon />,
       },
       {
         label: "Inventory Report",
-        href: "/admin/reports/inventory",
+        href: "/pisaupedia/admin/reports/inventory",
         icon: <InventoryReportIcon />,
       },
     ],

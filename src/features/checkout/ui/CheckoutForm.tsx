@@ -3,11 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { HttpError } from "@/shared/api/http-error";
+import { staticPaymentOptions, type StaticPaymentType } from "@/shared/config/payment.config";
 import { Button } from "@/shared/ui/Button";
 
 import { validateCoupon, type ValidateCouponResult } from "@/entities/coupon/api/coupon.api";
 import { createOrder } from "@/entities/order/api/order.api";
-import { getPaymentMethods, type PaymentMethod } from "@/entities/payment/api/payment.api";
 import {
   calculateShippingCost,
   searchDestinations,
@@ -52,10 +52,10 @@ export function CheckoutForm() {
   const [shippingLoading, setShippingLoading] = useState(false);
   const [shippingError, setShippingError] = useState<string | null>(null);
 
-  // Payment methods
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  // selectedPayment holds "qris" or "va:<bankCode>"
-  const [selectedPayment, setSelectedPayment] = useState<string>("");
+  // Payment method — static list (bank transfer / QRIS / ShopeePay / DANA),
+  // shown as instructions on the checkout-success page rather than routed
+  // through a live gateway. See shared/config/payment.config.ts.
+  const [selectedPayment, setSelectedPayment] = useState<StaticPaymentType | "">("");
 
   const catalogItems = useMemo(() => items.filter((i) => !i.component), [items]);
 
@@ -69,12 +69,6 @@ export function CheckoutForm() {
     const t = setTimeout(() => setDebouncedQuery(destQuery), 350);
     return () => clearTimeout(t);
   }, [destQuery]);
-
-  useEffect(() => {
-    getPaymentMethods()
-      .then(setPaymentMethods)
-      .catch(() => setPaymentMethods([]));
-  }, []);
 
   useEffect(() => {
     if (debouncedQuery.trim().length < 3) {
@@ -179,15 +173,6 @@ export function CheckoutForm() {
       return;
     }
 
-    // selectedPayment is "qris" or "va:<bankCode>". Map to the backend's
-    // payment_type/payment_channel contract.
-    let paymentType = "qris";
-    let paymentChannel: string | undefined;
-    if (selectedPayment.startsWith("va:")) {
-      paymentType = "bank_transfer";
-      paymentChannel = selectedPayment.slice(3);
-    }
-
     const form = new FormData(e.currentTarget);
     setLoading(true);
     try {
@@ -204,8 +189,7 @@ export function CheckoutForm() {
         destination_id: String(destination.id),
         courier: shippingOption.code,
         service: shippingOption.service,
-        payment_type: paymentType,
-        payment_channel: paymentChannel,
+        payment_type: selectedPayment,
         items: catalogItems.map((i) => ({ product_slug: i.slug, quantity: i.quantity })),
       });
 
@@ -313,34 +297,28 @@ export function CheckoutForm() {
         </fieldset>
       )}
 
-      {/* Payment method selection */}
-      {paymentMethods.length > 0 && (
-        <fieldset className="flex flex-col gap-3">
-          <legend className="mb-2 font-display text-lg font-semibold tracking-tightest">Metode Pembayaran</legend>
-          <div className="flex flex-col gap-2">
-            {paymentMethods.map((m) => {
-              const value = m.payment_type === "qris" ? "qris" : `va:${m.bank_code}`;
-              const active = selectedPayment === value;
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setSelectedPayment(value)}
-                  className={`flex items-center gap-3 border px-3 py-2.5 text-left text-sm transition-colors ${
-                    active ? "border-accent bg-accent/5" : "border-border hover:bg-muted"
-                  }`}
-                >
-                  {m.logo_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={m.logo_url} alt="" className="h-6 w-auto flex-none" />
-                  ) : null}
-                  <span className="font-medium">{m.display_name}</span>
-                </button>
-              );
-            })}
-          </div>
-        </fieldset>
-      )}
+      {/* Payment method selection — static channels, instructions shown on
+          the checkout-success page after the order is created. */}
+      <fieldset className="flex flex-col gap-3">
+        <legend className="mb-2 font-display text-lg font-semibold tracking-tightest">Metode Pembayaran</legend>
+        <div className="flex flex-col gap-2">
+          {staticPaymentOptions.map((m) => {
+            const active = selectedPayment === m.value;
+            return (
+              <button
+                key={m.value}
+                type="button"
+                onClick={() => setSelectedPayment(m.value)}
+                className={`flex items-center gap-3 border px-3 py-2.5 text-left text-sm transition-colors ${
+                  active ? "border-accent bg-accent/5" : "border-border hover:bg-muted"
+                }`}
+              >
+                <span className="font-medium">{m.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
 
       <fieldset className="flex flex-col gap-3">
         <legend className="mb-2 font-display text-lg font-semibold tracking-tightest">Coupon</legend>

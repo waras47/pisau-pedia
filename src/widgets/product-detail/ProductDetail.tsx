@@ -60,12 +60,10 @@ export function ProductDetail({ product, related, reviews = [] }: ProductDetailP
     ? product.angleImages?.[selectedAngle]
     : product.image;
 
-  // Always show all 3 tabs, same as the reference layout — missing data
-  // gets a graceful fallback message instead of hiding the tab.
   const tabs: { key: typeof activeTab; label: string }[] = [
     { key: "description", label: "Description" },
     { key: "specification", label: "Specification" },
-    { key: "care", label: "Knife Care" },
+    ...(product.careInstructions ? [{ key: "care" as const, label: "Knife Care" }] : []),
   ];
 
   return (

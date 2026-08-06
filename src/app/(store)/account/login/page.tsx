@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { googleLoginUrl, googleStatus } from "@/features/auth/api/auth.api";
+import { googleLoginUrl, googleStatus, resendVerification } from "@/features/auth/api/auth.api";
 import { useAuth } from "@/features/auth/model/AuthProvider";
+import { useLocaleCurrency } from "@/features/locale-currency/model/LocaleProvider";
 import { HttpError } from "@/shared/api/http-error";
 import { Button } from "@/shared/ui/Button";
 import { Container } from "@/shared/ui/Container";
@@ -25,6 +26,7 @@ const inputClass =
 
 export default function AccountLoginPage() {
   const { login, register, status } = useAuth();
+  const { t } = useLocaleCurrency();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/";
@@ -33,6 +35,9 @@ export default function AccountLoginPage() {
   const [googleEnabled, setGoogleEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
 
   useEffect(() => {
     if (status === "authenticated") router.replace(redirectTo);
@@ -46,13 +51,18 @@ export default function AccountLoginPage() {
 
   useEffect(() => {
     if (searchParams.get("error") === "google_failed") {
-      setError("Login dengan Google gagal. Silakan coba lagi.");
+      setError(t("google_failed"));
     }
-  }, [searchParams]);
+    if (searchParams.get("verified") === "true") {
+      setSuccess(t("verify_success_desc"));
+    }
+  }, [searchParams, t]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
+    setUnverifiedEmail(null);
     const form = new FormData(e.currentTarget);
     const email = String(form.get("email"));
     const password = String(form.get("password"));
@@ -61,22 +71,47 @@ export default function AccountLoginPage() {
     try {
       if (mode === "login") {
         await login(email, password);
+        router.push(redirectTo);
       } else {
         const fullName = String(form.get("fullName"));
         const phone = form.get("phone") ? String(form.get("phone")) : undefined;
         await register(email, password, fullName, phone);
+        setSuccess(t("register_success"));
+        setMode("login");
       }
-      router.push(redirectTo);
     } catch (err) {
-      setError(err instanceof HttpError ? err.message : "Terjadi kesalahan, coba lagi.");
+      if (err instanceof HttpError) {
+        if (err.message === "email not verified") {
+          setError(t("email_not_verified"));
+          setUnverifiedEmail(email);
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError(t("generic_error"));
+      }
     } finally {
       setLoading(false);
     }
   }
 
+  async function handleResend() {
+    if (!unverifiedEmail) return;
+    setResending(true);
+    try {
+      await resendVerification(unverifiedEmail);
+      setSuccess(t("verification_sent"));
+      setError(null);
+      setUnverifiedEmail(null);
+    } catch (err) {
+      setError(err instanceof HttpError ? err.message : t("generic_error"));
+    } finally {
+      setResending(false);
+    }
+  }
+
   function handleGoogleClick() {
-    const url = new URL(googleLoginUrl());
-    window.location.href = url.toString();
+    window.location.href = googleLoginUrl();
   }
 
   return (
@@ -84,12 +119,18 @@ export default function AccountLoginPage() {
       <Container className="mx-auto flex max-w-sm flex-col gap-8">
         <div className="text-center">
           <h1 className="font-display text-2xl font-semibold tracking-tightest">
-            {mode === "login" ? "Masuk ke akun Anda" : "Buat akun baru"}
+            {mode === "login" ? t("login_title") : t("register_title")}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Belanja lebih cepat dan lacak pesanan Anda — atau lanjutkan sebagai tamu saat checkout.
+            {t("login_subtitle")}
           </p>
         </div>
+
+        {success && (
+          <div className="rounded border border-green-200 bg-green-50 p-3 text-center text-sm text-green-700">
+            {success}
+          </div>
+        )}
 
         {googleEnabled && (
           <>
@@ -99,11 +140,11 @@ export default function AccountLoginPage() {
               className="flex h-11 w-full items-center justify-center gap-3 border border-border bg-background text-sm font-medium text-foreground transition-colors hover:bg-muted"
             >
               <GoogleIcon />
-              Lanjutkan dengan Google
+              {t("continue_google")}
             </button>
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
               <span className="h-px flex-1 bg-border" />
-              atau
+              {t("or")}
               <span className="h-px flex-1 bg-border" />
             </div>
           </>
@@ -111,39 +152,55 @@ export default function AccountLoginPage() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           {mode === "register" && (
-            <input name="fullName" required placeholder="Nama lengkap" className={inputClass} />
+            <input name="fullName" required placeholder={t("full_name")} className={inputClass} />
           )}
-          <input type="email" name="email" required placeholder="Email" className={inputClass} />
+          <input type="email" name="email" required placeholder={t("email_placeholder")} className={inputClass} />
           <input
             type="password"
             name="password"
             required
             minLength={8}
-            placeholder="Password (minimal 8 karakter)"
+            placeholder={t("password_placeholder")}
             className={inputClass}
           />
           {mode === "register" && (
-            <input name="phone" placeholder="Nomor telepon (opsional)" className={inputClass} />
+            <input name="phone" placeholder={t("phone_placeholder")} className={inputClass} />
           )}
 
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+          {error && (
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-red-600">{error}</p>
+              {unverifiedEmail && (
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resending}
+                  className="text-sm font-medium text-accent hover:underline disabled:opacity-50"
+                >
+                  {resending ? t("processing") : t("resend_verification")}
+                </button>
+              )}
+            </div>
+          )}
 
           <Button type="submit" size="lg" disabled={loading}>
-            {loading ? "Memproses…" : mode === "login" ? "Masuk" : "Daftar"}
+            {loading ? t("processing") : mode === "login" ? t("sign_in") : t("sign_up")}
           </Button>
         </form>
 
         <p className="text-center text-sm text-muted-foreground">
-          {mode === "login" ? "Belum punya akun? " : "Sudah punya akun? "}
+          {mode === "login" ? t("no_account") : t("has_account")}
           <button
             type="button"
             onClick={() => {
               setMode(mode === "login" ? "register" : "login");
               setError(null);
+              setSuccess(null);
+              setUnverifiedEmail(null);
             }}
             className="font-medium text-accent hover:underline"
           >
-            {mode === "login" ? "Daftar" : "Masuk"}
+            {mode === "login" ? t("sign_up") : t("sign_in")}
           </button>
         </p>
       </Container>

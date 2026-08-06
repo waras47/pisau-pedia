@@ -51,14 +51,14 @@ export function KnifeConfigurator({
   const [openStep, setOpenStep] = useState(1);
   const [infoBlade, setInfoBlade] = useState<KnifeBlade | null>(null);
 
-  const allShapes = apiShapes?.length ? apiShapes : staticShapes;
-  const allBlades = apiBlades ?? [];
-  const allHandles = apiHandles?.length ? apiHandles : staticHandles;
-  const allAccessories = apiAccessories?.length ? apiAccessories : staticAccessories;
+  const allShapes = apiShapes !== undefined ? apiShapes : staticShapes;
+  const allBlades = apiBlades !== undefined ? apiBlades : [];
+  const allHandles = apiHandles !== undefined ? apiHandles : staticHandles;
+  const allAccessories = apiAccessories !== undefined ? apiAccessories : staticAccessories;
 
   const shape = allShapes.find((s) => s.id === shapeId) ?? null;
   const availableBlades = shapeId
-    ? (allBlades.length ? allBlades.filter((b) => b.shapeId === shapeId) : staticGetBladesByShape(shapeId))
+    ? (apiBlades !== undefined ? allBlades.filter((b) => b.shapeId === shapeId) : staticGetBladesByShape(shapeId))
     : [];
   const blade = availableBlades.find((b) => b.id === bladeId) ?? null;
   const handle = allHandles.find((h) => h.id === handleId) ?? null;

@@ -30,12 +30,13 @@ async function fetchJson<T>(path: string): Promise<T | null> {
 }
 
 function mapShapes(
-  items: Array<{ id: string; name: string; category: string; image_url?: string }>,
+  items: Array<{ id: string; name: string; category: string; description?: string; image_url?: string }>,
 ): KnifeShape[] {
   return items.map((s) => ({
     id: s.id,
     name: s.name,
     category: s.category,
+    description: s.description,
     image: s.image_url,
   }));
 }
@@ -49,6 +50,8 @@ function mapBlades(
     length_mm: number;
     price: number;
     compare_at_price?: number;
+    description?: string;
+    specifications?: Record<string, string>;
     image_url?: string;
   }>,
 ): KnifeBlade[] {
@@ -60,6 +63,8 @@ function mapBlades(
     lengthMm: b.length_mm,
     price: b.price,
     compareAtPrice: b.compare_at_price,
+    description: b.description,
+    specifications: b.specifications,
     image: b.image_url,
   }));
 }

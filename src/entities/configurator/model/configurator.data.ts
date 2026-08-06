@@ -12,8 +12,6 @@ export const shapes: KnifeShape[] = [
   { id: "gyuto", name: "Gyuto", category: "Multi-Purpose", image: "/dev-images/configurator/shape-gyuto.webp", previewImage: "/dev-images/configurator/preview-outline.png", silhouetteLight: "http://localhost:9000/pisaupedia/configurator/shapes/gyuto-black.png", silhouetteDark: "http://localhost:9000/pisaupedia/configurator/shapes/gyuto-grey.png" },
   { id: "santoku", name: "Santoku", category: "Multi-Purpose", image: "/dev-images/configurator/shape-santoku.webp", previewImage: "/dev-images/configurator/preview-outline.png", silhouetteLight: "http://localhost:9000/pisaupedia/configurator/shapes/santoku-black.png", silhouetteDark: "http://localhost:9000/pisaupedia/configurator/shapes/santoku-grey.png" },
   { id: "bunka", name: "Bunka", category: "Multi-Purpose", image: "/dev-images/configurator/shape-bunka.webp", previewImage: "/dev-images/configurator/preview-outline.png", silhouetteLight: "http://localhost:9000/pisaupedia/configurator/shapes/bunka-black.png", silhouetteDark: "http://localhost:9000/pisaupedia/configurator/shapes/bunka-grey.png" },
-  { id: "nakiri", name: "Nakiri", category: "Vegetable", image: "/dev-images/configurator/blade-nakiri-1.jpg", previewImage: "/dev-images/configurator/preview-outline.png" },
-  { id: "petty", name: "Petty", category: "Paring", image: "/dev-images/configurator/blade-petty-1.jpg", previewImage: "/dev-images/configurator/preview-outline.png" },
 ];
 
 // Langkah 2 — blade, masing-masing terikat ke satu shape (shapeId)
@@ -92,42 +90,6 @@ export const blades: KnifeBlade[] = [
     previewImage: "/dev-images/configurator/preview-blade-bunka-zdp-silver.png",
     description: "The HAP-40 Bunka Black is our premium bunka offering. HAP-40 is a high-speed powder steel that combines extreme hardness with surprising toughness — it holds its edge far longer than conventional steels. The black Kurouchi finish gives it a bold, industrial aesthetic. For serious cooks who demand the best.",
     specifications: { "Steel": "HAP-40 (High-speed powder steel)", "Length": "190mm", "Hardness": "64-66 HRC", "Finish": "Kurouchi Black", "Grind": "Double bevel", "Weight": "160g" },
-  },
-  {
-    id: "tsuchime-nakiri-165",
-    image: "/dev-images/configurator/blade-nakiri-1.jpg",
-    shapeId: "nakiri",
-    name: "Tsuchime Nakiri 165mm",
-    steel: "VG-10",
-    lengthMm: 165,
-    price: 138,
-    previewImage: "/dev-images/configurator/preview-blade-bunka-hap40.png",
-    description: "The Tsuchime Nakiri is a dedicated vegetable knife with a straight edge and tall blade — perfect for clean push cuts through root vegetables and leafy greens. The hammered (tsuchime) finish creates small air pockets that help food release from the blade. VG-10 steel offers low-maintenance sharpness.",
-    specifications: { "Steel": "VG-10", "Length": "165mm", "Hardness": "60-61 HRC", "Finish": "Tsuchime (hammered)", "Grind": "Double bevel", "Weight": "158g" },
-  },
-  {
-    id: "mori-nakiri-170",
-    image: "/dev-images/configurator/blade-nakiri-2.png",
-    shapeId: "nakiri",
-    name: "Mori Nakiri 170mm",
-    steel: "Aogami #2",
-    lengthMm: 170,
-    price: 148,
-    previewImage: "/dev-images/configurator/preview-blade-bunka-zdp-silver.png",
-    description: "The Mori Nakiri pairs the classic vegetable knife profile with Aogami #2 carbon steel for ultimate sharpness. The slightly longer 170mm blade gives extra cutting surface for larger vegetables. Carbon steel develops a unique patina over time, making each knife truly one-of-a-kind.",
-    specifications: { "Steel": "Aogami #2 (Blue Steel #2)", "Length": "170mm", "Hardness": "62-63 HRC", "Finish": "Kurouchi", "Grind": "Double bevel", "Weight": "168g" },
-  },
-  {
-    id: "hibana-petty-120",
-    image: "/dev-images/configurator/blade-petty-1.jpg",
-    shapeId: "petty",
-    name: "Hibana Petty 120mm",
-    steel: "Shirogami #2",
-    lengthMm: 120,
-    price: 86,
-    previewImage: "/dev-images/configurator/preview-blade-gyuto-hap40.png",
-    description: "The Hibana Petty is a compact utility knife for detail work — peeling, trimming, and precision cuts that larger knives can't handle. Shirogami #2 takes an exceptionally keen edge, making this small blade feel surgical. An essential companion to your main chef knife.",
-    specifications: { "Steel": "Shirogami #2 (White Steel #2)", "Length": "120mm", "Hardness": "63-64 HRC", "Finish": "Kurouchi", "Grind": "Double bevel", "Weight": "58g" },
   },
 ];
 

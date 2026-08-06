@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { ProductGrid, type Product } from "@/entities/product";
-import { Badge } from "@/shared/ui/Badge";
+
 
 export type SortKey = "featured" | "price-asc" | "price-desc" | "rating";
 
@@ -53,21 +53,22 @@ export function CollectionToolbar({ products }: CollectionToolbarProps) {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <button
-              key={category}
-              type="button"
-              onClick={() => setActiveCategory(category)}
-              className="transition-opacity hover:opacity-80"
-            >
-              <Badge
-                variant={activeCategory === category ? "copper" : "outline"}
-              >
+        <div className="flex items-center gap-2">
+          <label htmlFor="category-filter" className="text-xs text-muted-foreground whitespace-nowrap">
+            Category
+          </label>
+          <select
+            id="category-filter"
+            value={activeCategory}
+            onChange={(e) => setActiveCategory(e.target.value)}
+            className="border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+          >
+            {categories.map((category) => (
+              <option key={category} value={category}>
                 {category}
-              </Badge>
-            </button>
-          ))}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="flex items-center gap-3">

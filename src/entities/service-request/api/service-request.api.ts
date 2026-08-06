@@ -31,6 +31,10 @@ export function createServiceRequest(input: CreateServiceRequestInput) {
   });
 }
 
+export function listMyServiceRequests() {
+  return apiFetch<ServiceRequestResponse[]>("/users/me/service-requests");
+}
+
 export function listServiceRequests(type: ServiceRequestType, status?: string) {
   const params = new URLSearchParams({ type, per_page: "50" });
   if (status) params.set("status", status);

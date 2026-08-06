@@ -1,9 +1,14 @@
+"use client";
+
 import Link from "next/link";
 
+import { useLocaleCurrency } from "@/features/locale-currency/model/LocaleProvider";
 import { Button } from "@/shared/ui/Button";
 import { Container } from "@/shared/ui/Container";
 
 export function ConfiguratorBanner() {
+  const { t } = useLocaleCurrency();
+
   return (
     <section className="bg-muted/40 py-16">
       <Container className="grid items-center gap-10 lg:grid-cols-2">
@@ -26,18 +31,17 @@ export function ConfiguratorBanner() {
 
         <div className="flex flex-col items-start gap-4">
           <span className="font-accent text-lg italic text-copper">
-            Endless possibilities
+            {t("config_eyebrow")}
           </span>
           <h2 className="font-display text-3xl font-semibold tracking-tightest sm:text-4xl">
-            Build your knife with the configurator
+            {t("config_title")}
           </h2>
           <p className="max-w-md text-muted-foreground">
-            Choose a blade profile and steel, then match it with a custom
-            handle, sheath, and engraving. One blade, made entirely yours.
+            {t("config_desc")}
           </p>
           <Link href="/pages/configurator">
             <Button size="lg" className="mt-2">
-              Build a Knife
+              {t("config_cta")}
             </Button>
           </Link>
         </div>

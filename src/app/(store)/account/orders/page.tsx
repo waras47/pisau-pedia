@@ -45,6 +45,15 @@ export default function MyOrdersPage() {
       <Container className="flex flex-col gap-8">
         <h1 className="font-display text-2xl font-semibold tracking-tightest">Pesanan Saya</h1>
 
+        <div className="flex gap-3 text-sm">
+          <span className="rounded-full bg-foreground px-4 py-1.5 text-background">
+            Pesanan
+          </span>
+          <Link href="/account/services" className="rounded-full border border-border px-4 py-1.5 text-muted-foreground hover:bg-muted">
+            Servis
+          </Link>
+        </div>
+
         {loading ? (
           <p className="text-muted-foreground">Memuat…</p>
         ) : error ? (

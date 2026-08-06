@@ -6,92 +6,10 @@ import { createServiceRequest } from "@/entities/service-request/api/service-req
 import { HttpError } from "@/shared/api/http-error";
 import { Container } from "@/shared/ui/Container";
 import { Button } from "@/shared/ui/Button";
-
-const steps = [
-  {
-    number: "01",
-    title: "Submit Your Request",
-    description:
-      "Fill out the contact form below with details about your knives — type, condition, and any specific issues. We'll reply within 1 business day with a quote.",
-  },
-  {
-    number: "02",
-    title: "Ship Your Knives",
-    description:
-      "Pack your knives securely and ship them to our workshop. We provide a prepaid shipping label for EU customers (minimum 3 knives per order).",
-  },
-  {
-    number: "03",
-    title: "We Sharpen & Repair",
-    description:
-      "Our craftsmen sharpen each blade by hand on Japanese whetstones, restoring the factory edge angle. Chipped blades are repaired on coarse stones before sharpening.",
-  },
-  {
-    number: "04",
-    title: "Receive Your Knives",
-    description:
-      "Your knives are carefully wrapped and shipped back with tracking. Typical turnaround: 6–8 business days from the moment we receive them.",
-  },
-];
-
-const pricingTiers = [
-  {
-    service: "Standard Sharpening",
-    description: "Restore a dull edge to factory sharpness on whetstones.",
-    price: "€15",
-    per: "per knife",
-  },
-  {
-    service: "Chip Repair + Sharpening",
-    description:
-      "Remove chips up to 2 mm, re-profile the edge, then sharpen to a mirror finish.",
-    price: "€25",
-    per: "per knife",
-  },
-  {
-    service: "Full Restoration",
-    description:
-      "Thinning, chip repair, re-profiling, and polishing. For badly worn or damaged blades.",
-    price: "€40",
-    per: "per knife",
-  },
-  {
-    service: "Handle Replacement",
-    description:
-      "Replace a cracked or loose Japanese handle (wa-handle) with a new octagonal magnolia handle.",
-    price: "€35",
-    per: "per knife",
-  },
-];
-
-const faqs = [
-  {
-    q: "Which knives do you accept?",
-    a: "We sharpen all kitchen knives — Japanese, Western, and hybrid. We do not sharpen serrated knives, scissors, or garden tools.",
-  },
-  {
-    q: "Is there a minimum order?",
-    a: "Yes, we require a minimum of 3 knives per order to keep shipping costs reasonable.",
-  },
-  {
-    q: "Do you ship outside the EU?",
-    a: "Currently our mail-in service is available for EU customers only due to customs regulations on sharp objects.",
-  },
-  {
-    q: "How should I pack my knives?",
-    a: "Wrap each blade in cardboard or newspaper and secure with tape. Place wrapped knives in a sturdy box with padding. Never ship loose blades.",
-  },
-  {
-    q: "What if my knife can't be repaired?",
-    a: "If we determine a knife is beyond repair, we'll contact you before proceeding. You'll only be charged for work completed.",
-  },
-  {
-    q: "How long does the service take?",
-    a: "Typical turnaround is 6–8 business days from the moment we receive your knives, including return shipping.",
-  },
-];
+import { useLocaleCurrency } from "@/features/locale-currency";
 
 export function SharpeningService() {
+  const { t } = useLocaleCurrency();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -101,6 +19,35 @@ export function SharpeningService() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const steps = [
+    { number: "01", title: t("sharp_step1_title"), description: t("sharp_step1_desc") },
+    { number: "02", title: t("sharp_step2_title"), description: t("sharp_step2_desc") },
+    { number: "03", title: t("sharp_step3_title"), description: t("sharp_step3_desc") },
+    { number: "04", title: t("sharp_step4_title"), description: t("sharp_step4_desc") },
+  ];
+
+  const pricingTiers = [
+    { service: t("sharp_tier1_name"), description: t("sharp_tier1_desc"), price: t("sharp_tier1_price"), per: t("sharp_tier1_per") },
+    { service: t("sharp_tier2_name"), description: t("sharp_tier2_desc"), price: t("sharp_tier2_price"), per: t("sharp_tier2_per") },
+    { service: t("sharp_tier3_name"), description: t("sharp_tier3_desc"), price: t("sharp_tier3_price"), per: t("sharp_tier3_per") },
+    { service: t("sharp_tier4_name"), description: t("sharp_tier4_desc"), price: t("sharp_tier4_price"), per: t("sharp_tier4_per") },
+  ];
+
+  const beforeAfter = [
+    { label: t("sharp_ba1_label"), before: t("sharp_ba1_before"), after: t("sharp_ba1_after") },
+    { label: t("sharp_ba2_label"), before: t("sharp_ba2_before"), after: t("sharp_ba2_after") },
+    { label: t("sharp_ba3_label"), before: t("sharp_ba3_before"), after: t("sharp_ba3_after") },
+  ];
+
+  const faqs = [
+    { q: t("sharp_faq1_q"), a: t("sharp_faq1_a") },
+    { q: t("sharp_faq2_q"), a: t("sharp_faq2_a") },
+    { q: t("sharp_faq3_q"), a: t("sharp_faq3_a") },
+    { q: t("sharp_faq4_q"), a: t("sharp_faq4_a") },
+    { q: t("sharp_faq5_q"), a: t("sharp_faq5_a") },
+    { q: t("sharp_faq6_q"), a: t("sharp_faq6_a") },
+  ];
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -115,7 +62,7 @@ export function SharpeningService() {
       });
       setSubmitted(true);
     } catch (err) {
-      setError(err instanceof HttpError ? err.message : "Gagal mengirim request, coba lagi.");
+      setError(err instanceof HttpError ? err.message : t("sharp_form_error"));
     } finally {
       setSubmitting(false);
     }
@@ -127,28 +74,26 @@ export function SharpeningService() {
       <section className="bg-surface py-16 sm:py-24">
         <Container className="flex flex-col items-center gap-6 text-center">
           <span className="font-accent text-base italic text-copper">
-            Professional Mail-In Service
+            {t("sharp_hero_eyebrow")}
           </span>
           <h1 className="max-w-3xl font-display text-4xl font-semibold tracking-tightest sm:text-5xl lg:text-6xl">
-            Knife Sharpening &amp; Repairs
+            {t("sharp_hero_title")}
           </h1>
           <p className="max-w-2xl text-lg text-muted-foreground">
-            Send us your dull or damaged knives — we&apos;ll sharpen them by
-            hand on Japanese whetstones and ship them back to you, sharper than
-            new.
+            {t("sharp_hero_desc")}
           </p>
           <div className="mt-2 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
             <span className="flex items-center gap-2">
               <ClockIcon />
-              6–8 business days
+              {t("sharp_turnaround")}
             </span>
             <span className="flex items-center gap-2">
               <TruckIcon />
-              EU shipping included
+              {t("sharp_shipping")}
             </span>
             <span className="flex items-center gap-2">
               <ShieldIcon />
-              Satisfaction guaranteed
+              {t("sharp_guarantee")}
             </span>
           </div>
         </Container>
@@ -158,7 +103,7 @@ export function SharpeningService() {
       <section className="py-16">
         <Container>
           <h2 className="mb-12 text-center font-display text-3xl font-semibold tracking-tightest sm:text-4xl">
-            How It Works
+            {t("sharp_how_title")}
           </h2>
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {steps.map((step) => (
@@ -182,10 +127,10 @@ export function SharpeningService() {
       <section className="bg-surface py-16">
         <Container>
           <h2 className="mb-4 text-center font-display text-3xl font-semibold tracking-tightest sm:text-4xl">
-            Pricing
+            {t("sharp_pricing_title")}
           </h2>
           <p className="mb-12 text-center text-muted-foreground">
-            All prices include return shipping within the EU.
+            {t("sharp_pricing_note")}
           </p>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {pricingTiers.map((tier) => (
@@ -217,14 +162,10 @@ export function SharpeningService() {
       <section className="py-16">
         <Container>
           <h2 className="mb-12 text-center font-display text-3xl font-semibold tracking-tightest sm:text-4xl">
-            Before &amp; After
+            {t("sharp_ba_title")}
           </h2>
           <div className="grid gap-8 sm:grid-cols-3">
-            {[
-              { label: "Chipped Gyuto", before: "Chipped blade edge", after: "Mirror-polished edge" },
-              { label: "Dull Santoku", before: "Rounded, dull edge", after: "Razor-sharp 15° edge" },
-              { label: "Worn Nakiri", before: "Scratched & uneven", after: "Thinned & restored" },
-            ].map((item) => (
+            {beforeAfter.map((item) => (
               <div key={item.label} className="flex flex-col gap-4">
                 <div className="grid grid-cols-2 gap-2">
                   <div className="flex aspect-[4/3] items-center justify-center bg-muted text-xs text-muted-foreground">
@@ -252,7 +193,7 @@ export function SharpeningService() {
       <section className="bg-surface py-16">
         <Container className="max-w-3xl">
           <h2 className="mb-12 text-center font-display text-3xl font-semibold tracking-tightest sm:text-4xl">
-            Frequently Asked Questions
+            {t("sharp_faq_title")}
           </h2>
           <div className="flex flex-col divide-y divide-border">
             {faqs.map((faq, i) => (
@@ -284,11 +225,10 @@ export function SharpeningService() {
       <section className="py-16">
         <Container className="max-w-2xl">
           <h2 className="mb-4 text-center font-display text-3xl font-semibold tracking-tightest sm:text-4xl">
-            Request a Quote
+            {t("sharp_form_title")}
           </h2>
           <p className="mb-10 text-center text-muted-foreground">
-            Tell us about your knives and we&apos;ll get back to you within 1
-            business day.
+            {t("sharp_form_desc")}
           </p>
 
           {submitted ? (
@@ -297,11 +237,10 @@ export function SharpeningService() {
                 <CheckIcon />
               </div>
               <h3 className="font-display text-xl font-semibold">
-                Request Received
+                {t("sharp_form_success_title")}
               </h3>
               <p className="text-muted-foreground">
-                Thank you! We&apos;ll review your request and reply within 1
-                business day.
+                {t("sharp_form_success_desc")}
               </p>
             </div>
           ) : (
@@ -312,7 +251,7 @@ export function SharpeningService() {
                     htmlFor="name"
                     className="text-xs font-semibold uppercase tracking-widest2 text-foreground"
                   >
-                    Name
+                    {t("sharp_form_name")}
                   </label>
                   <input
                     id="name"
@@ -323,7 +262,7 @@ export function SharpeningService() {
                       setFormData({ ...formData, name: e.target.value })
                     }
                     className="border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
-                    placeholder="Your name"
+                    placeholder={t("sharp_form_name_placeholder")}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -331,7 +270,7 @@ export function SharpeningService() {
                     htmlFor="email"
                     className="text-xs font-semibold uppercase tracking-widest2 text-foreground"
                   >
-                    Email
+                    {t("sharp_form_email")}
                   </label>
                   <input
                     id="email"
@@ -342,7 +281,7 @@ export function SharpeningService() {
                       setFormData({ ...formData, email: e.target.value })
                     }
                     className="border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
-                    placeholder="you@example.com"
+                    placeholder={t("sharp_form_email_placeholder")}
                   />
                 </div>
               </div>
@@ -351,7 +290,7 @@ export function SharpeningService() {
                   htmlFor="message"
                   className="text-xs font-semibold uppercase tracking-widest2 text-foreground"
                 >
-                  Message
+                  {t("sharp_form_message")}
                 </label>
                 <textarea
                   id="message"
@@ -362,12 +301,12 @@ export function SharpeningService() {
                     setFormData({ ...formData, message: e.target.value })
                   }
                   className="border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
-                  placeholder="Describe your knives, their condition, and what service you need..."
+                  placeholder={t("sharp_form_message_placeholder")}
                 />
               </div>
               {error ? <p className="text-sm text-red-600">{error}</p> : null}
               <Button type="submit" className="self-start" disabled={submitting}>
-                {submitting ? "Sending..." : "Send Request"}
+                {submitting ? t("sharp_form_sending") : t("sharp_form_submit")}
               </Button>
             </form>
           )}

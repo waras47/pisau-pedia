@@ -34,7 +34,7 @@ export function MegaMenu() {
             key={item.label}
             className="absolute inset-x-0 top-full z-40 border-t border-border bg-surface shadow-lg"
           >
-            <Container className="grid grid-cols-3 gap-10 py-10">
+            <Container className={`grid gap-10 py-10 ${item.columns.length >= 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
               {item.columns.map((column) => (
                 <div key={column.title} className="flex flex-col gap-3">
                   <span className="text-xs font-semibold uppercase tracking-widest2 text-muted-foreground">

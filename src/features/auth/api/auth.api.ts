@@ -16,8 +16,13 @@ export function login(email: string, password: string) {
   });
 }
 
+interface RegisterResponse {
+  user: SessionUser;
+  requires_verification: boolean;
+}
+
 export function register(email: string, password: string, fullName: string, phone?: string) {
-  return apiFetch<AuthResponse>("/auth/register", {
+  return apiFetch<RegisterResponse>("/auth/register", {
     method: "POST",
     body: JSON.stringify({ email, password, full_name: fullName, phone }),
   });
@@ -39,6 +44,17 @@ export function googleExchange(code: string) {
   return apiFetch<AuthResponse>("/auth/google/exchange", {
     method: "POST",
     body: JSON.stringify({ code }),
+  });
+}
+
+export function verifyEmail(token: string) {
+  return apiFetch<null>(`/auth/verify-email?token=${encodeURIComponent(token)}`);
+}
+
+export function resendVerification(email: string) {
+  return apiFetch<null>("/auth/resend-verification", {
+    method: "POST",
+    body: JSON.stringify({ email }),
   });
 }
 

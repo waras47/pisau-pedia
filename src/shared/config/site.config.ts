@@ -2,7 +2,7 @@ export const siteConfig = {
   name: "Pisau Pedia",
   tagline: "Pisau Dapur Berkualitas, Asli Indonesia",
   description:
-    "Pisaupedia menghadirkan pisau dapur berkualitas asli Indonesia dengan pilihan material sesuai kebutuhan Anda. Melayani pesanan khusus perorangan & restoran, penggantian handle, pembuatan sarung pisau (saya), dan perbaikan pisau.",
+    "Pisaupedia menghadirkan pisau dapur berkualitas asli Indonesia dengan pilihan material sesuai kebutuhan Anda. Melayani pesanan khusus perorangan & restoran, penggantian handle, pembuatan sarung pisau, dan perbaikan pisau.",
   // TODO: ganti dengan domain production sungguhan begitu sudah di-deploy.
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "https://pisaupedia.com",
   freeShippingThreshold: 300,

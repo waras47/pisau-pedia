@@ -7,7 +7,6 @@ import { useSearchParams } from "next/navigation";
 import { HttpError } from "@/shared/api/http-error";
 
 import {
-  checkPaymentStatus,
   getOrder,
   getOrderStatusCounts,
   listOrders,
@@ -56,7 +55,6 @@ export default function OrdersPage() {
   const [saving, setSaving] = useState(false);
   const [detail, setDetail] = useState<OrderResponse | null>(null);
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
-  const [checkingStatus, setCheckingStatus] = useState(false);
   // Seeded once from ?q= (e.g. arriving from the admin global search) —
   // typed edits afterward stay local until Enter, same as Customers.
   const [search, setSearch] = useState(() => searchParams.get("q") ?? "");
@@ -112,24 +110,6 @@ export default function OrdersPage() {
     }
   }
 
-  async function handleCheckPaymentStatus(id: string) {
-    setCheckingStatus(true);
-    try {
-      const updated = await checkPaymentStatus(id);
-      setDetail(updated);
-      await loadOrders();
-      if (updated.payment_status === "paid") {
-        alert("Status pembayaran sudah PAID — order diperbarui.");
-      } else {
-        alert(`Belum ada pembayaran diterima Komerce untuk order ini (status: ${updated.payment_status}).`);
-      }
-    } catch (err) {
-      alert(err instanceof HttpError ? err.message : "Gagal mengecek status pembayaran");
-    } finally {
-      setCheckingStatus(false);
-    }
-  }
-
   async function handlePaymentStatusChange(id: string, paymentStatus: string) {
     setSaving(true);
     try {
@@ -177,7 +157,7 @@ export default function OrdersPage() {
         {orderStatusOptions.map((o) => (
           <Link
             key={o.value}
-            href={`/admin/orders?status=${o.value}`}
+            href={`/pisaupedia/admin/orders?status=${o.value}`}
             className={`flex items-center gap-3 rounded-xl bg-gradient-to-br p-4 shadow-sm transition-transform hover:scale-[1.02] ${
               statusCardGradient[o.value] ?? "from-gray-400 to-gray-600"
             } ${statusFilter === o.value ? "ring-2 ring-offset-2 ring-emerald-400" : ""}`}
@@ -350,15 +330,17 @@ export default function OrdersPage() {
                       <option key={p.value} value={p.value}>{p.label}</option>
                     ))}
                   </select>
-                  {detail.payment_status !== "paid" && (
-                    <button
-                      type="button"
-                      onClick={() => handleCheckPaymentStatus(detail.id)}
-                      disabled={checkingStatus}
-                      className="mt-1 self-start text-xs font-medium text-emerald-600 hover:underline disabled:opacity-50"
+                  {detail.payment_proof_url ? (
+                    <a
+                      href={detail.payment_proof_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 self-start text-xs font-medium text-emerald-600 hover:underline"
                     >
-                      {checkingStatus ? "Mengecek..." : "🔄 Cek Status Pembayaran ke Komerce"}
-                    </button>
+                      🧾 Lihat bukti pembayaran
+                    </a>
+                  ) : (
+                    <p className="mt-1 text-xs text-gray-400">Belum ada bukti pembayaran diunggah.</p>
                   )}
                 </div>
               </div>

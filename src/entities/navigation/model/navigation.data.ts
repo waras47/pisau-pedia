@@ -15,19 +15,22 @@ export const mainNav: NavItem[] = [
         title: "By Type",
         links: [
           { label: "Gyuto — Chef's Knife", href: "/collections/gyuto" },
-          { label: "Santoku — Multi-Purpose", href: "/collections/santoku" },
+          { label: "K-Tip Gyuto", href: "/collections/k-tip-gyuto" },
+          { label: "Slicer — Slicing", href: "/collections/slicer" },
           { label: "Bunka — Multi-Purpose", href: "/collections/bunka" },
-          { label: "Nakiri — Vegetable", href: "/collections/nakiri" },
           { label: "Petty — Paring", href: "/collections/petty" },
+          { label: "Deba — Fish & Bone", href: "/collections/deba" },
+          { label: "Yanagiba — Sashimi", href: "/collections/yanagiba" },
+          { label: "Honesuki — Deboning", href: "/collections/honesuki" },
+          { label: "Kiritsuke", href: "/collections/kiritsuke" },
+          { label: "Taiwan Tuna", href: "/collections/taiwan" },
         ],
       },
       {
         title: "By Usage",
         links: [
           { label: "Multi-Purpose", href: "/collections/multi-purpose" },
-          { label: "Vegetable Knives", href: "/collections/vegetable" },
           { label: "Slicing & Sashimi", href: "/collections/slicing" },
-          { label: "Bread Knives", href: "/collections/bread" },
         ],
       },
       {

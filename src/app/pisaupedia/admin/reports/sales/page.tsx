@@ -66,7 +66,7 @@ export default function SalesReportPage() {
     }
   }
 
-  const avgOrderValue = report && report.total_orders > 0 ? report.total_revenue / report.total_orders : 0;
+  const avgOrderValue = report && report.total_orders > 0 ? (report.total_revenue ?? 0) / report.total_orders : 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -148,7 +148,7 @@ export default function SalesReportPage() {
             <div className="rounded-xl bg-white p-5 shadow-sm">
               <h3 className="mb-3 text-sm font-semibold text-gray-700">Status Pesanan</h3>
               <div className="flex flex-col gap-2">
-                {Object.entries(report.status_counts).length === 0 ? (
+                {!report.status_counts || Object.entries(report.status_counts).length === 0 ? (
                   <p className="text-sm text-gray-400">Tidak ada data.</p>
                 ) : (
                   Object.entries(report.status_counts).map(([status, count]) => (
@@ -163,7 +163,7 @@ export default function SalesReportPage() {
 
             <div className="rounded-xl bg-white p-5 shadow-sm">
               <h3 className="mb-3 text-sm font-semibold text-gray-700">Top 5 Produk Terlaris</h3>
-              {report.top_products.length === 0 ? (
+              {!report.top_products || report.top_products.length === 0 ? (
                 <p className="text-sm text-gray-400">Belum ada penjualan pada rentang ini.</p>
               ) : (
                 <div className="flex flex-col gap-2">

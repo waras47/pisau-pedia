@@ -80,15 +80,15 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
 
   function goToProducts() {
     setSearchDropdownOpen(false);
-    router.push(`/admin/products?q=${encodeURIComponent(searchQuery)}`);
+    router.push(`/pisaupedia/admin/products?q=${encodeURIComponent(searchQuery)}`);
   }
   function goToCustomers() {
     setSearchDropdownOpen(false);
-    router.push(`/admin/customers?q=${encodeURIComponent(searchQuery)}`);
+    router.push(`/pisaupedia/admin/customers?q=${encodeURIComponent(searchQuery)}`);
   }
   function goToOrders() {
     setSearchDropdownOpen(false);
-    router.push(`/admin/orders?q=${encodeURIComponent(searchQuery)}`);
+    router.push(`/pisaupedia/admin/orders?q=${encodeURIComponent(searchQuery)}`);
   }
 
   const searchProducts = searchResult?.products ?? [];
@@ -160,7 +160,7 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
   async function handleLogout() {
     setMenuOpen(false);
     await logout();
-    router.push("/admin/login");
+    router.push("/pisaupedia/admin/login");
   }
 
   return (

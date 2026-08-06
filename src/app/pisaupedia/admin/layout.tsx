@@ -1,9 +1,10 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 import { AuthProvider, useAuth } from "@/features/auth/model/AuthProvider";
+
 import { AdminHeader } from "@/widgets/admin/admin-header";
 import { AdminSidebar } from "@/widgets/admin/admin-sidebar";
 
@@ -11,15 +12,15 @@ function AdminGuard({ children }: { children: ReactNode }) {
   const { status, user } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
-  const isLoginPage = pathname === "/admin/login";
+  const isLoginPage = pathname === "/pisaupedia/admin/login";
 
   useEffect(() => {
     if (status === "loading") return;
     if (status === "unauthenticated" && !isLoginPage) {
-      router.replace("/admin/login");
+      router.replace("/pisaupedia/admin/login");
     }
     if (status === "authenticated" && isLoginPage) {
-      router.replace("/admin");
+      router.replace("/pisaupedia/admin");
     }
     if (status === "authenticated" && user?.role !== "admin" && !isLoginPage) {
       router.replace("/");
@@ -37,8 +38,8 @@ function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  if (pathname === "/admin/login") {
-    return <div className="flex h-screen items-center justify-center bg-[#f0f1f3]">{children}</div>;
+  if (pathname === "/pisaupedia/admin/login") {
+    return <div className="h-screen overflow-y-auto">{children}</div>;
   }
 
   return (

@@ -17,8 +17,8 @@ export function generateMetadata({ params }: PostPageProps): Metadata {
   const post = getPostBySlug(params.slug);
   if (!post || post.categorySlug !== params.category) return { title: "Not found" };
   return {
-    title: `${post.title} — Pisau Pedia`,
-    description: post.excerpt,
+    title: `${post.title.id} — Pisau Pedia`,
+    description: post.excerpt.id,
   };
 }
 

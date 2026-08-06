@@ -26,7 +26,7 @@ interface CategoryApiItem {
 // /pages/sharpening-repairs), "accessories" aggregates the generic
 // "aksesoris" bucket plus every accessory sub-category split out of it, and
 // "knives" aggregates every knife-type category.
-const KNIFE_TYPE_SLUGS = ["gyuto", "santoku", "bunka", "nakiri", "petty"];
+const KNIFE_TYPE_SLUGS = ["gyuto", "k-tip-gyuto", "slicer", "petty", "deba", "bunka", "yanagiba", "honesuki", "kiritsuke", "taiwan", "santoku", "nakiri"];
 const ACCESSORY_SLUGS = [
   "aksesoris",
   "cutting-boards",
@@ -43,23 +43,20 @@ const SHARPENING_REDIRECT = "/pages/sharpening-repairs";
 // e.g. Santoku knives as "multi-purpose" would remove them from the "By
 // Type" nav that already works. Instead these aggregate over the existing
 // shape categories that fit the usage, same pattern as KNIFE_TYPE_SLUGS.
-const USAGE_AGGREGATES: Record<string, { title: string; description: string; slugs: string[] }> = {
-  "multi-purpose": {
-    title: "Multi-Purpose Knives",
-    description: "Gyuto, Santoku, and Bunka — the knives that handle most of what happens on a cutting board.",
-    slugs: ["gyuto", "santoku", "bunka"],
-  },
-  vegetable: {
-    title: "Vegetable Knives",
-    description: "Nakiri knives, built with a flat edge for clean, straight cuts through vegetables.",
-    slugs: ["nakiri"],
-  },
-  slicing: {
-    title: "Slicing & Sashimi",
-    description: "Sujihiki knives — long, narrow blades for slicing and sashimi work.",
-    slugs: ["sujihiki"],
-  },
-};
+interface CollectionApiItem {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  categories: { id: string; slug: string }[];
+}
+
+async function getCollection(slug: string): Promise<CollectionApiItem | null> {
+  const res = await fetch(`${env.apiBaseUrl}/collections/${slug}`, { next: { revalidate: 60 } });
+  if (!res.ok) return null;
+  const json = await res.json();
+  return json.data as CollectionApiItem;
+}
 
 // "Bestsellers" / "New Arrivals" / "On Sale" aren't categories either — they
 // read off existing product data (rating for bestsellers, the `badge` field
@@ -131,7 +128,7 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
   if (params.handle === "knives") {
     return {
       title: "Pisau Bergaya Jepang — Pisau Pedia",
-      description: "Semua tipe pisau dapur bergaya Jepang buatan Pisau Pedia — Gyuto, Santoku, Bunka, Nakiri, dan Petty.",
+      description: "Semua tipe pisau dapur Jepang buatan Pisau Pedia — Gyuto, K-Tip Gyuto, Slicer, Petty, Deba, Bunka, Yanagiba, Honesuki, Kiritsuke, dan lainnya.",
     };
   }
   if (params.handle === "accessories") {
@@ -140,9 +137,9 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
       description: "Cutting boards, knife care, and kitchen tools that earn their keep.",
     };
   }
-  const usageView = USAGE_AGGREGATES[params.handle];
-  if (usageView) {
-    return { title: `${usageView.title} — Pisau Pedia`, description: usageView.description };
+  const collection = await getCollection(params.handle);
+  if (collection) {
+    return { title: `${collection.name} — Pisau Pedia`, description: collection.description };
   }
   const badgeView = BADGE_VIEWS[params.handle];
   if (badgeView) {
@@ -171,7 +168,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
     return (
       <CollectionListing
         title="Japanese Knives"
-        description="Semua tipe pisau dapur Jepang — Gyuto, Santoku, Bunka, Nakiri, dan Petty."
+        description="Semua tipe pisau dapur Jepang — Gyuto, K-Tip Gyuto, Slicer, Deba, Bunka, Yanagiba, Honesuki, Kiritsuke, dan lainnya."
         products={products.map(toProduct)}
       />
     );
@@ -188,13 +185,14 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
     );
   }
 
-  const usageView = USAGE_AGGREGATES[params.handle];
-  if (usageView) {
-    const products = await getProductsInCategories(usageView.slugs);
+  const collectionData = await getCollection(params.handle);
+  if (collectionData) {
+    const slugs = collectionData.categories.map((c) => c.slug);
+    const products = await getProductsInCategories(slugs);
     return (
       <CollectionListing
-        title={usageView.title}
-        description={usageView.description}
+        title={collectionData.name}
+        description={collectionData.description}
         products={products.map(toProduct)}
       />
     );
@@ -213,11 +211,12 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
   }
 
   if (params.handle === "bestsellers") {
-    const products = [...(await getAllProducts())].sort((a, b) => b.rating - a.rating || b.review_count - a.review_count);
+    const res = await fetch(`${env.apiBaseUrl}/products?per_page=50&sort=bestseller`, { next: { revalidate: 60 } });
+    const products: ProductApiItem[] = res.ok ? (await res.json()).data : [];
     return (
       <CollectionListing
         title="Bestsellers"
-        description="Our most-loved knives and accessories, ranked by customer rating."
+        description="Produk terlaris berdasarkan jumlah penjualan."
         products={products.map(toProduct)}
       />
     );
