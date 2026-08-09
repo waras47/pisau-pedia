@@ -12,7 +12,8 @@ export default function AdminLoginPage() {
       <div className="relative flex h-56 shrink-0 items-end overflow-hidden bg-black sm:h-72 lg:h-auto lg:w-1/2 lg:items-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={PANEL_IMAGE} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-transparent lg:to-black/30" />
+        <div className="absolute inset-0 bg-black/15" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-black/40 lg:to-black/85" />
 
         <div className="relative z-10 flex w-full flex-col gap-3 p-6 sm:p-8 lg:max-w-xl lg:p-14">
           {/* self-start: without it, being a flex-col child stretches this
