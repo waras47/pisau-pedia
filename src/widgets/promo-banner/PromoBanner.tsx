@@ -40,14 +40,14 @@ export async function PromoBanner() {
   return (
     <section className="border-b border-border bg-surface">
       <Container className="py-0">
-        <div className="flex flex-col items-center gap-6 py-8 lg:flex-row lg:gap-10">
+        <div className="flex flex-col items-center justify-center gap-6 py-8 lg:flex-row lg:gap-10">
           <PromoImage
             title={promo.title}
             discountPercent={promo.discount_percent}
             imageUrl={promo.popup_image}
           />
 
-          <div className="flex flex-col items-start gap-4">
+          <div className="flex flex-col items-center gap-4 text-center lg:items-start lg:text-left">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Diskon hingga {promo.discount_percent}%
             </p>
