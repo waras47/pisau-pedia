@@ -284,7 +284,7 @@ export default function ProductsPage() {
         care_instructions: editProduct.careInstructions || undefined,
         specs: editProduct.specs,
         highlights: editProduct.highlights,
-        images: images.length > 0 ? images : undefined,
+        images: images,
       };
       if (modal === "add") {
         await createProduct(payload);
