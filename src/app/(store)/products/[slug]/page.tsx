@@ -31,23 +31,26 @@ async function getApiProduct(slug: string): Promise<ProductApiDetail | null> {
 
 async function getApiReviews(slug: string): Promise<Review[]> {
   try {
-    const res = await fetch(`${env.apiBaseUrl}/products/${slug}/reviews`, {
-      cache: "no-store",
-    });
+    const res = await fetch(
+      `${env.apiBaseUrl}/reviews?product_slug=${encodeURIComponent(slug)}&scope=product&per_page=50`,
+      { cache: "no-store" },
+    );
     if (!res.ok) return [];
     const json = await res.json();
     const items = (json.data ?? []) as Array<{
       id: string;
-      author: string;
+      customer_name: string;
       rating: number;
-      comment: string;
+      content: string;
+      photos?: string[];
       created_at: string;
     }>;
     return items.map((r) => ({
       id: r.id,
-      author: r.author,
+      author: r.customer_name,
       rating: r.rating,
-      content: r.comment,
+      content: r.content,
+      photos: r.photos,
       date: r.created_at,
     }));
   } catch {

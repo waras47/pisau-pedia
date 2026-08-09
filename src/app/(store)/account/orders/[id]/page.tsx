@@ -275,6 +275,31 @@ export default function MyOrderDetailPage() {
           </p>
         </div>
 
+        {(order.tracking_number || order.shipping_evidence_url) && (
+          <div className="border border-border bg-muted/30 p-4">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest2 text-muted-foreground">Informasi Pengiriman</p>
+            {order.tracking_number && (
+              <div className="mb-2">
+                <p className="text-xs text-muted-foreground">No. Resi</p>
+                <p className="font-mono text-sm font-semibold">{order.tracking_number}</p>
+              </div>
+            )}
+            {order.shipping_evidence_url && (
+              <div>
+                <p className="mb-1 text-xs text-muted-foreground">Bukti Pengiriman</p>
+                <a href={order.shipping_evidence_url} target="_blank" rel="noopener noreferrer">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={order.shipping_evidence_url}
+                    alt="Bukti pengiriman"
+                    className="max-h-48 rounded border border-border object-contain"
+                  />
+                </a>
+              </div>
+            )}
+          </div>
+        )}
+
         {canConfirm ? (
           <div className="border border-border p-4">
             <p className="mb-3 text-sm">Sudah menerima paketnya?</p>

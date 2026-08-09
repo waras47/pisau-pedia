@@ -14,15 +14,15 @@ const contactInfo = [
   {
     icon: MessageCircle,
     title: "WhatsApp",
-    content: "0813-4305-8848",
+    content: "0812-9202-4942",
     href: `https://wa.me/${siteConfig.social.whatsapp}?text=Halo%20Pisau%20Pedia%2C%20saya%20mau%20tanya.`,
     description: "Chat langsung dengan tim kami",
   },
   {
     icon: Phone,
     title: "Telepon",
-    content: "0813-4305-8848",
-    href: "tel:+6281343058848",
+    content: "0812-9202-4942",
+    href: "tel:+62812-92024942",
     description: "Senin - Sabtu, 09:00 - 17:00 WIB",
   },
   {
@@ -75,8 +75,7 @@ export default function ContactPage() {
             <h2 className="text-lg font-semibold text-foreground">Workshop</h2>
           </div>
           <p className="text-sm leading-relaxed text-foreground/90">
-            Sebelah Itoe Bakery, Jln Raya Hankam, Jln Baru, Masuk Rmh No.84,
-            RT.006/RW.006, Jatimurni, Pondok Melati, Bekasi, West Java 17431
+            Jl Baru No 84 RT 06 RW 06, Jl Raya Hankam, Jati Murni, Pondok Melati, Kota Bekasi, Jawa Barat 17431, Indonesia
           </p>
           <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
             <Clock size={14} />

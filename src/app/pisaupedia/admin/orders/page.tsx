@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import { HttpError } from "@/shared/api/http-error";
+import { uploadImage } from "@/shared/api/upload.api";
 
 import {
   getOrder,
@@ -97,12 +98,12 @@ export default function OrdersPage() {
     }
   }
 
-  async function handleStatusChange(id: string, status: string) {
+  async function handleStatusChange(id: string, status: string, extra?: { tracking_number?: string; shipping_evidence_url?: string }) {
     setSaving(true);
     try {
-      await updateOrderStatus(id, status);
+      await updateOrderStatus(id, status, extra);
       await Promise.all([loadOrders(), loadStatusCounts()]);
-      if (detail?.id === id) setDetail((d) => (d ? { ...d, status } : d));
+      if (detail?.id === id) setDetail((d) => (d ? { ...d, status, ...extra } : d));
     } catch (err) {
       alert(err instanceof HttpError ? err.message : "Gagal mengubah status pesanan");
     } finally {
@@ -345,6 +346,18 @@ export default function OrdersPage() {
                 </div>
               </div>
 
+              <ShippingEvidenceSection
+                detail={detail}
+                saving={saving}
+                onSave={(trackingNumber, evidenceUrl) =>
+                  handleStatusChange(detail.id, detail.status, {
+                    tracking_number: trackingNumber || undefined,
+                    shipping_evidence_url: evidenceUrl || undefined,
+                  })
+                }
+                onUpdate={(patch) => setDetail((d) => (d ? { ...d, ...patch } : d))}
+              />
+
               {detail.customer_confirmed_at ? (
                 <div className="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
                   ✅ Dikonfirmasi diterima customer, {formatDate(detail.customer_confirmed_at)}
@@ -371,6 +384,79 @@ export default function OrdersPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function ShippingEvidenceSection({
+  detail,
+  saving,
+  onSave,
+  onUpdate,
+}: {
+  detail: OrderResponse;
+  saving: boolean;
+  onSave: (trackingNumber: string, evidenceUrl: string) => void;
+  onUpdate: (patch: Partial<OrderResponse>) => void;
+}) {
+  const [trackingNumber, setTrackingNumber] = useState(detail.tracking_number ?? "");
+  const [evidenceUrl, setEvidenceUrl] = useState(detail.shipping_evidence_url ?? "");
+  const [uploading, setUploading] = useState(false);
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      setEvidenceUrl(url);
+      onUpdate({ shipping_evidence_url: url });
+    } catch {
+      alert("Gagal upload bukti pengiriman");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  return (
+    <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+      <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Bukti Pengiriman</p>
+      <div className="flex flex-col gap-3">
+        <div>
+          <label className="mb-1 block text-xs text-gray-500">No. Resi</label>
+          <input
+            type="text"
+            value={trackingNumber}
+            onChange={(e) => setTrackingNumber(e.target.value)}
+            placeholder="Masukkan nomor resi"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs text-gray-500">Foto Bukti Pengiriman</label>
+          <div className="flex items-center gap-3">
+            {evidenceUrl && (
+              <a href={evidenceUrl} target="_blank" rel="noopener noreferrer">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={evidenceUrl} alt="Bukti pengiriman" className="h-20 w-20 rounded-lg border border-gray-200 object-cover" />
+              </a>
+            )}
+            <label className={`cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm hover:bg-gray-100 ${uploading ? "opacity-40 pointer-events-none" : ""}`}>
+              {uploading ? "Mengupload..." : evidenceUrl ? "Ganti Foto" : "Upload Foto"}
+              <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleUpload} disabled={uploading} />
+            </label>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => onSave(trackingNumber, evidenceUrl)}
+          disabled={saving || uploading}
+          className="self-start rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-40"
+        >
+          {saving ? "Menyimpan..." : "Simpan Bukti Pengiriman"}
+        </button>
+      </div>
     </div>
   );
 }

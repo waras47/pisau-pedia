@@ -87,11 +87,14 @@ const en = {
   banner_accessories_desc: "Cutting boards, holders, and kitchen tools that earn their keep.",
   banner_accessories_cta: "Browse Accessories",
 
+  // Announcement bar
+  announcement_bar: "Worldwide Shipping — We deliver to your doorstep, anywhere in the world",
+
   // Trust badges (homepage)
   trust_eyebrow: "Customer first",
   trust_title: "Why shop with us",
-  trust_shipping_title: "Express Worldwide Shipping",
-  trust_shipping_desc: "Fast shipping via reliable courier. Free on orders over a certain amount.",
+  trust_shipping_title: "Worldwide Shipping",
+  trust_shipping_desc: "We ship to every corner of the world. Your knife arrives safe, wherever you are.",
   trust_duties_title: "No Duties & Fees",
   trust_duties_desc: "We cover import fees worldwide. All prices shown are final.",
   trust_returns_title: "Easy 30-Day Returns",
@@ -356,11 +359,14 @@ const id = {
   banner_accessories_desc: "Talenan, holder, dan peralatan dapur yang benar-benar berguna.",
   banner_accessories_cta: "Lihat Aksesoris",
 
+  // Announcement bar
+  announcement_bar: "Pengiriman ke Seluruh Dunia — Kami antar ke depan pintu Anda, di mana pun berada",
+
   // Trust badges (homepage)
   trust_eyebrow: "Pelanggan utama",
   trust_title: "Kenapa belanja di sini",
-  trust_shipping_title: "Pengiriman Cepat",
-  trust_shipping_desc: "Pengiriman cepat via kurir terpercaya. Gratis ongkir untuk pesanan di atas nominal tertentu.",
+  trust_shipping_title: "Pengiriman ke Seluruh Dunia",
+  trust_shipping_desc: "Kami mengirim ke seluruh penjuru dunia. Pisau Anda sampai dengan aman, di mana pun Anda berada.",
   trust_duties_title: "Tanpa Biaya Tambahan",
   trust_duties_desc: "Semua harga yang ditampilkan sudah final, tanpa biaya tersembunyi.",
   trust_returns_title: "Garansi 30 Hari",

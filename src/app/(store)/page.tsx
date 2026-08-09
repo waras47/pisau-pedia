@@ -1,6 +1,6 @@
 import { BrowseCategories } from "@/widgets/browse-categories";
 import { CategoryBanners } from "@/widgets/category-banners";
-import { ConfiguratorBanner } from "@/widgets/configurator-banner";
+
 import { FeaturedCollection } from "@/widgets/featured-collection";
 import { Hero } from "@/widgets/hero";
 import { MonthlyPick } from "@/widgets/monthly-pick";
@@ -13,15 +13,14 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <FeaturedCollection />
       <PromoBanner />
       <CategoryBanners />
-      <FeaturedCollection />
-      <TrustBadges />
       <MonthlyPick />
-      <Testimonials />
       <NewArrivals />
+      <TrustBadges />
+      <Testimonials />
       <BrowseCategories />
-      <ConfiguratorBanner />
     </>
   );
 }

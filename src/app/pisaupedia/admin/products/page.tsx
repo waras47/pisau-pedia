@@ -182,8 +182,23 @@ export default function ProductsPage() {
       result = result.filter((p) => p.category === filterCategory);
     }
     if (filterStatus) {
-      if (filterStatus === "in-stock") result = result.filter((p) => !p.badge || p.badge === "new");
-      else result = result.filter((p) => p.badge === filterStatus);
+      switch (filterStatus) {
+        case "in-stock":
+          result = result.filter((p) => (p.stock ?? 0) > 2);
+          break;
+        case "low-stock":
+          result = result.filter((p) => (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 2);
+          break;
+        case "out-of-stock":
+          result = result.filter((p) => (p.stock ?? 0) === 0);
+          break;
+        case "new":
+          result = result.filter((p) => p.badge === "new");
+          break;
+        case "sale":
+          result = result.filter((p) => p.badge === "sale");
+          break;
+      }
     }
     const sorted = [...result];
     sorted.sort((a, b) => {
@@ -399,9 +414,10 @@ export default function ProductsPage() {
         >
           <option value="">All Status</option>
           <option value="in-stock">In Stock</option>
+          <option value="low-stock">Low Stock (≤2)</option>
+          <option value="out-of-stock">Out of Stock</option>
           <option value="new">New</option>
           <option value="sale">On Sale</option>
-          <option value="sold-out">Out of Stock</option>
         </select>
         {(search || filterCategory || filterStatus) && (
           <button

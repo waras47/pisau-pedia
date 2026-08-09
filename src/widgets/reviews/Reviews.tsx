@@ -9,7 +9,7 @@ import { Container } from "@/shared/ui/Container";
 import { SectionHeading } from "@/shared/ui/SectionHeading";
 
 import { RatingStars } from "@/entities/product/ui/RatingStars";
-import { createReview, type ReviewApiItem } from "@/entities/review/api/review.api";
+import { createReview, uploadReviewPhoto, type ReviewApiItem } from "@/entities/review/api/review.api";
 
 interface ReviewsProps {
   productReviews: ReviewApiItem[];
@@ -155,6 +155,14 @@ function ReviewList({ reviews }: { reviews: ReviewApiItem[] }) {
             <p className="flex-1 text-sm leading-relaxed text-foreground/90">
               &ldquo;{review.content}&rdquo;
             </p>
+            {review.photos && review.photos.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {review.photos.map((url, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={url} src={url} alt={`Review foto ${i + 1}`} className="h-16 w-16 rounded object-cover" />
+                ))}
+              </div>
+            )}
             <div className="flex items-center justify-between border-t border-border pt-4 text-xs text-muted-foreground">
               <div className="flex flex-col gap-0.5">
                 <span className="font-medium text-foreground">{review.customer_name}</span>
@@ -178,9 +186,30 @@ function WriteReviewForm({ onDone }: { onDone: () => void }) {
   const [email, setEmail] = useState("");
   const [rating, setRating] = useState(5);
   const [content, setContent] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files?.length) return;
+    setUploadingPhoto(true);
+    try {
+      const urls: string[] = [];
+      for (const file of Array.from(files)) {
+        const url = await uploadReviewPhoto(file);
+        urls.push(url);
+      }
+      setPhotos((prev) => [...prev, ...urls].slice(0, 5));
+    } catch {
+      setError("Gagal mengunggah foto, coba lagi.");
+    } finally {
+      setUploadingPhoto(false);
+      e.target.value = "";
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -192,6 +221,7 @@ function WriteReviewForm({ onDone }: { onDone: () => void }) {
         customer_email: email || undefined,
         rating,
         content,
+        photos: photos.length > 0 ? photos : undefined,
       });
       setSubmitted(true);
     } catch (err) {
@@ -261,8 +291,39 @@ function WriteReviewForm({ onDone }: { onDone: () => void }) {
         placeholder="How was shipping, packaging, and our support?"
         className="w-full border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
       />
+      <div className="flex flex-col gap-2">
+        <label className="text-sm text-muted-foreground">Foto (maks. 5)</label>
+        {photos.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {photos.map((url, i) => (
+              <div key={url} className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt={`Upload ${i + 1}`} className="h-16 w-16 rounded object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setPhotos((prev) => prev.filter((_, j) => j !== i))}
+                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {photos.length < 5 && (
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            onChange={handlePhotoUpload}
+            disabled={uploadingPhoto}
+            className="text-sm"
+          />
+        )}
+        {uploadingPhoto && <p className="text-xs text-muted-foreground">Mengunggah foto...</p>}
+      </div>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
-      <Button type="submit" disabled={loading}>
+      <Button type="submit" disabled={loading || uploadingPhoto}>
         {loading ? "Submitting…" : "Submit Review"}
       </Button>
     </form>

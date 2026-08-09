@@ -50,7 +50,7 @@ export async function uploadImage(file: File): Promise<string> {
   const form = new FormData();
   form.append("image", file);
   const token = tokenStorage.getAccessToken();
-  const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/admin/uploads/image`, {
+  const res = await fetch(`${env.apiBaseUrl}/admin/uploads/image`, {
     method: "POST",
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: form,

@@ -93,7 +93,7 @@ export function deleteReview(id: string) {
 export async function uploadReviewPhoto(file: File): Promise<string> {
   const form = new FormData();
   form.append("image", file);
-  const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/reviews/upload-photo`, {
+  const res = await fetch(`${env.apiBaseUrl}/reviews/upload-photo`, {
     method: "POST",
     body: form,
   });

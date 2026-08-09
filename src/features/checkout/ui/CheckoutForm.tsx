@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { HttpError } from "@/shared/api/http-error";
-import { staticPaymentOptions, type StaticPaymentType } from "@/shared/config/payment.config";
+import { paymentConfig, staticPaymentOptions, type StaticPaymentType } from "@/shared/config/payment.config";
 import { Button } from "@/shared/ui/Button";
 
 import { validateCoupon, type ValidateCouponResult } from "@/entities/coupon/api/coupon.api";
@@ -304,20 +304,35 @@ export function CheckoutForm() {
         <div className="flex flex-col gap-2">
           {staticPaymentOptions.map((m) => {
             const active = selectedPayment === m.value;
+            const isDisabled = !!m.disabled;
             return (
               <button
                 key={m.value}
                 type="button"
-                onClick={() => setSelectedPayment(m.value)}
+                disabled={isDisabled}
+                onClick={() => !isDisabled && setSelectedPayment(m.value)}
                 className={`flex items-center gap-3 border px-3 py-2.5 text-left text-sm transition-colors ${
-                  active ? "border-accent bg-accent/5" : "border-border hover:bg-muted"
+                  isDisabled
+                    ? "cursor-not-allowed border-border bg-muted/50 text-muted-foreground/50"
+                    : active
+                      ? "border-accent bg-accent/5"
+                      : "border-border hover:bg-muted"
                 }`}
               >
                 <span className="font-medium">{m.label}</span>
+                {isDisabled && <span className="ml-auto text-xs text-muted-foreground/50">Segera hadir</span>}
               </button>
             );
           })}
         </div>
+
+        {selectedPayment === "bank_transfer" && (
+          <div className="border border-accent/30 bg-accent/5 px-4 py-3 text-sm">
+            <p className="font-semibold">{paymentConfig.bankTransfer.bankName}</p>
+            <p className="mt-1 font-mono text-base tracking-wide">{paymentConfig.bankTransfer.accountNumber}</p>
+            <p className="text-muted-foreground">a.n. {paymentConfig.bankTransfer.accountHolder}</p>
+          </div>
+        )}
       </fieldset>
 
       <fieldset className="flex flex-col gap-3">

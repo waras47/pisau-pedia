@@ -6,7 +6,12 @@ export async function uploadImage(file: File): Promise<string> {
   const form = new FormData();
   form.append("image", file);
 
-  const res = await fetch(`${env.apiBaseUrl}/admin/uploads/image`, {
+  let base = env.apiBaseUrl;
+  if (typeof window !== "undefined" && base.startsWith("/")) {
+    base = `${window.location.origin}${base}`;
+  }
+
+  const res = await fetch(`${base}/admin/uploads/image`, {
     method: "POST",
     headers: { Authorization: `Bearer ${tokenStorage.getAccessToken()}` },
     body: form,

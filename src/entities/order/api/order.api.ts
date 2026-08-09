@@ -62,6 +62,8 @@ export interface OrderResponse {
   payment_expiry?: string;
   // Set once the customer uploads a receipt/screenshot at checkout-success —
   // part of the manual/static payment flow (no automated gateway).
+  tracking_number?: string;
+  shipping_evidence_url?: string;
   payment_proof_url?: string;
   invoice_url?: string;
   // Set once the customer self-confirms the package arrived — separate
@@ -185,10 +187,10 @@ export function getOrder(id: string) {
   return apiFetch<OrderResponse>(`/admin/orders/${id}`);
 }
 
-export function updateOrderStatus(id: string, status: string) {
+export function updateOrderStatus(id: string, status: string, extra?: { tracking_number?: string; shipping_evidence_url?: string }) {
   return apiFetch<null>(`/admin/orders/${id}/status`, {
     method: "PATCH",
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status, ...extra }),
   });
 }
 

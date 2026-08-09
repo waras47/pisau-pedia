@@ -58,7 +58,7 @@ export function Footer() {
               rel="noopener noreferrer"
               className="transition-colors hover:text-accent"
             >
-              Sebelah Itoe Bakery, Jln Raya Hankam, Jln Baru, Masuk Rmh No.84, RT.006/RW.006, Jatimurni, Pondok Melati, Bekasi 17431
+              Jl Baru No 84 RT 06 RW 06, Jl Raya Hankam, Jati Murni, Pondok Melati, Kota Bekasi, Jawa Barat 17431, Indonesia
             </a>
           </div>
 
@@ -70,17 +70,17 @@ export function Footer() {
               rel="noopener noreferrer"
               className="transition-colors hover:text-accent"
             >
-              0813-4305-8848
+              0812-9202-4942
             </a>
           </div>
 
-          <div className="flex gap-2.5 text-sm text-foreground/90">
+          {/* <div className="flex gap-2.5 text-sm text-foreground/90">
             <Banknote size={15} className="mt-0.5 shrink-0 text-accent" />
             <div>
               <p>Bank Mandiri — 1170011490331</p>
               <p className="text-muted-foreground">a.n. Rahmawati Nur Aida</p>
             </div>
-          </div>
+          </div> */}
 
           <div className="flex items-center gap-3 pt-2">
             {socialLinks.map(({ label, href, icon: Icon }) => (
