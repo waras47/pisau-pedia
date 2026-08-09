@@ -25,7 +25,7 @@ export const paymentConfig = {
   },
   qris: {
     label: "QRIS",
-    // TODO: pasang gambar QRIS asli di public/dev-images/payment/qris.png
+    // TODO: pasang gambar QRIS asli di public/images/payment/qris.png
     // dan ganti imageUrl di bawah ini — sengaja dikosongkan (bukan gambar
     // buatan) karena QRIS palsu/salah bisa membuat pembayaran customer
     // tidak sampai ke mana pun.

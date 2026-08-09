@@ -43,7 +43,7 @@ export const posts: BlogPost[] = [
     categorySlug: "knife-types",
     readingMinutes: 6,
     publishedAt: "2026-05-12",
-    image: "/dev-images/blog/gyuto-santoku-bunka.jpg",
+    image: "/images/blog/gyuto-santoku-bunka.jpg",
     content: {
       en: [
         "If you're buying your first Japanese chef's knife, you'll almost certainly end up choosing between a Gyuto, a Santoku, or a Bunka. All three are marketed as \"multi-purpose\" knives, and all three can genuinely handle most kitchen tasks — but the blade geometry behind each one leads to a noticeably different feel in hand.",
@@ -76,7 +76,7 @@ export const posts: BlogPost[] = [
     categorySlug: "knife-types",
     readingMinutes: 5,
     publishedAt: "2026-05-28",
-    image: "/dev-images/blog/nakiri-vs-usuba.jpg",
+    image: "/images/blog/nakiri-vs-usuba.jpg",
     content: {
       en: [
         "Most Japanese knife shapes are multi-purpose by design, but vegetable prep gets a category of its own: the rectangular, flat-edged blades built specifically for clean, straight cuts through produce. The two you'll come across are the Nakiri and the Usuba, and while they look similar, they're built for very different skill levels.",
@@ -107,7 +107,7 @@ export const posts: BlogPost[] = [
     categorySlug: "sharpening-guide",
     readingMinutes: 7,
     publishedAt: "2026-06-03",
-    image: "/dev-images/blog/whetstone-grits.jpg",
+    image: "/images/blog/whetstone-grits.jpg",
     content: {
       en: [
         "Every whetstone is labeled with a grit number, and it's tempting to think of that number as a simple coarse-to-fine scale where higher is always \"better.\" In practice, each grit range does a specific job, and skipping straight to a high grit on a knife that needs real repair just wastes time polishing an edge that was never properly reshaped underneath.",
@@ -140,7 +140,7 @@ export const posts: BlogPost[] = [
     categorySlug: "sharpening-guide",
     readingMinutes: 6,
     publishedAt: "2026-06-14",
-    image: "/dev-images/blog/sharpening-angle.jpg",
+    image: "/images/blog/sharpening-angle.jpg",
     content: {
       en: [
         "Bevel angle is one of the most-argued numbers in knife sharpening, and part of the confusion is that there genuinely isn't one correct answer — it depends on what the knife was ground to in the first place. Get the angle wrong relative to the existing bevel and you'll either fail to reach the actual edge, or you'll grind away far more steel than necessary reshaping it to a new angle.",
@@ -171,7 +171,7 @@ export const posts: BlogPost[] = [
     categorySlug: "steel-care",
     readingMinutes: 6,
     publishedAt: "2026-06-20",
-    image: "/dev-images/blog/carbon-vs-stainless.jpg",
+    image: "/images/blog/carbon-vs-stainless.jpg",
     content: {
       en: [
         "The carbon-versus-stainless question usually gets reduced to a single point: carbon steel rusts if you're not careful, stainless doesn't. That's true, but it's also the least interesting part of the comparison — the more relevant difference for daily cooking is how each type of steel behaves at the edge, not just how it behaves in the sink.",
@@ -202,7 +202,7 @@ export const posts: BlogPost[] = [
     categorySlug: "steel-care",
     readingMinutes: 5,
     publishedAt: "2026-06-29",
-    image: "/dev-images/blog/patina.jpg",
+    image: "/images/blog/patina.jpg",
     content: {
       en: [
         "New carbon steel comes out of the box bright and silver, and within the first few weeks of use it starts to change — a grey, blue, or brownish tint spreading unevenly across the blade face. The first instinct is to assume something's gone wrong. In fact, this is patina, a naturally forming oxide layer, and it's one of the more useful things about carbon steel rather than a flaw in it.",

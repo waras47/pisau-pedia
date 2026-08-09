@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import { confirmOrderReceived, getMyOrder, type OrderItemResponse, type OrderResponse } from "@/entities/order/api/order.api";
 import { orderStatusLabel, orderStatusStyle, paymentStatusLabel, paymentStyle } from "@/entities/order/model/order-status";
-import { createReview } from "@/entities/review/api/review.api";
+import { createReview, uploadReviewPhoto } from "@/entities/review/api/review.api";
 import { useAuth } from "@/features/auth/model/AuthProvider";
 import { HttpError } from "@/shared/api/http-error";
 import { Button } from "@/shared/ui/Button";
@@ -51,8 +51,34 @@ function ReviewForm({
 }) {
   const [rating, setRating] = useState(5);
   const [content, setContent] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files?.length) return;
+    if (photos.length + files.length > 5) {
+      setError("Maksimal 5 foto");
+      return;
+    }
+    setUploading(true);
+    setError(null);
+    try {
+      const urls: string[] = [];
+      for (const file of Array.from(files)) {
+        const url = await uploadReviewPhoto(file);
+        urls.push(url);
+      }
+      setPhotos((prev) => [...prev, ...urls]);
+    } catch {
+      setError("Gagal upload foto");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -64,6 +90,7 @@ function ReviewForm({
         customer_name: customerName,
         rating,
         content,
+        photos: photos.length > 0 ? photos : undefined,
       });
       onSubmitted();
     } catch (err) {
@@ -98,8 +125,42 @@ function ReviewForm({
         placeholder="Bagaimana kualitas produknya?"
         className="w-full border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
       />
+
+      <div className="flex flex-col gap-2">
+        <p className="text-xs text-muted-foreground">Foto produk (opsional, maks 5)</p>
+        {photos.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {photos.map((url, i) => (
+              <div key={url} className="relative">
+                <img src={url} alt={`Foto ${i + 1}`} className="h-16 w-16 rounded object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setPhotos((prev) => prev.filter((_, j) => j !== i))}
+                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {photos.length < 5 && (
+          <label className={`cursor-pointer self-start rounded border border-border px-3 py-1.5 text-xs hover:bg-muted/50 ${uploading ? "opacity-40 pointer-events-none" : ""}`}>
+            {uploading ? "Mengupload..." : "Tambah Foto"}
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              className="hidden"
+              onChange={handlePhotoUpload}
+              disabled={uploading}
+            />
+          </label>
+        )}
+      </div>
+
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
-      <Button type="submit" size="sm" disabled={loading} className="self-start">
+      <Button type="submit" size="sm" disabled={loading || uploading} className="self-start">
         {loading ? "Mengirim…" : "Kirim Review"}
       </Button>
     </form>

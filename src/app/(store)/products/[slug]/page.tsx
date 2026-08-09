@@ -23,7 +23,7 @@ interface ProductPageProps {
 // the static catalog for the original demo/configurator products that were
 // never migrated to the database.
 async function getApiProduct(slug: string): Promise<ProductApiDetail | null> {
-  const res = await fetch(`${env.apiBaseUrl}/products/${slug}`, { next: { revalidate: 60 } });
+  const res = await fetch(`${env.apiBaseUrl}/products/${slug}`, { cache: "no-store" });
   if (!res.ok) return null;
   const json = await res.json();
   return json.data as ProductApiDetail;
@@ -32,7 +32,7 @@ async function getApiProduct(slug: string): Promise<ProductApiDetail | null> {
 async function getApiReviews(slug: string): Promise<Review[]> {
   try {
     const res = await fetch(`${env.apiBaseUrl}/products/${slug}/reviews`, {
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
     if (!res.ok) return [];
     const json = await res.json();
@@ -57,7 +57,7 @@ async function getApiReviews(slug: string): Promise<Review[]> {
 
 async function getApiRelated(category: string, slug: string): Promise<Product[]> {
   if (!category) return [];
-  const res = await fetch(`${env.apiBaseUrl}/products?per_page=50`, { next: { revalidate: 60 } });
+  const res = await fetch(`${env.apiBaseUrl}/products?per_page=50`, { cache: "no-store" });
   if (!res.ok) return [];
   const json = await res.json();
   const items = (json.data as ProductApiItem[]) ?? [];

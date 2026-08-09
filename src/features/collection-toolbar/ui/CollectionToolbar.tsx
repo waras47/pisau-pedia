@@ -1,14 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { ProductGrid, type Product } from "@/entities/product";
-
 
 export type SortKey = "featured" | "price-asc" | "price-desc" | "rating";
 
 interface CollectionToolbarProps {
   products: Product[];
+  perPage?: number;
 }
 
 const sortOptions: { value: SortKey; label: string }[] = [
@@ -18,16 +18,20 @@ const sortOptions: { value: SortKey; label: string }[] = [
   { value: "rating", label: "Top Rated" },
 ];
 
-export function CollectionToolbar({ products }: CollectionToolbarProps) {
+const PER_PAGE_OPTIONS = [12, 24, 48];
+
+export function CollectionToolbar({ products, perPage = 12 }: CollectionToolbarProps) {
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [sort, setSort] = useState<SortKey>("featured");
+  const [page, setPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(perPage);
 
   const categories = useMemo(() => {
     const unique = Array.from(new Set(products.map((p) => p.category)));
     return ["All", ...unique];
   }, [products]);
 
-  const visibleProducts = useMemo(() => {
+  const filteredProducts = useMemo(() => {
     const filtered =
       activeCategory === "All"
         ? products
@@ -50,6 +54,19 @@ export function CollectionToolbar({ products }: CollectionToolbarProps) {
     return sorted;
   }, [products, activeCategory, sort]);
 
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const pagedProducts = filteredProducts.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
+  const handleCategoryChange = useCallback((value: string) => {
+    setActiveCategory(value);
+    setPage(1);
+  }, []);
+
+  const handlePerPageChange = useCallback((value: number) => {
+    setItemsPerPage(value);
+    setPage(1);
+  }, []);
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
@@ -60,7 +77,7 @@ export function CollectionToolbar({ products }: CollectionToolbarProps) {
           <select
             id="category-filter"
             value={activeCategory}
-            onChange={(e) => setActiveCategory(e.target.value)}
+            onChange={(e) => handleCategoryChange(e.target.value)}
             className="border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
           >
             {categories.map((category) => (
@@ -73,11 +90,20 @@ export function CollectionToolbar({ products }: CollectionToolbarProps) {
 
         <div className="flex items-center gap-3">
           <span className="text-xs text-muted-foreground">
-            {visibleProducts.length} products
+            {filteredProducts.length} produk
           </span>
           <select
+            value={itemsPerPage}
+            onChange={(e) => handlePerPageChange(Number(e.target.value))}
+            className="border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+          >
+            {PER_PAGE_OPTIONS.map((n) => (
+              <option key={n} value={n}>{n} / halaman</option>
+            ))}
+          </select>
+          <select
             value={sort}
-            onChange={(e) => setSort(e.target.value as SortKey)}
+            onChange={(e) => { setSort(e.target.value as SortKey); setPage(1); }}
             className="border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
           >
             {sortOptions.map((option) => (
@@ -89,7 +115,42 @@ export function CollectionToolbar({ products }: CollectionToolbarProps) {
         </div>
       </div>
 
-      <ProductGrid products={visibleProducts} />
+      <ProductGrid products={pagedProducts} />
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="rounded border border-border px-3 py-1.5 text-sm disabled:opacity-30"
+          >
+            ←
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => setPage(p)}
+              className={`rounded px-3 py-1.5 text-sm ${
+                p === page
+                  ? "bg-foreground text-background font-medium"
+                  : "border border-border hover:bg-muted/50"
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="rounded border border-border px-3 py-1.5 text-sm disabled:opacity-30"
+          >
+            →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

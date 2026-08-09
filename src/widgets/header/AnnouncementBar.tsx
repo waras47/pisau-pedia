@@ -6,8 +6,8 @@ export function AnnouncementBar() {
     <div className="bg-blue-600 text-white">
       <Container className="flex h-9 items-center justify-center text-center">
         <p className="text-xs tracking-wide">
-          Free worldwide express shipping on orders over{" "}
-          {siteConfig.freeShippingThreshold}€
+          Gratis ongkir untuk pesanan di atas Rp{" "}
+          {new Intl.NumberFormat("id-ID").format(siteConfig.freeShippingThreshold)}
         </p> 
       </Container>
     </div>

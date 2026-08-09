@@ -391,7 +391,7 @@ function PreviewBox({
         ) : !blade ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={shape.previewImage ?? "/dev-images/configurator/preview-outline.png"}
+            src={shape.previewImage ?? "/images/configurator/preview-outline.png"}
             alt={`${shape.name} outline`}
             className="knife-img absolute opacity-50"
           />

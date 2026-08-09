@@ -10,7 +10,7 @@ function OrderSummary() {
   const { items, subtotal } = useCart();
   const { formatPrice, convert, currency: displayCurrency, t } = useLocaleCurrency();
   const { shippingOption, freeShipping } = useCheckout();
-  const cartCurrency = items[0]?.currency ?? "EUR";
+  const cartCurrency = items[0]?.currency ?? "IDR";
 
   // Shipping cost from RajaOngkir is always IDR; the catalog subtotal is in the
   // cart's source currency. Convert both into the display currency before summing.

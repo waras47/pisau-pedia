@@ -28,7 +28,7 @@ export function QuizBanner() {
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/dev-images/products/shirobana-sujihiki-240.jpg"
+              src="/images/products/shirobana-sujihiki-240.jpg"
               alt="Find your knife quiz preview"
               className="aspect-[4/3] w-full object-cover opacity-90"
             />

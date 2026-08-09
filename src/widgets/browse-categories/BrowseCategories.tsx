@@ -12,19 +12,19 @@ const categories: { titleKey: DictionaryKey; href: string; label: string; image:
     titleKey: "browse_knives",
     href: "/collections/knives",
     label: "Knife collection",
-    image: "/dev-images/products/aoi-gyuto-210.jpg",
+    image: "/images/products/aoi-gyuto-210.jpg",
   },
   {
     titleKey: "browse_sharpening",
     href: "/collections/sharpening",
     label: "Sharpening stones",
-    image: "/dev-images/products/sharpening-stone.jpg",
+    image: "/images/products/sharpening-stone.jpg",
   },
   {
     titleKey: "browse_accessories",
     href: "/collections/accessories",
     label: "Kitchen accessories",
-    image: "/dev-images/products/magnetic-knife-holder-walnut.jpg",
+    image: "/images/products/magnetic-knife-holder-walnut.jpg",
   },
 ];
 

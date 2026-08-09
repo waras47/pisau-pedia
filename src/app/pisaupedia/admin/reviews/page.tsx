@@ -247,6 +247,13 @@ export default function ReviewsPage() {
                     <td className="px-4 py-3"><Stars rating={r.rating} /></td>
                     <td className="max-w-xs px-4 py-3 text-gray-500">
                       <p className="truncate">{r.content}</p>
+                      {r.photos && r.photos.length > 0 && (
+                        <div className="mt-1 flex gap-1">
+                          {r.photos.map((url, i) => (
+                            <img key={url} src={url} alt={`Foto ${i + 1}`} className="h-8 w-8 rounded object-cover" />
+                          ))}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${statusStyle(r.status)}`}>

@@ -34,7 +34,7 @@ function mapProduct(p: ApiProduct): Product {
     description: p.description,
     price: p.price,
     compareAtPrice: p.compare_at_price || undefined,
-    currency: "EUR",
+    currency: "IDR",
     rating: p.rating,
     reviewCount: p.review_count,
     badge: p.badge as Product["badge"],

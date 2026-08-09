@@ -35,7 +35,7 @@ export function CartDrawer() {
     };
   }, [isOpen, closeCart]);
 
-  const currency = items[0]?.currency ?? "EUR";
+  const currency = items[0]?.currency ?? "IDR";
 
   return (
     <>

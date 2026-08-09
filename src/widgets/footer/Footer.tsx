@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Facebook, Instagram, Youtube } from "lucide-react";
+import { Facebook, Instagram, Youtube, MapPin, Phone, Banknote } from "lucide-react";
 
 import { siteConfig } from "@/shared/config/site.config";
 import { Container } from "@/shared/ui/Container";
@@ -49,15 +49,47 @@ export function Footer() {
           <Link href="/" className="flex items-center">
             <Logo className="h-9 w-auto" />
           </Link>
-          <p className="max-w-xs text-sm text-muted-foreground">
-            {siteConfig.description}
-          </p>
+
+          <div className="flex gap-2.5 text-sm text-foreground/90">
+            <MapPin size={15} className="mt-0.5 shrink-0 text-accent" />
+            <a
+              href="https://maps.app.goo.gl/DhrwhjL1G37aC5f38"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-accent"
+            >
+              Sebelah Itoe Bakery, Jln Raya Hankam, Jln Baru, Masuk Rmh No.84, RT.006/RW.006, Jatimurni, Pondok Melati, Bekasi 17431
+            </a>
+          </div>
+
+          <div className="flex gap-2.5 text-sm text-foreground/90">
+            <Phone size={15} className="mt-0.5 shrink-0 text-accent" />
+            <a
+              href={`https://wa.me/${siteConfig.social.whatsapp}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-accent"
+            >
+              0813-4305-8848
+            </a>
+          </div>
+
+          <div className="flex gap-2.5 text-sm text-foreground/90">
+            <Banknote size={15} className="mt-0.5 shrink-0 text-accent" />
+            <div>
+              <p>Bank Mandiri — 1170011490331</p>
+              <p className="text-muted-foreground">a.n. Rahmawati Nur Aida</p>
+            </div>
+          </div>
+
           <div className="flex items-center gap-3 pt-2">
             {socialLinks.map(({ label, href, icon: Icon }) => (
               <Link
                 key={label}
                 href={href}
                 aria-label={label}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex h-9 w-9 items-center justify-center border border-border text-foreground transition-colors hover:border-accent hover:text-accent"
               >
                 <Icon size={16} />

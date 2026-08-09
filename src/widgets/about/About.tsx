@@ -50,7 +50,7 @@ export function About() {
           <div className="aspect-square w-full overflow-hidden bg-muted">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/dev-images/image_about_us.webp"
+              src="/images/image_about_us.webp"
               alt={t("about_story_image_label")}
               className="h-full w-full object-cover"
             />

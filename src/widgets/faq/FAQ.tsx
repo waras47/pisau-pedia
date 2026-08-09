@@ -40,7 +40,7 @@ const categories: FaqCategory[] = [
     items: [
       {
         q: "How much does shipping cost?",
-        a: `A flat rate applies to most orders, and shipping is free on orders over ${siteConfig.freeShippingThreshold}€ (or the equivalent in your local currency). The exact cost and delivery estimate for your address are shown at checkout before you pay.`,
+        a: `Ongkir flat rate untuk sebagian besar pesanan, dan gratis ongkir untuk pesanan di atas Rp ${new Intl.NumberFormat("id-ID").format(siteConfig.freeShippingThreshold)}. Estimasi biaya dan waktu pengiriman akan ditampilkan saat checkout.`,
       },
       {
         q: "How long does delivery take?",

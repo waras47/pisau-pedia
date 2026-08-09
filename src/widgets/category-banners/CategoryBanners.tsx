@@ -21,7 +21,7 @@ const banners: {
     ctaKey: "banner_sharpening_cta",
     href: "/collections/sharpening",
     label: "Sharpening stone in use",
-    image: "/dev-images/products/sharpening-stone.jpg",
+    image: "/images/products/sharpening-stone.jpg",
   },
   {
     titleKey: "banner_accessories_title",
@@ -29,7 +29,7 @@ const banners: {
     ctaKey: "banner_accessories_cta",
     href: "/collections/accessories",
     label: "Kitchen accessories",
-    image: "/dev-images/products/hasegawa-cutting-board-m.jpg",
+    image: "/images/products/hasegawa-cutting-board-m.jpg",
   },
 ];
 

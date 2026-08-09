@@ -1,3 +1,4 @@
+import { env } from "@/shared/config/env";
 import { apiFetch } from "@/shared/api/client";
 
 export type ReviewStatus = "pending" | "approved" | "rejected";
@@ -10,18 +11,18 @@ export interface ReviewApiItem {
   customer_email?: string;
   rating: number;
   content: string;
+  photos?: string[];
   status: ReviewStatus;
   created_at: string;
 }
 
 export interface CreateReviewInput {
-  // Omit for a "shop review" about the store itself, not tied to a
-  // specific product.
   product_slug?: string;
   customer_name: string;
   customer_email?: string;
   rating: number;
   content: string;
+  photos?: string[];
 }
 
 export interface AdminCreateReviewInput extends CreateReviewInput {
@@ -87,4 +88,16 @@ export function updateReviewStatus(id: string, status: ReviewStatus) {
 
 export function deleteReview(id: string) {
   return apiFetch<null>(`/admin/reviews/${id}`, { method: "DELETE" });
+}
+
+export async function uploadReviewPhoto(file: File): Promise<string> {
+  const form = new FormData();
+  form.append("image", file);
+  const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/reviews/upload-photo`, {
+    method: "POST",
+    body: form,
+  });
+  if (!res.ok) throw new Error("Upload failed");
+  const json = await res.json();
+  return json.data.url;
 }

@@ -99,7 +99,7 @@ const initialCampaigns: Campaign[] = [
     recipients: 0,
     openRate: 0,
     clickRate: 0,
-    content: "Finding the perfect gift for the chef in your life? Our curated holiday guide features hand-picked recommendations from beginner-friendly Santoku to professional-grade Yanagiba. Plus, free engraving on all orders over €200.",
+    content: "Cari hadiah untuk chef favorit Anda? Panduan kami menampilkan rekomendasi dari Santoku untuk pemula hingga Yanagiba profesional. Gratis engraving untuk pesanan di atas Rp 3.000.000.",
   },
   {
     id: "cm-5",

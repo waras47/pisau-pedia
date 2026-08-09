@@ -1,6 +1,6 @@
 import { apiFetch, apiFetchPaginated } from "@/shared/api/client";
 
-export type NotificationModule = "product" | "order" | "customer" | "service";
+export type NotificationModule = "product" | "order" | "customer" | "service" | "review";
 
 export interface NotificationApiItem {
   id: string;

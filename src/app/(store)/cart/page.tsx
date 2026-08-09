@@ -14,7 +14,7 @@ import { useLocaleCurrency } from "@/features/locale-currency";
 export default function CartPage() {
   const { items, subtotal, totalItems, updateQuantity, removeItem } = useCart();
   const { formatPrice, t } = useLocaleCurrency();
-  const currency = items[0]?.currency ?? "EUR";
+  const currency = items[0]?.currency ?? "IDR";
 
   return (
     <section className="py-16">

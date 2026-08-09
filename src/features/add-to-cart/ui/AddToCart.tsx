@@ -54,7 +54,7 @@ export function AddToCart({ product }: AddToCartProps) {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Ships in 2–4 business days · Free EU shipping over €150
+        Pengiriman 2–4 hari kerja · Gratis ongkir pesanan di atas Rp 500.000
       </p>
     </div>
   );

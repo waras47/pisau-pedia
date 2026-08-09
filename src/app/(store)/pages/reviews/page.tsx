@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 async function getReviews(scope: "product" | "shop"): Promise<ReviewApiItem[]> {
   const res = await fetch(`${env.apiBaseUrl}/reviews?scope=${scope}&per_page=50`, {
-    next: { revalidate: 60 },
+    cache: "no-store",
   });
   if (!res.ok) return [];
   const json = await res.json();

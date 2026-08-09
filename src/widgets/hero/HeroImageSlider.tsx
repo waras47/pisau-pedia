@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 
 const slides = [
-  { src: "/dev-images/products/aoi-gyuto-210.jpg", alt: "Aoi Gyuto 210mm — hand-forged chef's knife" },
-  { src: "/dev-images/products/yama-gyuto-240.jpg", alt: "Yama Gyuto 240mm — hand-forged chef's knife" },
-  { src: "/dev-images/products/sumi-santoku-180.jpg", alt: "Sumi Santoku 180mm" },
-  { src: "/dev-images/products/kuro-bunka-190.jpg", alt: "Kuro Bunka 190mm — Damascus steel" },
-  { src: "/dev-images/products/tsuchime-nakiri-165.jpg", alt: "Tsuchime Nakiri 165mm" },
+  { src: "/images/products/aoi-gyuto-210.jpg", alt: "Aoi Gyuto 210mm — hand-forged chef's knife" },
+  { src: "/images/products/yama-gyuto-240.jpg", alt: "Yama Gyuto 240mm — hand-forged chef's knife" },
+  { src: "/images/products/sumi-santoku-180.jpg", alt: "Sumi Santoku 180mm" },
+  { src: "/images/products/kuro-bunka-190.jpg", alt: "Kuro Bunka 190mm — Damascus steel" },
+  { src: "/images/products/tsuchime-nakiri-165.jpg", alt: "Tsuchime Nakiri 165mm" },
 ];
 
 export function HeroImageSlider() {

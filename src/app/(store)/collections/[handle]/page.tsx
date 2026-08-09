@@ -52,7 +52,7 @@ interface CollectionApiItem {
 }
 
 async function getCollection(slug: string): Promise<CollectionApiItem | null> {
-  const res = await fetch(`${env.apiBaseUrl}/collections/${slug}`, { next: { revalidate: 60 } });
+  const res = await fetch(`${env.apiBaseUrl}/collections/${slug}`, { cache: "no-store" });
   if (!res.ok) return null;
   const json = await res.json();
   return json.data as CollectionApiItem;
@@ -79,7 +79,7 @@ function resolveCategorySlug(handle: string): string {
 }
 
 async function getCategory(slug: string): Promise<CategoryApiItem | null> {
-  const res = await fetch(`${env.apiBaseUrl}/categories/${slug}`, { next: { revalidate: 60 } });
+  const res = await fetch(`${env.apiBaseUrl}/categories/${slug}`, { cache: "no-store" });
   if (!res.ok) return null;
   const json = await res.json();
   return json.data as CategoryApiItem;
@@ -87,7 +87,7 @@ async function getCategory(slug: string): Promise<CategoryApiItem | null> {
 
 async function getProductsInCategory(slug: string): Promise<ProductApiItem[]> {
   const res = await fetch(`${env.apiBaseUrl}/products?category=${slug}&per_page=50`, {
-    next: { revalidate: 60 },
+    cache: "no-store",
   });
   if (!res.ok) return [];
   const json = await res.json();
@@ -100,7 +100,7 @@ async function getProductsInCategories(slugs: string[]): Promise<ProductApiItem[
 }
 
 async function getAllProducts(): Promise<ProductApiItem[]> {
-  const res = await fetch(`${env.apiBaseUrl}/products?per_page=50`, { next: { revalidate: 60 } });
+  const res = await fetch(`${env.apiBaseUrl}/products?per_page=50`, { cache: "no-store" });
   if (!res.ok) return [];
   const json = await res.json();
   return json.data as ProductApiItem[];
@@ -211,7 +211,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
   }
 
   if (params.handle === "bestsellers") {
-    const res = await fetch(`${env.apiBaseUrl}/products?per_page=50&sort=bestseller`, { next: { revalidate: 60 } });
+    const res = await fetch(`${env.apiBaseUrl}/products?per_page=50&sort=bestseller`, { cache: "no-store" });
     const products: ProductApiItem[] = res.ok ? (await res.json()).data : [];
     return (
       <CollectionListing

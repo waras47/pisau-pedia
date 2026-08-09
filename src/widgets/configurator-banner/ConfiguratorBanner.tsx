@@ -12,21 +12,13 @@ export function ConfiguratorBanner() {
   return (
     <section className="bg-muted/40 py-16">
       <Container className="grid items-center gap-10 lg:grid-cols-2">
-        <div className="relative">
+        <div className="overflow-hidden rounded-lg">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/dev-images/products/yama-gyuto-240.jpg"
-            alt="Blade options"
-            className="aspect-square w-full object-cover"
+            src="/config-home.webp"
+            alt="Konfigurator pisau"
+            className="aspect-[4/3] w-full object-cover"
           />
-          <div className="absolute -bottom-6 -right-6 hidden w-2/3 border-4 border-background sm:block">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/dev-images/products/wooden-saya-gyuto-210.jpg"
-              alt="Handle options"
-              className="aspect-square w-full object-cover"
-            />
-          </div>
         </div>
 
         <div className="flex flex-col items-start gap-4">

@@ -1,37 +1,40 @@
-import { type Review, reviews as staticReviews, ReviewCard } from "@/entities/review";
+import { type Review, ReviewCard } from "@/entities/review";
 import { env } from "@/shared/config/env";
 import { Container } from "@/shared/ui/Container";
 import { TestimonialsHeading } from "./TestimonialsHeading";
 
 async function getTestimonials(): Promise<Review[]> {
   try {
-    const res = await fetch(`${env.apiBaseUrl}/products/featured/reviews`, {
+    const res = await fetch(`${env.apiBaseUrl}/reviews?per_page=6`, {
       next: { revalidate: 300 },
     });
-    if (!res.ok) return staticReviews;
+    if (!res.ok) return [];
     const json = await res.json();
     const items = (json.data ?? []) as Array<{
       id: string;
-      author: string;
+      customer_name: string;
       rating: number;
-      comment: string;
+      content: string;
+      photos?: string[];
       created_at: string;
     }>;
-    if (!items.length) return staticReviews;
     return items.map((r) => ({
       id: r.id,
-      author: r.author,
+      author: r.customer_name,
       rating: r.rating,
-      content: r.comment,
+      content: r.content,
+      photos: r.photos,
       date: r.created_at,
     }));
   } catch {
-    return staticReviews;
+    return [];
   }
 }
 
 export async function Testimonials() {
   const reviews = await getTestimonials();
+
+  if (reviews.length === 0) return null;
 
   return (
     <section className="bg-muted/40 py-16">

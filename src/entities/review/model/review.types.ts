@@ -4,4 +4,5 @@ export interface Review {
   rating: number;
   date: string;
   content: string;
+  photos?: string[];
 }

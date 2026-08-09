@@ -288,9 +288,9 @@ const id = {
 
   // Hero (homepage)
   hero_eyebrow: "Jantung dapur Anda",
-  hero_title: "Pisau Pedia",
+  hero_title: "PISAUPEDIA",
   hero_subtitle:
-    "Pisau Pedia adalah produk asli Indonesia yang menghadirkan pisau dapur berkualitas dengan material yang bisa disesuaikan kebutuhan Anda — diasah presisi dan siap pakai sebelum sampai ke dapur Anda.",
+    "PISAUPEDIA adalah produk asli Indonesia yang menghadirkan pisau dapur berkualitas dengan material yang bisa disesuaikan kebutuhan Anda — diasah presisi dan siap pakai sebelum sampai ke dapur Anda.",
   hero_cta_primary: "Temukan Pisau Anda",
   hero_cta_secondary: "Rakit Pisau Sendiri",
   hero_footer: "Produk asli Indonesia — melayani pesanan perorangan & restoran",
@@ -306,7 +306,7 @@ const id = {
   about_hero_eyebrow: "Cerita Kami",
   about_hero_title: "Pisau Pedia",
   about_hero_subtitle:
-    "Pisau Pedia adalah produk asli Indonesia, dibuat untuk performa terbaik di dapur Anda — untuk pecinta memasak dan profesional dapur di Indonesia, dengan material yang bisa disesuaikan dan layanan purna jual yang jarang ditawarkan toko lain.",
+    "PISAUPEDIA adalah produk asli Indonesia, dibuat untuk performa terbaik di dapur Anda — untuk pecinta memasak dan profesional dapur di Indonesia, dengan material yang bisa disesuaikan dan layanan purna jual yang jarang ditawarkan toko lain.",
   about_story_eyebrow: "Produk Asli Indonesia",
   about_story_title: "Dibangun untuk kebutuhan dapur Indonesia",
   about_story_p1:
@@ -370,7 +370,7 @@ const id = {
 
   // Browse categories (homepage)
   browse_title: "Jelajahi Koleksi Kami",
-  browse_knives: "Pisau Jepang",
+  browse_knives: "Pisau Dapur",
   browse_sharpening: "Alat Pengasahan",
   browse_accessories: "Aksesoris Dapur",
 

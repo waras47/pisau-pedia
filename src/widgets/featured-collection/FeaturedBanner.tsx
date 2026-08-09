@@ -14,7 +14,7 @@ export function FeaturedBanner() {
     <div className="grid items-center gap-8 lg:grid-cols-2">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/dev-images/products/kuro-bunka-190.jpg"
+        src="/images/products/kuro-bunka-190.jpg"
         alt={t("featured_title")}
         className="aspect-[4/3] w-full object-cover"
       />
