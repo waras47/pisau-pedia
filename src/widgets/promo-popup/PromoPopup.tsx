@@ -17,7 +17,11 @@ export function PromoPopup() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (localStorage.getItem(LS_KEY)) return;
+    const dismissed = localStorage.getItem(LS_KEY);
+    if (dismissed) {
+      const ts = Number(dismissed);
+      if (!isNaN(ts) && Date.now() - ts < 6 * 60 * 60 * 1000) return;
+    }
 
     const timer = setTimeout(() => {
       getPromoPopup()
@@ -44,7 +48,7 @@ export function PromoPopup() {
 
   const handleDismissBubble = () => {
     setVisible(false);
-    localStorage.setItem(LS_KEY, "1");
+    localStorage.setItem(LS_KEY, String(Date.now()));
   };
 
   const handleSubmit = async () => {
@@ -66,7 +70,7 @@ export function PromoPopup() {
 
   const handleClose = () => {
     setOpen(false);
-    localStorage.setItem(LS_KEY, "1");
+    localStorage.setItem(LS_KEY, String(Date.now()));
     setTimeout(() => setVisible(false), 300);
   };
 

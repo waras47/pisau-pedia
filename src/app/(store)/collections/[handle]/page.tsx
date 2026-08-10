@@ -60,17 +60,12 @@ async function getCollection(slug: string): Promise<CollectionApiItem | null> {
 
 // "Bestsellers" / "New Arrivals" / "On Sale" aren't categories either — they
 // read off existing product data (rating for bestsellers, the `badge` field
-// for the other two) rather than a `category_id`.
+// for new arrivals, compare_at_price for sale) rather than a `category_id`.
 const BADGE_VIEWS: Record<string, { title: string; description: string; badge: string }> = {
   "new-arrivals": {
     title: "New Arrivals",
     description: "The latest additions to the catalog.",
     badge: "new",
-  },
-  sale: {
-    title: "On Sale",
-    description: "Selected knives and accessories at a reduced price, while stock lasts.",
-    badge: "sale",
   },
 };
 
@@ -205,6 +200,18 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
       <CollectionListing
         title={badgeView.title}
         description={badgeView.description}
+        products={products.map(toProduct)}
+      />
+    );
+  }
+
+  if (params.handle === "sale") {
+    const products = (await getAllProducts())
+      .filter((p) => p.compare_at_price && p.compare_at_price > p.price);
+    return (
+      <CollectionListing
+        title="On Sale"
+        description="Selected knives and accessories at a reduced price, while stock lasts."
         products={products.map(toProduct)}
       />
     );

@@ -18,7 +18,7 @@ export function SitePromoPopup() {
         const data = JSON.parse(dismissed);
         if (data.id && data.ts) {
           const hoursSince = (Date.now() - data.ts) / 3_600_000;
-          if (hoursSince < 24) return;
+          if (hoursSince < 6) return;
         }
       } catch {
         return;

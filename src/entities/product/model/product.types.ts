@@ -20,7 +20,7 @@ export interface Product {
   currency: string;
   rating: number;
   reviewCount: number;
-  badge?: "new" | "sale" | "sold-out";
+  badge?: "new" | "sold-out";
   slug: string;
   maker?: string;
   /** Jumlah stok — dipakai di admin panel untuk kelola inventory. */

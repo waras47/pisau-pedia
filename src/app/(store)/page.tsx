@@ -13,8 +13,8 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <FeaturedCollection />
       <PromoBanner />
+      <FeaturedCollection />
       <CategoryBanners />
       <MonthlyPick />
       <NewArrivals />

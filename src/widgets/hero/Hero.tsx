@@ -32,7 +32,7 @@ export function Hero() {
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
         const val = json?.data?.value as HeroText | undefined;
-        if (val?.title) setCustom(val);
+        if (val?.title || val?.title_id) setCustom(val);
       })
       .catch(() => {});
   }, []);

@@ -64,7 +64,6 @@ function formatRupiah(amount: number) {
 const badgeOptions: { value: Product["badge"] | ""; label: string }[] = [
   { value: "", label: "In Stock" },
   { value: "new", label: "New" },
-  { value: "sale", label: "On Sale" },
   { value: "sold-out", label: "Out of Stock" },
 ];
 

@@ -28,7 +28,7 @@ export function FeaturedBanner() {
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
         const val = json?.data?.value as FeaturedData | undefined;
-        if (val?.title) setData(val);
+        if (val?.title || val?.title_id) setData(val);
       })
       .catch(() => {});
   }, []);

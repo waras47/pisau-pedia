@@ -15,23 +15,19 @@ interface ProductCardProps {
   className?: string;
 }
 
-const badgeLabel: Record<NonNullable<Product["badge"]>, string> = {
-  new: "New",
-  sale: "Sale",
-  "sold-out": "Sold Out",
-};
+function discountPercent(price: number, compareAt: number): number {
+  if (!compareAt || compareAt <= price) return 0;
+  return Math.round(((compareAt - price) / compareAt) * 100);
+}
 
 export function ProductCard({ product, className }: ProductCardProps) {
   const { formatPrice, t } = useLocaleCurrency();
   const isSoldOut = product.badge === "sold-out";
+  const discount = product.compareAtPrice ? discountPercent(product.price, product.compareAtPrice) : 0;
 
   const media = (
     <div className="relative">
       {product.image ? (
-        // Box ratio matches the product photo set's actual aspect ratio
-        // (~1.875:1 / 15:8, checked across all 44 dev-image files) —
-        // object-contain still guards against any future image that
-        // doesn't match, letterboxing instead of cropping it.
         <div className="aspect-[15/8] w-full overflow-hidden bg-muted">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -43,12 +39,17 @@ export function ProductCard({ product, className }: ProductCardProps) {
       ) : (
         <PlaceholderImage label={product.category} ratio="landscape" />
       )}
-      {product.badge ? (
-        <Badge
-          variant={product.badge === "sale" ? "copper" : "neutral"}
-          className="absolute left-3 top-3"
-        >
-          {badgeLabel[product.badge]}
+      {isSoldOut ? (
+        <Badge variant="neutral" className="absolute left-3 top-3">
+          Sold Out
+        </Badge>
+      ) : product.badge === "new" ? (
+        <Badge variant="neutral" className="absolute left-3 top-3">
+          New
+        </Badge>
+      ) : discount > 0 ? (
+        <Badge variant="copper" className="absolute left-3 top-3">
+          Save {discount}%
         </Badge>
       ) : null}
     </div>

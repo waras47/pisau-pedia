@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { ProductGrid, type Product } from "@/entities/product";
 
 export type SortKey = "featured" | "price-asc" | "price-desc" | "rating";
+type StockFilter = "all" | "in-stock" | "out-of-stock";
 
 interface CollectionToolbarProps {
   products: Product[];
@@ -18,10 +19,17 @@ const sortOptions: { value: SortKey; label: string }[] = [
   { value: "rating", label: "Top Rated" },
 ];
 
+const stockOptions: { value: StockFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "in-stock", label: "In Stock" },
+  { value: "out-of-stock", label: "Out of Stock" },
+];
+
 const PER_PAGE_OPTIONS = [12, 24, 48];
 
 export function CollectionToolbar({ products, perPage = 12 }: CollectionToolbarProps) {
   const [activeCategory, setActiveCategory] = useState<string>("All");
+  const [stockFilter, setStockFilter] = useState<StockFilter>("all");
   const [sort, setSort] = useState<SortKey>("featured");
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(perPage);
@@ -32,10 +40,15 @@ export function CollectionToolbar({ products, perPage = 12 }: CollectionToolbarP
   }, [products]);
 
   const filteredProducts = useMemo(() => {
-    const filtered =
-      activeCategory === "All"
-        ? products
-        : products.filter((p) => p.category === activeCategory);
+    let filtered = activeCategory === "All"
+      ? products
+      : products.filter((p) => p.category === activeCategory);
+
+    if (stockFilter === "in-stock") {
+      filtered = filtered.filter((p) => p.badge !== "sold-out");
+    } else if (stockFilter === "out-of-stock") {
+      filtered = filtered.filter((p) => p.badge === "sold-out");
+    }
 
     const sorted = [...filtered];
     switch (sort) {
@@ -52,7 +65,7 @@ export function CollectionToolbar({ products, perPage = 12 }: CollectionToolbarP
         break;
     }
     return sorted;
-  }, [products, activeCategory, sort]);
+  }, [products, activeCategory, stockFilter, sort]);
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const pagedProducts = filteredProducts.slice((page - 1) * itemsPerPage, page * itemsPerPage);
@@ -70,22 +83,41 @@ export function CollectionToolbar({ products, perPage = 12 }: CollectionToolbarP
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2">
-          <label htmlFor="category-filter" className="text-xs text-muted-foreground whitespace-nowrap">
-            Category
-          </label>
-          <select
-            id="category-filter"
-            value={activeCategory}
-            onChange={(e) => handleCategoryChange(e.target.value)}
-            className="border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
-          >
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <label htmlFor="category-filter" className="text-xs text-muted-foreground whitespace-nowrap">
+              Category
+            </label>
+            <select
+              id="category-filter"
+              value={activeCategory}
+              onChange={(e) => handleCategoryChange(e.target.value)}
+              className="border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+            >
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <label htmlFor="stock-filter" className="text-xs text-muted-foreground whitespace-nowrap">
+              Availability
+            </label>
+            <select
+              id="stock-filter"
+              value={stockFilter}
+              onChange={(e) => { setStockFilter(e.target.value as StockFilter); setPage(1); }}
+              className="border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+            >
+              {stockOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
