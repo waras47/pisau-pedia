@@ -384,7 +384,7 @@ function PreviewBox({
         {!shape ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src="http://localhost:9000/pisaupedia/configurator/shapes/preview-outline.png"
+            src="/images/configurator/preview-outline.png"
             alt="Knife outline"
             className="knife-img absolute opacity-60"
           />

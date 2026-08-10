@@ -15,6 +15,7 @@ import {
 import { globalSearch, type GlobalSearchResult } from "@/entities/search/api/search.api";
 
 import { useAuth } from "@/features/auth/model/AuthProvider";
+import { usePushNotification } from "@/features/push-notification/usePushNotification";
 
 const NOTIFICATION_POLL_MS = 30000;
 const SEARCH_DEBOUNCE_MS = 300;
@@ -60,6 +61,7 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
   const { user, logout } = useAuth();
   const router = useRouter();
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const push = usePushNotification();
 
   function handleSearchInput(value: string) {
     setSearchQuery(value);
@@ -271,6 +273,31 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
                     ))
                   )}
                 </div>
+                {push.state !== "unsupported" && (
+                  <div className="border-t border-gray-100 px-3 py-2">
+                    {push.state === "granted" ? (
+                      <button
+                        type="button"
+                        onClick={push.unsubscribe}
+                        disabled={push.loading}
+                        className="w-full rounded bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 disabled:opacity-50"
+                      >
+                        {push.loading ? "..." : "Matikan Push Notification"}
+                      </button>
+                    ) : push.state === "denied" ? (
+                      <p className="text-center text-xs text-gray-400">Push notification diblokir browser. Ubah di pengaturan browser.</p>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={push.subscribe}
+                        disabled={push.loading}
+                        className="w-full rounded bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-600 disabled:opacity-50"
+                      >
+                        {push.loading ? "..." : "Aktifkan Push Notification"}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </>
           )}

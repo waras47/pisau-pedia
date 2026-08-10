@@ -32,6 +32,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.siteUrl),
   title: `${siteConfig.tagline} — ${siteConfig.name}`,
   description: siteConfig.description,
+  manifest: "/manifest.json",
   openGraph: {
     type: "website",
     locale: "id_ID",

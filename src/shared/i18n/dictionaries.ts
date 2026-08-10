@@ -19,9 +19,9 @@ const en = {
 
   // Hero (homepage)
   hero_eyebrow: "The heart of your kitchen",
-  hero_title: "Pisau Pedia",
+  hero_title: "PISAUPEDIA",
   hero_subtitle:
-    "Pisau Pedia is a genuine Indonesian brand offering quality kitchen knives with materials tailored to how you cook — precision-sharpened and ready to use before they reach your kitchen.",
+    "PISAUPEDIA is a genuine Indonesian brand offering quality kitchen knives with materials tailored to how you cook — precision-sharpened and ready to use before they reach your kitchen.",
   hero_cta_primary: "Find Your Knife",
   hero_cta_secondary: "Build a Knife",
   hero_footer: "Proudly Indonesian — custom orders for home cooks & restaurants",
@@ -307,7 +307,7 @@ const id = {
 
   // About page
   about_hero_eyebrow: "Cerita Kami",
-  about_hero_title: "Pisau Pedia",
+  about_hero_title: "PISAUPEDIA",
   about_hero_subtitle:
     "PISAUPEDIA adalah produk asli Indonesia, dibuat untuk performa terbaik di dapur Anda — untuk pecinta memasak dan profesional dapur di Indonesia, dengan material yang bisa disesuaikan dan layanan purna jual yang jarang ditawarkan toko lain.",
   about_story_eyebrow: "Produk Asli Indonesia",

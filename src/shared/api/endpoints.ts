@@ -66,6 +66,8 @@ function mapShape(s: ApiKnifeShape): KnifeShape {
     name: s.name,
     category: s.category,
     image: s.image_url || undefined,
+    silhouetteLight: s.image_url || undefined,
+    silhouetteDark: s.image_url || undefined,
   };
 }
 

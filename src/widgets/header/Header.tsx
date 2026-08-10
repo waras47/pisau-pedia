@@ -28,7 +28,7 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-border bg-surface">
       <AnnouncementBar />
 
-      <Container className="flex h-20 items-center justify-between gap-6">
+      <Container className="flex h-14 sm:h-20 items-center justify-between gap-4 sm:gap-6">
         <div className="flex items-center gap-3 lg:hidden">
           <IconButton label="Open menu" onClick={() => setMobileMenuOpen(true)}>
             <Menu size={22} />
@@ -36,7 +36,7 @@ export function Header() {
         </div>
 
         <Link href="/" className="flex items-center">
-          <Logo className="h-16 w-auto" />
+          <Logo className="h-10 sm:h-16 w-auto" />
         </Link>
 
         <MegaMenu />

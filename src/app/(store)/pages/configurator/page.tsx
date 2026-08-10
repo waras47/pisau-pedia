@@ -11,6 +11,8 @@ import type {
 
 import { KnifeConfigurator } from "@/features/knife-configurator";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Knife Configurator — Pisau Pedia",
   description: "Build your own custom Japanese knife, blade to handle.",
@@ -38,6 +40,8 @@ function mapShapes(
     category: s.category,
     description: s.description,
     image: s.image_url,
+    silhouetteLight: s.image_url,
+    silhouetteDark: s.image_url,
   }));
 }
 
