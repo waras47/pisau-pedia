@@ -241,6 +241,7 @@ export default function ProductsPage() {
     setEditProduct({
       ...product,
       description: detail.description,
+      descriptionEn: detail.description_en,
       careInstructions: detail.care_instructions,
       specs: detail.specs,
       highlights: detail.highlights,
@@ -281,6 +282,7 @@ export default function ProductsPage() {
         stock: editProduct.stock,
         weight: editProduct.weight,
         description: editProduct.description,
+        description_en: editProduct.descriptionEn || undefined,
         care_instructions: editProduct.careInstructions || undefined,
         specs: editProduct.specs,
         highlights: editProduct.highlights,
@@ -786,16 +788,32 @@ export default function ProductsPage() {
                   </Field>
                 </div>
 
-                {/* Description */}
-                <Field label="Description">
-                  <textarea
-                    rows={3}
-                    value={editProduct.description ?? ""}
-                    onChange={(e) => updateField("description", e.target.value)}
-                    className="admin-input resize-none"
-                    placeholder="Short product description..."
-                  />
-                </Field>
+                {/* Description (bilingual) */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Description</span>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-medium text-blue-500">🇮🇩 Indonesia</span>
+                      <textarea
+                        rows={3}
+                        value={editProduct.description ?? ""}
+                        onChange={(e) => updateField("description", e.target.value)}
+                        className="admin-input resize-none"
+                        placeholder="Deskripsi produk (Indonesia)..."
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-medium text-red-500">🇬🇧 English</span>
+                      <textarea
+                        rows={3}
+                        value={editProduct.descriptionEn ?? ""}
+                        onChange={(e) => updateField("descriptionEn", e.target.value)}
+                        className="admin-input resize-none"
+                        placeholder="Product description (English)..."
+                      />
+                    </div>
+                  </div>
+                </div>
 
                 {/* Knife Care */}
                 <Field label="Knife Care (perawatan pisau)">

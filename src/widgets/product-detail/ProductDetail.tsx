@@ -43,7 +43,8 @@ const DEFAULT_CARE_TIPS = [
 ];
 
 export function ProductDetail({ product, related, reviews = [] }: ProductDetailProps) {
-  const { formatPrice } = useLocaleCurrency();
+  const { formatPrice, locale } = useLocaleCurrency();
+  const description = (locale === "en" && product.descriptionEn) ? product.descriptionEn : product.description;
   const galleryLabels =
     product.galleryLabels ?? [product.category, "Detail", "In use"];
 
@@ -189,8 +190,8 @@ export function ProductDetail({ product, related, reviews = [] }: ProductDetailP
               ) : null}
             </div>
 
-            {product.description ? (
-              <p className="text-muted-foreground">{product.description}</p>
+            {description ? (
+              <p className="text-muted-foreground">{description}</p>
             ) : null}
 
             <AddToCart product={product} />
@@ -232,7 +233,7 @@ export function ProductDetail({ product, related, reviews = [] }: ProductDetailP
 
           {activeTab === "description" ? (
             <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
-              {product.description ?? "Deskripsi lengkap untuk produk ini akan segera ditambahkan."}
+              {description ?? "Deskripsi lengkap untuk produk ini akan segera ditambahkan."}
             </p>
           ) : null}
 

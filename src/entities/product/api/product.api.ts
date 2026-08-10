@@ -29,6 +29,7 @@ export interface ProductAngleImages {
 
 export interface ProductApiDetail extends ProductApiItem {
   description?: string;
+  description_en?: string;
   care_instructions?: string;
   images: string[];
   angle_images: ProductAngleImages;
@@ -46,6 +47,7 @@ export interface ProductInput {
   name: string;
   slug?: string;
   description?: string;
+  description_en?: string;
   care_instructions?: string;
   price: number;
   compare_at_price?: number;

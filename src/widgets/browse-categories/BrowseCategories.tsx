@@ -7,15 +7,17 @@ import { useLocaleCurrency } from "@/features/locale-currency/model/LocaleProvid
 import { Container } from "@/shared/ui/Container";
 import { SectionHeading } from "@/shared/ui/SectionHeading";
 import { env } from "@/shared/config/env";
+import { localized } from "@/shared/lib/localized";
 
 interface BrowseCategory {
   title: string;
   href: string;
   image: string;
+  [key: string]: string;
 }
 
 export function BrowseCategories() {
-  const { t } = useLocaleCurrency();
+  const { t, locale } = useLocaleCurrency();
   const [categories, setCategories] = useState<BrowseCategory[]>([]);
 
   useEffect(() => {
@@ -38,9 +40,9 @@ export function BrowseCategories() {
           {categories.map((cat, i) => (
             <Link key={i} href={cat.href} className="group flex flex-col gap-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cat.image} alt={cat.title} className="aspect-[4/3] w-full object-cover" />
+              <img src={cat.image} alt={localized(cat, "title", locale)} className="aspect-[4/3] w-full object-cover" />
               <span className="text-center font-display text-lg font-medium transition-colors group-hover:text-accent">
-                {cat.title}
+                {localized(cat, "title", locale)}
               </span>
             </Link>
           ))}

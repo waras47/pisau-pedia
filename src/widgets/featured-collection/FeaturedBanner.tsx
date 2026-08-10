@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react";
 
 import { Badge } from "@/shared/ui/Badge";
 import { env } from "@/shared/config/env";
+import { localized } from "@/shared/lib/localized";
 
 import { useLocaleCurrency } from "@/features/locale-currency";
 
@@ -15,10 +16,11 @@ interface FeaturedData {
   description: string;
   cta: string;
   image: string;
+  [key: string]: string;
 }
 
 export function FeaturedBanner() {
-  const { t } = useLocaleCurrency();
+  const { t, locale } = useLocaleCurrency();
   const [data, setData] = useState<FeaturedData | null>(null);
 
   useEffect(() => {
@@ -31,10 +33,10 @@ export function FeaturedBanner() {
       .catch(() => {});
   }, []);
 
-  const badge = data?.badge || t("featured_badge");
-  const title = data?.title || t("featured_title");
-  const description = data?.description || t("featured_desc");
-  const cta = data?.cta || t("featured_cta");
+  const badge = localized(data, "badge", locale) || t("featured_badge");
+  const title = localized(data, "title", locale) || t("featured_title");
+  const description = localized(data, "description", locale) || t("featured_desc");
+  const cta = localized(data, "cta", locale) || t("featured_cta");
   const image = data?.image;
 
   return (

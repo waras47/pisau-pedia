@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/shared/ui/Button";
 import { Container } from "@/shared/ui/Container";
 import { env } from "@/shared/config/env";
+import { localized } from "@/shared/lib/localized";
 
 import { useLocaleCurrency } from "@/features/locale-currency";
 
@@ -19,10 +20,11 @@ interface HeroText {
   cta_primary: string;
   cta_secondary: string;
   footer: string;
+  [key: string]: string;
 }
 
 export function Hero() {
-  const { t } = useLocaleCurrency();
+  const { t, locale } = useLocaleCurrency();
   const [custom, setCustom] = useState<HeroText | null>(null);
 
   useEffect(() => {
@@ -35,12 +37,12 @@ export function Hero() {
       .catch(() => {});
   }, []);
 
-  const eyebrow = custom?.eyebrow || t("hero_eyebrow");
-  const title = custom?.title || t("hero_title");
-  const subtitle = custom?.subtitle || t("hero_subtitle");
-  const ctaPrimary = custom?.cta_primary || t("hero_cta_primary");
-  const ctaSecondary = custom?.cta_secondary || t("hero_cta_secondary");
-  const footer = custom?.footer || t("hero_footer");
+  const eyebrow = localized(custom, "eyebrow", locale) || t("hero_eyebrow");
+  const title = localized(custom, "title", locale) || t("hero_title");
+  const subtitle = localized(custom, "subtitle", locale) || t("hero_subtitle");
+  const ctaPrimary = localized(custom, "cta_primary", locale) || t("hero_cta_primary");
+  const ctaSecondary = localized(custom, "cta_secondary", locale) || t("hero_cta_secondary");
+  const footer = localized(custom, "footer", locale) || t("hero_footer");
 
   return (
     <section className="relative flex min-h-[80vh] items-center overflow-hidden bg-black lg:min-h-[640px]">

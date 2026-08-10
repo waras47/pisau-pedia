@@ -88,6 +88,7 @@ function toProduct(p: ProductApiItem | ProductApiDetail): Product {
     weight: p.weight,
     image: p.image ?? detail.images?.[0],
     description: detail.description,
+    descriptionEn: detail.description_en,
     careInstructions: detail.care_instructions,
     specs: detail.specs,
     highlights: detail.highlights,

@@ -32,6 +32,7 @@ export interface Product {
 
   // — field opsional untuk halaman detail —
   description?: string;
+  descriptionEn?: string;
   careInstructions?: string;
   highlights?: string[];
   specs?: ProductSpec[];

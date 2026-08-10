@@ -21,54 +21,98 @@ interface SiteContentRow {
 interface HeroSlide {
   image: string;
   alt: string;
+  alt_id: string;
+  alt_en: string;
 }
 
 interface HeroText {
   eyebrow: string;
+  eyebrow_id: string;
+  eyebrow_en: string;
   title: string;
+  title_id: string;
+  title_en: string;
   subtitle: string;
+  subtitle_id: string;
+  subtitle_en: string;
   cta_primary: string;
+  cta_primary_id: string;
+  cta_primary_en: string;
   cta_secondary: string;
+  cta_secondary_id: string;
+  cta_secondary_en: string;
   footer: string;
+  footer_id: string;
+  footer_en: string;
 }
 
 interface CategoryBanner {
   title: string;
+  title_id: string;
+  title_en: string;
   description: string;
+  description_id: string;
+  description_en: string;
   cta: string;
+  cta_id: string;
+  cta_en: string;
   href: string;
   image: string;
 }
 
 interface BrowseCategory {
   title: string;
+  title_id: string;
+  title_en: string;
   href: string;
   image: string;
 }
 
 interface FeaturedBanner {
   badge: string;
+  badge_id: string;
+  badge_en: string;
   title: string;
+  title_id: string;
+  title_en: string;
   description: string;
+  description_id: string;
+  description_en: string;
   cta: string;
+  cta_id: string;
+  cta_en: string;
+  image: string;
 }
 
 /* ------------------------------------------------------------------ */
 /*  Defaults                                                           */
 /* ------------------------------------------------------------------ */
 
-const defaultHeroSlides: HeroSlide[] = [{ image: "", alt: "" }];
-const defaultHeroText: HeroText = { eyebrow: "", title: "", subtitle: "", cta_primary: "", cta_secondary: "", footer: "" };
+const defaultHeroSlides: HeroSlide[] = [{ image: "", alt: "", alt_id: "", alt_en: "" }];
+const defaultHeroText: HeroText = {
+  eyebrow: "", eyebrow_id: "", eyebrow_en: "",
+  title: "", title_id: "", title_en: "",
+  subtitle: "", subtitle_id: "", subtitle_en: "",
+  cta_primary: "", cta_primary_id: "", cta_primary_en: "",
+  cta_secondary: "", cta_secondary_id: "", cta_secondary_en: "",
+  footer: "", footer_id: "", footer_en: "",
+};
 const defaultCategoryBanners: CategoryBanner[] = [
-  { title: "", description: "", cta: "", href: "", image: "" },
-  { title: "", description: "", cta: "", href: "", image: "" },
+  { title: "", title_id: "", title_en: "", description: "", description_id: "", description_en: "", cta: "", cta_id: "", cta_en: "", href: "", image: "" },
+  { title: "", title_id: "", title_en: "", description: "", description_id: "", description_en: "", cta: "", cta_id: "", cta_en: "", href: "", image: "" },
 ];
 const defaultBrowseCategories: BrowseCategory[] = [
-  { title: "", href: "", image: "" },
-  { title: "", href: "", image: "" },
-  { title: "", href: "", image: "" },
+  { title: "", title_id: "", title_en: "", href: "", image: "" },
+  { title: "", title_id: "", title_en: "", href: "", image: "" },
+  { title: "", title_id: "", title_en: "", href: "", image: "" },
 ];
-const defaultFeaturedBanner: FeaturedBanner = { badge: "", title: "", description: "", cta: "" };
+const defaultFeaturedBanner: FeaturedBanner = {
+  badge: "", badge_id: "", badge_en: "",
+  title: "", title_id: "", title_en: "",
+  description: "", description_id: "", description_en: "",
+  cta: "", cta_id: "", cta_en: "",
+  image: "",
+};
 
 /* ------------------------------------------------------------------ */
 /*  Section config                                                     */
@@ -164,7 +208,7 @@ export default function SiteContentsPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-800">Konten Website</h1>
-        <p className="text-sm text-gray-400">Kelola konten dinamis halaman utama</p>
+        <p className="text-sm text-gray-400">Kelola konten dinamis halaman utama (multi-bahasa ID/EN)</p>
       </div>
 
       {/* Sections */}
@@ -260,6 +304,52 @@ function SectionForm({
 }
 
 /* ------------------------------------------------------------------ */
+/*  Bilingual field pair                                                */
+/* ------------------------------------------------------------------ */
+
+function BilingualField({
+  label,
+  valueId,
+  valueEn,
+  onChangeId,
+  onChangeEn,
+  full,
+  multiline,
+}: {
+  label: string;
+  valueId: string;
+  valueEn: string;
+  onChangeId: (v: string) => void;
+  onChangeEn: (v: string) => void;
+  full?: boolean;
+  multiline?: boolean;
+}) {
+  return (
+    <div className={`flex flex-col gap-2 ${full ? "sm:col-span-2" : ""}`}>
+      <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</span>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <div className="flex flex-col gap-1">
+          <span className="text-[10px] font-medium text-blue-500">🇮🇩 Indonesia</span>
+          {multiline ? (
+            <textarea rows={3} value={valueId} onChange={(e) => onChangeId(e.target.value)} className="sc-input resize-none" />
+          ) : (
+            <input type="text" value={valueId} onChange={(e) => onChangeId(e.target.value)} className="sc-input" />
+          )}
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-[10px] font-medium text-red-500">🇬🇧 English</span>
+          {multiline ? (
+            <textarea rows={3} value={valueEn} onChange={(e) => onChangeEn(e.target.value)} className="sc-input resize-none" />
+          ) : (
+            <input type="text" value={valueEn} onChange={(e) => onChangeEn(e.target.value)} className="sc-input" />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Hero Slides                                                        */
 /* ------------------------------------------------------------------ */
 
@@ -269,7 +359,7 @@ function HeroSlidesForm({ value, onChange }: { value: HeroSlide[]; onChange: (v:
     onChange(next);
   }
   function add() {
-    onChange([...value, { image: "", alt: "" }]);
+    onChange([...value, { image: "", alt: "", alt_id: "", alt_en: "" }]);
   }
   function remove(idx: number) {
     onChange(value.filter((_, i) => i !== idx));
@@ -291,14 +381,13 @@ function HeroSlidesForm({ value, onChange }: { value: HeroSlide[]; onChange: (v:
               value={slide.image}
               onUploaded={(url) => update(idx, { image: url })}
             />
-            <Field label="Alt Text">
-              <input
-                type="text"
-                value={slide.alt}
-                onChange={(e) => update(idx, { alt: e.target.value })}
-                className="sc-input"
-              />
-            </Field>
+            <BilingualField
+              label="Alt Text"
+              valueId={slide.alt_id || slide.alt || ""}
+              valueEn={slide.alt_en || ""}
+              onChangeId={(v) => update(idx, { alt_id: v, alt: v })}
+              onChangeEn={(v) => update(idx, { alt_en: v })}
+            />
           </div>
         </div>
       ))}
@@ -314,10 +403,13 @@ function HeroSlidesForm({ value, onChange }: { value: HeroSlide[]; onChange: (v:
 /* ------------------------------------------------------------------ */
 
 function HeroTextForm({ value, onChange }: { value: HeroText; onChange: (v: HeroText) => void }) {
-  function update(field: keyof HeroText, val: string) {
-    onChange({ ...value, [field]: val });
+  function updateBilingual(field: string, lang: "id" | "en", val: string) {
+    const patch: Record<string, string> = { [`${field}_${lang}`]: val };
+    if (lang === "id") patch[field] = val;
+    onChange({ ...value, ...patch });
   }
-  const fields: { key: keyof HeroText; label: string }[] = [
+
+  const fields: { key: string; label: string }[] = [
     { key: "eyebrow", label: "Eyebrow" },
     { key: "title", label: "Title" },
     { key: "subtitle", label: "Subtitle" },
@@ -325,12 +417,18 @@ function HeroTextForm({ value, onChange }: { value: HeroText; onChange: (v: Hero
     { key: "cta_secondary", label: "CTA Secondary" },
     { key: "footer", label: "Footer" },
   ];
+
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       {fields.map((f) => (
-        <Field key={f.key} label={f.label}>
-          <input type="text" value={value[f.key]} onChange={(e) => update(f.key, e.target.value)} className="sc-input" />
-        </Field>
+        <BilingualField
+          key={f.key}
+          label={f.label}
+          valueId={(value as Record<string, string>)[`${f.key}_id`] || (value as Record<string, string>)[f.key] || ""}
+          valueEn={(value as Record<string, string>)[`${f.key}_en`] || ""}
+          onChangeId={(v) => updateBilingual(f.key, "id", v)}
+          onChangeEn={(v) => updateBilingual(f.key, "en", v)}
+        />
       ))}
     </div>
   );
@@ -345,8 +443,13 @@ function CategoryBannersForm({ value, onChange }: { value: CategoryBanner[]; onC
     const next = value.map((b, i) => (i === idx ? { ...b, ...patch } : b));
     onChange(next);
   }
+  function updateBilingual(idx: number, field: string, lang: "id" | "en", val: string) {
+    const patch: Record<string, string> = { [`${field}_${lang}`]: val };
+    if (lang === "id") patch[field] = val;
+    update(idx, patch as Partial<CategoryBanner>);
+  }
   function add() {
-    onChange([...value, { title: "", description: "", cta: "", href: "", image: "" }]);
+    onChange([...value, { title: "", title_id: "", title_en: "", description: "", description_id: "", description_en: "", cta: "", cta_id: "", cta_en: "", href: "", image: "" }]);
   }
   function remove(idx: number) {
     onChange(value.filter((_, i) => i !== idx));
@@ -363,15 +466,27 @@ function CategoryBannersForm({ value, onChange }: { value: CategoryBanner[]; onC
             )}
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Judul">
-              <input type="text" value={banner.title} onChange={(e) => update(idx, { title: e.target.value })} className="sc-input" />
-            </Field>
-            <Field label="Deskripsi">
-              <input type="text" value={banner.description} onChange={(e) => update(idx, { description: e.target.value })} className="sc-input" />
-            </Field>
-            <Field label="Teks CTA">
-              <input type="text" value={banner.cta} onChange={(e) => update(idx, { cta: e.target.value })} className="sc-input" />
-            </Field>
+            <BilingualField
+              label="Judul"
+              valueId={banner.title_id || banner.title || ""}
+              valueEn={banner.title_en || ""}
+              onChangeId={(v) => updateBilingual(idx, "title", "id", v)}
+              onChangeEn={(v) => updateBilingual(idx, "title", "en", v)}
+            />
+            <BilingualField
+              label="Deskripsi"
+              valueId={banner.description_id || banner.description || ""}
+              valueEn={banner.description_en || ""}
+              onChangeId={(v) => updateBilingual(idx, "description", "id", v)}
+              onChangeEn={(v) => updateBilingual(idx, "description", "en", v)}
+            />
+            <BilingualField
+              label="Teks CTA"
+              valueId={banner.cta_id || banner.cta || ""}
+              valueEn={banner.cta_en || ""}
+              onChangeId={(v) => updateBilingual(idx, "cta", "id", v)}
+              onChangeEn={(v) => updateBilingual(idx, "cta", "en", v)}
+            />
             <Field label="Link (href)">
               <input type="text" value={banner.href} onChange={(e) => update(idx, { href: e.target.value })} className="sc-input" />
             </Field>
@@ -395,8 +510,13 @@ function BrowseCategoriesForm({ value, onChange }: { value: BrowseCategory[]; on
     const next = value.map((c, i) => (i === idx ? { ...c, ...patch } : c));
     onChange(next);
   }
+  function updateBilingual(idx: number, field: string, lang: "id" | "en", val: string) {
+    const patch: Record<string, string> = { [`${field}_${lang}`]: val };
+    if (lang === "id") patch[field] = val;
+    update(idx, patch as Partial<BrowseCategory>);
+  }
   function add() {
-    onChange([...value, { title: "", href: "", image: "" }]);
+    onChange([...value, { title: "", title_id: "", title_en: "", href: "", image: "" }]);
   }
   function remove(idx: number) {
     onChange(value.filter((_, i) => i !== idx));
@@ -413,9 +533,13 @@ function BrowseCategoriesForm({ value, onChange }: { value: BrowseCategory[]; on
             )}
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Judul">
-              <input type="text" value={cat.title} onChange={(e) => update(idx, { title: e.target.value })} className="sc-input" />
-            </Field>
+            <BilingualField
+              label="Judul"
+              valueId={cat.title_id || cat.title || ""}
+              valueEn={cat.title_en || ""}
+              onChangeId={(v) => updateBilingual(idx, "title", "id", v)}
+              onChangeEn={(v) => updateBilingual(idx, "title", "en", v)}
+            />
             <Field label="Link (href)">
               <input type="text" value={cat.href} onChange={(e) => update(idx, { href: e.target.value })} className="sc-input" />
             </Field>
@@ -435,22 +559,46 @@ function BrowseCategoriesForm({ value, onChange }: { value: BrowseCategory[]; on
 /* ------------------------------------------------------------------ */
 
 function FeaturedBannerForm({ value, onChange }: { value: FeaturedBanner; onChange: (v: FeaturedBanner) => void }) {
-  function update(field: keyof FeaturedBanner, val: string) {
-    onChange({ ...value, [field]: val });
+  function updateBilingual(field: string, lang: "id" | "en", val: string) {
+    const patch: Record<string, string> = { [`${field}_${lang}`]: val };
+    if (lang === "id") patch[field] = val;
+    onChange({ ...value, ...patch });
   }
+
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="Badge">
-        <input type="text" value={value.badge} onChange={(e) => update("badge", e.target.value)} className="sc-input" />
-      </Field>
-      <Field label="Judul">
-        <input type="text" value={value.title} onChange={(e) => update("title", e.target.value)} className="sc-input" />
-      </Field>
-      <Field label="Deskripsi" full>
-        <textarea rows={3} value={value.description} onChange={(e) => update("description", e.target.value)} className="sc-input resize-none" />
-      </Field>
-      <Field label="Teks CTA">
-        <input type="text" value={value.cta} onChange={(e) => update("cta", e.target.value)} className="sc-input" />
+      <BilingualField
+        label="Badge"
+        valueId={value.badge_id || value.badge || ""}
+        valueEn={value.badge_en || ""}
+        onChangeId={(v) => updateBilingual("badge", "id", v)}
+        onChangeEn={(v) => updateBilingual("badge", "en", v)}
+      />
+      <BilingualField
+        label="Judul"
+        valueId={value.title_id || value.title || ""}
+        valueEn={value.title_en || ""}
+        onChangeId={(v) => updateBilingual("title", "id", v)}
+        onChangeEn={(v) => updateBilingual("title", "en", v)}
+      />
+      <BilingualField
+        label="Deskripsi"
+        valueId={value.description_id || value.description || ""}
+        valueEn={value.description_en || ""}
+        onChangeId={(v) => updateBilingual("description", "id", v)}
+        onChangeEn={(v) => updateBilingual("description", "en", v)}
+        full
+        multiline
+      />
+      <BilingualField
+        label="Teks CTA"
+        valueId={value.cta_id || value.cta || ""}
+        valueEn={value.cta_en || ""}
+        onChangeId={(v) => updateBilingual("cta", "id", v)}
+        onChangeEn={(v) => updateBilingual("cta", "en", v)}
+      />
+      <Field label="Gambar" full>
+        <ImageUploadField label="Gambar" value={value.image} onUploaded={(url) => onChange({ ...value, image: url })} />
       </Field>
     </div>
   );
