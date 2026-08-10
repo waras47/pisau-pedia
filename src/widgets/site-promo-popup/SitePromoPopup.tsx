@@ -79,7 +79,9 @@ export function SitePromoPopup() {
                   <span className="text-5xl font-black text-red-600">{promo.discount_percent}%</span>
                   <span className="text-xl font-bold text-gray-600 dark:text-gray-300">OFF</span>
                 </div>
-                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Untuk seluruh produk</p>
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  {promo.apply_to_all ? "Untuk seluruh produk" : `Untuk ${promo.product_ids?.length ?? 0} produk tertentu`}
+                </p>
                 {promo.description && (
                   <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">{promo.description}</p>
                 )}
@@ -124,7 +126,7 @@ export function SitePromoPopup() {
           className="flex items-center gap-2"
         >
           <span className="text-lg">🔥</span>
-          <span>{promo.discount_percent}% OFF Semua Produk!</span>
+          <span>{promo.discount_percent}% OFF {promo.apply_to_all ? "Semua Produk" : "Produk Pilihan"}!</span>
         </button>
         <button
           type="button"

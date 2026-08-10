@@ -224,6 +224,7 @@ export default function SitePromosPage() {
               <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
                 <th className="px-6 py-3">Promo</th>
                 <th className="px-6 py-3">Diskon</th>
+                <th className="px-6 py-3">Target</th>
                 <th className="px-6 py-3">Periode</th>
                 <th className="px-6 py-3">Status</th>
                 <th className="px-6 py-3">Popup Image</th>
@@ -232,9 +233,9 @@ export default function SitePromosPage() {
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {loading ? (
-                <tr><td colSpan={6} className="px-6 py-12 text-center text-gray-400">Loading...</td></tr>
+                <tr><td colSpan={7} className="px-6 py-12 text-center text-gray-400">Loading...</td></tr>
               ) : promos.length === 0 ? (
-                <tr><td colSpan={6} className="px-6 py-12 text-center text-gray-400">Belum ada promo</td></tr>
+                <tr><td colSpan={7} className="px-6 py-12 text-center text-gray-400">Belum ada promo</td></tr>
               ) : promos.map((p) => {
                 const status = promoStatus(p);
                 return (
@@ -245,6 +246,13 @@ export default function SitePromosPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-lg font-bold text-emerald-600">{p.discount_percent}%</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {p.apply_to_all ? (
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Semua produk</span>
+                      ) : (
+                        <span className="text-xs text-blue-600 dark:text-blue-400">{p.product_ids?.length ?? 0} produk</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
                       {formatDate(p.start_date)} — {formatDate(p.end_date)}
