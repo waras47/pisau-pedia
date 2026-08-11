@@ -22,6 +22,7 @@ export interface Product {
   reviewCount: number;
   badge?: "new" | "sold-out";
   slug: string;
+  sku?: string;
   maker?: string;
   /** Jumlah stok — dipakai di admin panel untuk kelola inventory. */
   stock?: number;

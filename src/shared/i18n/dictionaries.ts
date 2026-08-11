@@ -16,6 +16,9 @@ const en = {
   your_cart: "Your Cart",
   cart_empty: "Your cart is empty.",
   order_summary: "Order Summary",
+  checkout_intl_notice_title: "Shipping outside Indonesia?",
+  checkout_intl_notice_body:
+    "Our checkout only calculates shipping within Indonesia. Please contact our admin on WhatsApp or email first to arrange international shipping and confirm the cost before you order.",
 
   // Hero (homepage)
   hero_eyebrow: "The heart of your kitchen",
@@ -288,6 +291,9 @@ const id = {
   your_cart: "Keranjang Kamu",
   cart_empty: "Keranjang kamu masih kosong.",
   order_summary: "Ringkasan Pesanan",
+  checkout_intl_notice_title: "Pengiriman ke luar negeri?",
+  checkout_intl_notice_body:
+    "Sistem checkout kami hanya menghitung ongkir dalam Indonesia. Silakan hubungi admin kami via WhatsApp atau email dulu untuk mengatur pengiriman internasional dan konfirmasi biayanya sebelum kamu pesan.",
 
   // Hero (homepage)
   hero_eyebrow: "Jantung dapur Anda",

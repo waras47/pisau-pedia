@@ -5,6 +5,7 @@ export interface ProductApiItem {
   id: string;
   name: string;
   slug: string;
+  sku?: string;
   price: number;
   compare_at_price?: number;
   currency: string;
@@ -46,6 +47,7 @@ export interface ProductInput {
   category_id?: string;
   name: string;
   slug?: string;
+  sku?: string;
   description?: string;
   description_en?: string;
   care_instructions?: string;

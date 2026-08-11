@@ -35,6 +35,7 @@ const emptyProduct: Product = {
   id: "",
   name: "",
   slug: "",
+  sku: "",
   category: "",
   price: 0,
   currency: "IDR",
@@ -150,7 +151,7 @@ export default function ProductsPage() {
 
   function toProductVM(p: ProductApiItem): Product {
     return {
-      id: p.id, name: p.name, slug: p.slug, category: p.category ?? "",
+      id: p.id, name: p.name, slug: p.slug, sku: p.sku, category: p.category ?? "",
       price: p.price, compareAtPrice: p.compare_at_price, currency: "IDR",
       rating: p.rating, reviewCount: p.review_count, maker: p.maker,
       badge: p.badge as Product["badge"], stock: p.stock, weight: p.weight, image: p.image,
@@ -173,6 +174,7 @@ export default function ProductsPage() {
         (p) =>
           p.name.toLowerCase().includes(q) ||
           p.slug.toLowerCase().includes(q) ||
+          (p.sku ?? "").toLowerCase().includes(q) ||
           p.category.toLowerCase().includes(q) ||
           (p.maker ?? "").toLowerCase().includes(q),
       );
@@ -274,6 +276,7 @@ export default function ProductsPage() {
       const payload = {
         category_id: categoryId,
         name: editProduct.name,
+        sku: editProduct.sku || undefined,
         price: editProduct.price,
         compare_at_price: editProduct.compareAtPrice,
         maker: editProduct.maker || undefined,
@@ -456,6 +459,7 @@ export default function ProductsPage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-gray-700">{p.name}</p>
                     <p className="truncate text-[11px] text-gray-400">{p.slug}</p>
+                    {p.sku && <p className="truncate text-[11px] font-mono text-gray-400">SKU: {p.sku}</p>}
                   </div>
                   <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${getStatusStyle(p.badge)}`}>
                     {getStatusLabel(p.badge)}
@@ -553,6 +557,7 @@ export default function ProductsPage() {
                         <div>
                           <p className="font-medium text-gray-700">{p.name}</p>
                           <p className="text-[11px] text-gray-400">{p.slug}</p>
+                          {p.sku && <p className="text-[11px] font-mono text-gray-400">SKU: {p.sku}</p>}
                         </div>
                       </div>
                     </td>
@@ -673,6 +678,18 @@ export default function ProductsPage() {
                       onChange={(e) => updateField("slug", e.target.value)}
                       className="admin-input"
                       placeholder="auto-generated"
+                    />
+                  </Field>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="SKU">
+                    <input
+                      type="text"
+                      value={editProduct.sku ?? ""}
+                      onChange={(e) => updateField("sku", e.target.value.toUpperCase())}
+                      className="admin-input font-mono"
+                      placeholder={modal === "add" ? "kosongkan untuk generate otomatis" : "—"}
                     />
                   </Field>
                 </div>

@@ -84,6 +84,11 @@ interface FeaturedBanner {
   image: string;
 }
 
+interface ExchangeRateOverride {
+  mode: "auto" | "manual";
+  usd_to_idr: number;
+}
+
 /* ------------------------------------------------------------------ */
 /*  Defaults                                                           */
 /* ------------------------------------------------------------------ */
@@ -113,6 +118,7 @@ const defaultFeaturedBanner: FeaturedBanner = {
   cta: "", cta_id: "", cta_en: "",
   image: "",
 };
+const defaultExchangeRateOverride: ExchangeRateOverride = { mode: "auto", usd_to_idr: 0 };
 
 /* ------------------------------------------------------------------ */
 /*  Section config                                                     */
@@ -124,6 +130,7 @@ const SECTION_KEYS = [
   "category_banners",
   "browse_categories",
   "featured_banner",
+  "exchange_rate_override",
 ] as const;
 
 type SectionKey = (typeof SECTION_KEYS)[number];
@@ -134,6 +141,7 @@ const SECTION_LABELS: Record<SectionKey, string> = {
   category_banners: "Category Banners",
   browse_categories: "Browse Categories (Jelajahi Koleksi)",
   featured_banner: "Featured Banner",
+  exchange_rate_override: "Kurs Mata Uang (USD/IDR)",
 };
 
 /* ------------------------------------------------------------------ */
@@ -300,6 +308,8 @@ function SectionForm({
       return <BrowseCategoriesForm value={(value as BrowseCategory[] | undefined) ?? defaultBrowseCategories} onChange={onChange} />;
     case "featured_banner":
       return <FeaturedBannerForm value={(value as FeaturedBanner | undefined) ?? defaultFeaturedBanner} onChange={onChange} />;
+    case "exchange_rate_override":
+      return <ExchangeRateForm value={(value as ExchangeRateOverride | undefined) ?? defaultExchangeRateOverride} onChange={onChange} />;
   }
 }
 
@@ -600,6 +610,73 @@ function FeaturedBannerForm({ value, onChange }: { value: FeaturedBanner; onChan
       <Field label="Gambar" full>
         <ImageUploadField label="Gambar" value={value.image} onUploaded={(url) => onChange({ ...value, image: url })} />
       </Field>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Exchange Rate Override                                             */
+/* ------------------------------------------------------------------ */
+
+function ExchangeRateForm({ value, onChange }: { value: ExchangeRateOverride; onChange: (v: ExchangeRateOverride) => void }) {
+  const rate = value.usd_to_idr || 0;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <p className="text-sm text-gray-500">
+        Secara default, kurs USD ke IDR diambil otomatis dari internet dan diperbarui berkala.
+        Pilih &ldquo;Manual&rdquo; untuk menentukan sendiri berapa Rupiah per 1 Dolar — semua harga
+        produk yang ditampilkan dalam USD akan dihitung ulang pakai angka ini.
+      </p>
+
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <label className={`flex flex-1 cursor-pointer items-start gap-3 rounded-lg border p-4 ${value.mode === "auto" ? "border-emerald-400 bg-emerald-50/50" : "border-gray-200"}`}>
+          <input
+            type="radio"
+            name="exchange-rate-mode"
+            checked={value.mode === "auto"}
+            onChange={() => onChange({ ...value, mode: "auto" })}
+            className="mt-1"
+          />
+          <span>
+            <span className="block text-sm font-semibold text-gray-700">Otomatis</span>
+            <span className="block text-xs text-gray-500">Ikuti kurs pasar global (update tiap beberapa jam).</span>
+          </span>
+        </label>
+        <label className={`flex flex-1 cursor-pointer items-start gap-3 rounded-lg border p-4 ${value.mode === "manual" ? "border-emerald-400 bg-emerald-50/50" : "border-gray-200"}`}>
+          <input
+            type="radio"
+            name="exchange-rate-mode"
+            checked={value.mode === "manual"}
+            onChange={() => onChange({ ...value, mode: "manual" })}
+            className="mt-1"
+          />
+          <span>
+            <span className="block text-sm font-semibold text-gray-700">Manual</span>
+            <span className="block text-xs text-gray-500">Tentukan sendiri kursnya.</span>
+          </span>
+        </label>
+      </div>
+
+      {value.mode === "manual" && (
+        <Field label="1 USD = Rp">
+          <input
+            type="number"
+            min={1}
+            step={1}
+            value={rate || ""}
+            onChange={(e) => onChange({ ...value, usd_to_idr: Number(e.target.value) })}
+            placeholder="misal 15800"
+            className="sc-input max-w-xs"
+          />
+          {rate > 0 && (
+            <p className="mt-2 text-xs text-gray-500">
+              Contoh: produk Rp 10.000 akan tampil sebagai{" "}
+              <strong>${(10000 / rate).toFixed(2)}</strong> di mode USD.
+            </p>
+          )}
+        </Field>
+      )}
     </div>
   );
 }

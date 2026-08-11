@@ -1,10 +1,42 @@
 "use client";
 
+import { Mail, MessageCircle } from "lucide-react";
+
+import { siteConfig } from "@/shared/config/site.config";
 import { Container } from "@/shared/ui/Container";
 
 import { useCart } from "@/features/cart";
 import { CheckoutForm, CheckoutProvider, useCheckout } from "@/features/checkout";
 import { useLocaleCurrency } from "@/features/locale-currency";
+
+const SUPPORT_EMAIL = "pisaupedia@gmail.com";
+
+function InternationalShippingNotice() {
+  const { t } = useLocaleCurrency();
+
+  return (
+    <div className="mb-8 border border-border bg-surface p-4">
+      <p className="text-sm font-semibold text-foreground">{t("checkout_intl_notice_title")}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{t("checkout_intl_notice_body")}</p>
+      <div className="mt-3 flex flex-wrap gap-4">
+        <a
+          href={`https://wa.me/${siteConfig.social.whatsapp}?text=Halo%20Pisau%20Pedia%2C%20saya%20mau%20tanya%20soal%20pengiriman%20ke%20luar%20negeri.`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
+        >
+          <MessageCircle size={16} /> WhatsApp
+        </a>
+        <a
+          href={`mailto:${SUPPORT_EMAIL}`}
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
+        >
+          <Mail size={16} /> {SUPPORT_EMAIL}
+        </a>
+      </div>
+    </div>
+  );
+}
 
 function OrderSummary() {
   const { items, subtotal } = useCart();
@@ -77,6 +109,7 @@ export default function CheckoutPage() {
         <Container className="grid gap-12 lg:grid-cols-2">
           <div>
             <h1 className="mb-8 font-display text-3xl font-semibold tracking-tightest">Checkout</h1>
+            <InternationalShippingNotice />
             <CheckoutForm />
           </div>
           <OrderSummary />
