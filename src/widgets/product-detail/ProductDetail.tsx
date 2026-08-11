@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
-import { Badge } from "@/shared/ui/Badge";
 import { Container } from "@/shared/ui/Container";
 import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
 import { SectionHeading } from "@/shared/ui/SectionHeading";
@@ -181,12 +180,9 @@ export function ProductDetail({ product, related, reviews = [] }: ProductDetailP
                 {formatPrice(product.price, product.currency)}
               </span>
               {product.compareAtPrice ? (
-                <>
-                  <span className="text-lg text-muted-foreground line-through">
-                    {formatPrice(product.compareAtPrice, product.currency)}
-                  </span>
-                  <Badge variant="copper">Sale</Badge>
-                </>
+                <span className="text-lg text-muted-foreground line-through">
+                  {formatPrice(product.compareAtPrice, product.currency)}
+                </span>
               ) : null}
             </div>
 

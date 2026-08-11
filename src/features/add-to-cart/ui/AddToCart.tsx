@@ -54,7 +54,9 @@ export function AddToCart({ product }: AddToCartProps) {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Pengiriman 2–4 hari kerja · Gratis ongkir pesanan di atas Rp 500.000
+        {isSoldOut
+          ? "Stok habis"
+          : `Stok: ${product.stock ?? 0} unit`}
       </p>
     </div>
   );

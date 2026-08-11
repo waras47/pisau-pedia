@@ -82,8 +82,8 @@ export function CollectionToolbar({ products, perPage = 12 }: CollectionToolbarP
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-4 border-b border-border pb-6">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
             <label htmlFor="category-filter" className="text-xs text-muted-foreground whitespace-nowrap">
               Category
@@ -120,7 +120,7 @@ export function CollectionToolbar({ products, perPage = 12 }: CollectionToolbarP
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <span className="text-xs text-muted-foreground">
             {filteredProducts.length} produk
           </span>
