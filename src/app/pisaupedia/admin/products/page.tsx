@@ -160,6 +160,17 @@ export default function ProductsPage() {
 
   const PER_PAGE = 10;
 
+  // Fields the backend also requires (Name, Price) plus Category, which
+  // is only a frontend-enforced business rule — surfaced next to the Save
+  // button instead of just silently disabling it with no explanation.
+  const missingFields = useMemo(() => {
+    const missing: string[] = [];
+    if (!editProduct.name.trim()) missing.push("Nama Produk");
+    if (!editProduct.category.trim()) missing.push("Category");
+    if (!editProduct.price || editProduct.price <= 0) missing.push("Harga");
+    return missing;
+  }, [editProduct.name, editProduct.category, editProduct.price]);
+
   // Derived
   const allCategories = useMemo(
     () => Array.from(new Set(products.map((p) => p.category))).sort(),
@@ -263,7 +274,7 @@ export default function ProductsPage() {
   };
 
   async function handleSave() {
-    if (!editProduct.name.trim()) return;
+    if (missingFields.length > 0) return;
     setSaving(true);
     try {
       const categoryId = categories.find((c) => c.name === editProduct.category)?.id;
@@ -857,6 +868,11 @@ export default function ProductsPage() {
             </div>
 
             <div className="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4">
+              {missingFields.length > 0 && (
+                <p className="mr-auto text-xs text-red-500">
+                  Lengkapi dulu: {missingFields.join(", ")}
+                </p>
+              )}
               <button
                 type="button"
                 onClick={() => setModal("closed")}
@@ -867,10 +883,10 @@ export default function ProductsPage() {
               <button
                 type="button"
                 onClick={handleSave}
-                disabled={!editProduct.name.trim() || !editProduct.category.trim()}
+                disabled={missingFields.length > 0 || saving}
                 className="rounded-lg bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-40"
               >
-                {modal === "add" ? "Add Product" : "Save Changes"}
+                {saving ? "Menyimpan..." : modal === "add" ? "Add Product" : "Save Changes"}
               </button>
             </div>
           </div>

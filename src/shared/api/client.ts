@@ -15,6 +15,7 @@ interface ApiEnvelope<T> {
   message: string;
   data: T;
   meta?: ApiMeta;
+  errors?: unknown;
 }
 
 // Dispatched whenever a refresh attempt fails for a session that actually
@@ -73,7 +74,11 @@ async function apiFetchEnvelope<T>(
   const json = (await res.json().catch(() => null)) as ApiEnvelope<T> | null;
 
   if (!res.ok) {
-    throw new HttpError(res.status, json?.message ?? "Request failed");
+    // Validation failures put the human-readable detail in `errors`
+    // (e.g. "Name is required; Price must be at least 0") while `message`
+    // stays a generic "validation failed" — prefer the detail when present.
+    const detail = typeof json?.errors === "string" && json.errors ? json.errors : undefined;
+    throw new HttpError(res.status, detail ?? json?.message ?? "Request failed");
   }
 
   return json!;
