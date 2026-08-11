@@ -118,7 +118,7 @@ export function SitePromoPopup() {
 
   // Floating bubble
   return (
-    <div className="fixed bottom-24 right-4 z-[60] sm:bottom-6 sm:right-6">
+    <div className="fixed bottom-20 left-4 z-[60] sm:bottom-6 sm:right-6 sm:left-auto">
       <div className="group relative flex items-center gap-2 rounded-full bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-red-700 hover:shadow-xl hover:scale-105">
         <button
           type="button"
