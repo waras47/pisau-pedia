@@ -166,14 +166,14 @@ export function PromoPopup() {
 
   // Floating bubble
   return (
-    <div className="fixed bottom-36 left-4 z-[60] sm:bottom-6 sm:left-6">
-      <div className="group relative flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-emerald-700 hover:shadow-xl hover:scale-105">
+    <div className="fixed bottom-28 right-4 z-[60] sm:bottom-6 sm:left-6 sm:right-auto">
+      <div className="group relative flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-lg transition-all hover:bg-emerald-700 hover:shadow-xl sm:px-5 sm:py-3 sm:text-sm sm:gap-2">
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="flex items-center gap-2"
+          className="flex items-center gap-1.5 sm:gap-2"
         >
-          <span className="text-lg">🏷️</span>
+          <span className="text-sm sm:text-lg">🏷️</span>
           <span>{discountLabel} OFF?</span>
         </button>
         <button

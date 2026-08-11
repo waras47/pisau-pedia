@@ -118,15 +118,15 @@ export function SitePromoPopup() {
 
   // Floating bubble
   return (
-    <div className="fixed bottom-20 left-4 z-[60] sm:bottom-6 sm:right-6 sm:left-auto">
-      <div className="group relative flex items-center gap-2 rounded-full bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-red-700 hover:shadow-xl hover:scale-105">
+    <div className="fixed bottom-16 right-4 z-[60] sm:bottom-6 sm:right-6">
+      <div className="group relative flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-2 text-xs font-bold text-white shadow-lg transition-all hover:bg-red-700 hover:shadow-xl sm:px-5 sm:py-3 sm:text-sm sm:gap-2">
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="flex items-center gap-2"
+          className="flex items-center gap-1.5 sm:gap-2"
         >
-          <span className="text-lg">🔥</span>
-          <span>{promo.discount_percent}% OFF {promo.apply_to_all ? "Semua Produk" : "Produk Pilihan"}!</span>
+          <span className="text-sm sm:text-lg">🔥</span>
+          <span>{promo.discount_percent}% OFF</span>
         </button>
         <button
           type="button"
