@@ -24,7 +24,7 @@ async function getFeatured(): Promise<Product[]> {
       review_count: number;
       badge?: string;
       maker?: string;
-      images?: Array<{ url: string; alt: string }>;
+      image?: string;
     }>;
     if (!items?.length) return [];
     return items.map((p) => ({
@@ -39,7 +39,7 @@ async function getFeatured(): Promise<Product[]> {
       reviewCount: p.review_count,
       badge: p.badge as "new" | "sale" | "sold-out" | undefined,
       maker: p.maker,
-      image: p.images?.[0]?.url,
+      image: p.image,
     }));
   } catch {
     return [];

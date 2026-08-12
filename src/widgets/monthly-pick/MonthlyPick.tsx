@@ -19,7 +19,6 @@ async function getMonthlyPick(): Promise<Product | null> {
     const items = json.data as Array<Record<string, unknown>>;
     if (!items?.length) return null;
     const p = items[0]!;
-    const images = p.images as Array<{ url: string }> | undefined;
     return {
       id: p.id as string,
       name: p.name as string,
@@ -31,7 +30,7 @@ async function getMonthlyPick(): Promise<Product | null> {
       rating: p.rating as number,
       reviewCount: p.review_count as number,
       badge: p.badge as Product["badge"],
-      image: images?.[0]?.url,
+      image: p.image as string | undefined,
     };
   } catch {
     return null;
