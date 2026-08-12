@@ -81,6 +81,29 @@ export function createOrder(input: CreateOrderInput) {
   });
 }
 
+// CreateManualOrderInput is for admin-recorded orders (e.g. a WhatsApp
+// sale) — created already paid, no payment gateway or shipping-cost
+// lookup involved. See order_dto.go CreateManualOrderRequest.
+export interface CreateManualOrderInput {
+  customer_name: string;
+  customer_email?: string;
+  customer_phone?: string;
+  shipping_address: string;
+  shipping_city: string;
+  shipping_province?: string;
+  shipping_postal_code?: string;
+  shipping_cost?: number;
+  coupon_code?: string;
+  items: CreateOrderItemInput[];
+}
+
+export function createManualOrder(input: CreateManualOrderInput) {
+  return apiFetch<OrderResponse>("/admin/orders", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
 // getPublicOrder is used right after checkout (checkout/success) — the order
 // might belong to a guest (no login), so this hits the public GET /orders/:id
 // endpoint rather than the authenticated /users/me/orders/:id one below.

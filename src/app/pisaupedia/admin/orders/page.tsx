@@ -8,6 +8,7 @@ import { HttpError } from "@/shared/api/http-error";
 import { uploadImage } from "@/shared/api/upload.api";
 
 import {
+  createManualOrder,
   getOrder,
   getOrderStatusCounts,
   listOrders,
@@ -15,6 +16,7 @@ import {
   updateOrderStatus,
   updatePaymentStatus,
 } from "@/entities/order/api/order.api";
+import { listProducts, type ProductApiItem } from "@/entities/product/api/product.api";
 import {
   orderStatusLabel as statusLabel,
   orderStatusOptions,
@@ -59,6 +61,7 @@ export default function OrdersPage() {
   // Seeded once from ?q= (e.g. arriving from the admin global search) —
   // typed edits afterward stay local until Enter, same as Customers.
   const [search, setSearch] = useState(() => searchParams.get("q") ?? "");
+  const [showManualModal, setShowManualModal] = useState(false);
 
   async function loadOrders() {
     setLoading(true);
@@ -126,13 +129,22 @@ export default function OrdersPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800">Orders</h1>
-        <p className="text-sm text-gray-400">
-          {statusFilter ? `Menampilkan status: ${statusLabel(statusFilter)}` : "Semua pesanan customer"}
-          {" · "}
-          {orders.length} pesanan
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Orders</h1>
+          <p className="text-sm text-gray-400">
+            {statusFilter ? `Menampilkan status: ${statusLabel(statusFilter)}` : "Semua pesanan customer"}
+            {" · "}
+            {orders.length} pesanan
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowManualModal(true)}
+          className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600"
+        >
+          + Buat Order Manual
+        </button>
       </div>
 
       <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow-sm">
@@ -384,6 +396,145 @@ export default function OrdersPage() {
           </div>
         </div>
       )}
+
+      {showManualModal && (
+        <ManualOrderModal
+          onClose={() => setShowManualModal(false)}
+          onCreated={async () => {
+            setShowManualModal(false);
+            await Promise.all([loadOrders(), loadStatusCounts()]);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+interface ManualOrderItem {
+  productSlug: string;
+  quantity: number;
+}
+
+function ManualOrderModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+  const [products, setProducts] = useState<ProductApiItem[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [shippingCost, setShippingCost] = useState(0);
+  const [items, setItems] = useState<ManualOrderItem[]>([{ productSlug: "", quantity: 1 }]);
+
+  useEffect(() => {
+    listProducts({ perPage: 200 }).then(setProducts).catch(() => {});
+  }, []);
+
+  function updateItem(i: number, patch: Partial<ManualOrderItem>) {
+    setItems((prev) => prev.map((it, idx) => (idx === i ? { ...it, ...patch } : it)));
+  }
+
+  const validItems = items.filter((it) => it.productSlug && it.quantity > 0);
+  const canSave = customerName.trim() && address.trim() && city.trim() && validItems.length > 0;
+
+  async function handleSave() {
+    if (!canSave) return;
+    setSaving(true);
+    try {
+      await createManualOrder({
+        customer_name: customerName,
+        customer_email: customerEmail || undefined,
+        customer_phone: customerPhone || undefined,
+        shipping_address: address,
+        shipping_city: city,
+        shipping_cost: shippingCost,
+        items: validItems.map((it) => ({ product_slug: it.productSlug, quantity: it.quantity })),
+      });
+      onCreated();
+    } catch (err) {
+      alert(err instanceof HttpError ? err.message : "Gagal membuat order");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+      <div
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+          <h2 className="text-lg font-bold text-gray-800">Buat Order Manual</h2>
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+
+        <div className="flex flex-col gap-4 p-6">
+          <p className="text-xs text-gray-400">
+            Untuk order yang masuk lewat WhatsApp/telepon, supaya tetap tercatat di laporan. Order langsung dianggap sudah dibayar (lunas).
+          </p>
+
+          <div className="grid grid-cols-2 gap-3">
+            <input type="text" placeholder="Nama customer *" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="col-span-2 rounded-lg border border-gray-200 px-3 py-2 text-sm" />
+            <input type="text" placeholder="No. HP" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="rounded-lg border border-gray-200 px-3 py-2 text-sm" />
+            <input type="email" placeholder="Email (opsional)" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} className="rounded-lg border border-gray-200 px-3 py-2 text-sm" />
+            <input type="text" placeholder="Alamat pengiriman *" value={address} onChange={(e) => setAddress(e.target.value)} className="col-span-2 rounded-lg border border-gray-200 px-3 py-2 text-sm" />
+            <input type="text" placeholder="Kota *" value={city} onChange={(e) => setCity(e.target.value)} className="rounded-lg border border-gray-200 px-3 py-2 text-sm" />
+            <input type="number" min={0} placeholder="Ongkir (Rp)" value={shippingCost || ""} onChange={(e) => setShippingCost(Number(e.target.value))} className="rounded-lg border border-gray-200 px-3 py-2 text-sm" />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Item Pesanan</span>
+            {items.map((it, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <select
+                  value={it.productSlug}
+                  onChange={(e) => updateItem(i, { productSlug: e.target.value })}
+                  className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                >
+                  <option value="">Pilih produk...</option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.slug}>{p.name}</option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  min={1}
+                  value={it.quantity}
+                  onChange={(e) => updateItem(i, { quantity: Number(e.target.value) })}
+                  className="w-20 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                />
+                {items.length > 1 && (
+                  <button type="button" onClick={() => setItems((prev) => prev.filter((_, idx) => idx !== i))} className="text-xs text-red-500 hover:underline">
+                    Hapus
+                  </button>
+                )}
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setItems((prev) => [...prev, { productSlug: "", quantity: 1 }])}
+              className="self-start rounded-lg border border-dashed border-gray-300 px-3 py-1.5 text-xs text-gray-500 hover:border-emerald-400 hover:text-emerald-600"
+            >
+              + Tambah Item
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4">
+          <button type="button" onClick={onClose} className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">
+            Batal
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!canSave || saving}
+            className="rounded-lg bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-40"
+          >
+            {saving ? "Menyimpan..." : "Buat Order"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
