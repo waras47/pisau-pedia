@@ -12,6 +12,6 @@ export const siteConfig = {
     tiktok: "https://tiktok.com",
     youtube: "https://youtube.com",
     facebook: "https://www.facebook.com/share/1Efdp5ACxr/",
-    whatsapp: "6281292024942",
+    whatsapp: "628559991117",
   },
 } as const;

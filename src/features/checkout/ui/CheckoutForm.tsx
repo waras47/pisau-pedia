@@ -282,7 +282,7 @@ export function CheckoutForm() {
                     }`}
                   >
                     <span>
-                      <span className="font-medium">{opt.name} — {opt.service}</span>
+                      <span className="font-medium">{opt.code.toUpperCase()} — {opt.service}</span>
                       <span className="block text-xs text-muted-foreground">
                         {opt.description}
                         {opt.etd ? ` · estimasi ${opt.etd}` : ""}
