@@ -44,6 +44,7 @@ async function refreshAccessToken(): Promise<string | null> {
   }
   const json = (await res.json()) as ApiEnvelope<{ access_token: string; refresh_token: string }>;
   tokenStorage.setAccessToken(json.data.access_token);
+  tokenStorage.setRefreshToken(json.data.refresh_token);
   return json.data.access_token;
 }
 
