@@ -44,6 +44,7 @@ interface HeroText {
   footer: string;
   footer_id: string;
   footer_en: string;
+  [key: string]: string;
 }
 
 interface CategoryBanner {
@@ -434,8 +435,8 @@ function HeroTextForm({ value, onChange }: { value: HeroText; onChange: (v: Hero
         <BilingualField
           key={f.key}
           label={f.label}
-          valueId={(value as Record<string, string>)[`${f.key}_id`] || (value as Record<string, string>)[f.key] || ""}
-          valueEn={(value as Record<string, string>)[`${f.key}_en`] || ""}
+          valueId={value[`${f.key}_id`] || value[f.key] || ""}
+          valueEn={value[`${f.key}_en`] || ""}
           onChangeId={(v) => updateBilingual(f.key, "id", v)}
           onChangeEn={(v) => updateBilingual(f.key, "en", v)}
         />

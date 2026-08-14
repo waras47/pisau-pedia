@@ -20,7 +20,7 @@ export interface Product {
   currency: string;
   rating: number;
   reviewCount: number;
-  badge?: "new" | "sold-out";
+  badge?: "new" | "sale" | "sold-out";
   slug: string;
   sku?: string;
   maker?: string;

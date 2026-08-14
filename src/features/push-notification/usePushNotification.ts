@@ -40,7 +40,9 @@ export function usePushNotification() {
 
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidKey),
+        // ponytail: TS 5.7's generic Uint8Array<ArrayBufferLike> no longer
+        // structurally satisfies BufferSource — cast, not a real type bug.
+        applicationServerKey: urlBase64ToUint8Array(vapidKey) as BufferSource,
       });
 
       await subscribePush(subscription);
