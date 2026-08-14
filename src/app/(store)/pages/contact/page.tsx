@@ -14,15 +14,15 @@ const contactInfo = [
   {
     icon: MessageCircle,
     title: "WhatsApp",
-    content: "0812-9202-4942",
+    content: "+62 855-9991-117",
     href: `https://wa.me/${siteConfig.social.whatsapp}?text=Halo%20Pisau%20Pedia%2C%20saya%20mau%20tanya.`,
     description: "Chat langsung dengan tim kami",
   },
   {
     icon: Phone,
     title: "Telepon",
-    content: "0812-9202-4942",
-    href: "tel:+62812-92024942",
+    content: "+62 855-9991-117",
+    href: "tel:+628559991117",
     description: "Senin - Sabtu, 09:00 - 17:00 WIB",
   },
   {

@@ -70,7 +70,7 @@ export function Footer() {
               rel="noopener noreferrer"
               className="transition-colors hover:text-accent"
             >
-              0855-9991-117
+              08559991117
             </a>
           </div>
 
