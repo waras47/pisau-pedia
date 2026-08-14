@@ -1187,12 +1187,12 @@ function SpecsEditor({ specs, onChange }: { specs: ProductSpec[]; onChange: (s: 
       <div className="flex flex-col gap-2">
         {PRESET_SPEC_LABELS.map((label) => (
           <div key={label} className="flex items-center gap-2">
-            <span className="admin-input flex w-40 shrink-0 items-center bg-gray-50 text-gray-500">{label}</span>
+            <span className="w-40 shrink-0 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-500">{label}</span>
             <input
               type="text"
               value={specs.find((s) => s.label === label)?.value ?? ""}
               onChange={(e) => setPresetValue(label, e.target.value)}
-              className="admin-input"
+              className="admin-input min-w-0 flex-1"
               placeholder="Value"
             />
           </div>
@@ -1203,14 +1203,14 @@ function SpecsEditor({ specs, onChange }: { specs: ProductSpec[]; onChange: (s: 
               type="text"
               value={spec.label}
               onChange={(e) => updateExtra(i, "label", e.target.value)}
-              className="admin-input"
+              className="admin-input min-w-0 flex-1"
               placeholder="Custom label"
             />
             <input
               type="text"
               value={spec.value}
               onChange={(e) => updateExtra(i, "value", e.target.value)}
-              className="admin-input"
+              className="admin-input min-w-0 flex-1"
               placeholder="Value"
             />
             <button type="button" onClick={() => removeExtra(i)} className="shrink-0 text-red-400 hover:text-red-600">✕</button>
