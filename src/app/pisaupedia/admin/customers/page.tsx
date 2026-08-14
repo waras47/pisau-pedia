@@ -188,7 +188,6 @@ export default function CustomersPage() {
       {(detail || detailLoading) && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-          onClick={closeDetail}
         >
           <div
             onClick={(e) => e.stopPropagation()}

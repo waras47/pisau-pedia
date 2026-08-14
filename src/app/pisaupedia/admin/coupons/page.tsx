@@ -534,9 +534,9 @@ export default function CouponsPage() {
 
 // --- Sub-components ---
 
-function ModalOverlay({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+function ModalOverlay({ children }: { children: React.ReactNode; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div onClick={(e) => e.stopPropagation()} className="animate-fade-in">{children}</div>
     </div>
   );

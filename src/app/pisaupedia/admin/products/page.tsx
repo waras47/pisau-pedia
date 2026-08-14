@@ -1023,12 +1023,13 @@ export default function ProductsPage() {
 
 // --- Sub-components ---
 
-function ModalOverlay({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+function ModalOverlay({ children }: { children: React.ReactNode; onClose: () => void }) {
+  // No click-outside-to-close: an accidental click while filling out the
+  // create/edit product form used to discard it. Closing is via the X /
+  // Cancel button inside each modal only.
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="animate-fade-in">
-        {children}
-      </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="animate-fade-in">{children}</div>
     </div>
   );
 }

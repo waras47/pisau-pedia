@@ -103,7 +103,7 @@ function ShapePanel() {
       </div>
 
       {(modal === "add" || modal === "edit") && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setModal("closed")}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg rounded-xl bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
               <h2 className="text-lg font-bold text-gray-800">{modal === "add" ? "Tambah Shape" : `Edit: ${active?.name}`}</h2>
@@ -239,7 +239,7 @@ function BladePanel() {
       </div>
 
       {(modal === "add" || modal === "edit") && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setModal("closed")}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
               <h2 className="text-lg font-bold text-gray-800">{modal === "add" ? "Tambah Blade" : `Edit: ${active?.name}`}</h2>
@@ -358,7 +358,7 @@ function HandlePanel() {
       </div>
 
       {(modal === "add" || modal === "edit") && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setModal("closed")}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg rounded-xl bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
               <h2 className="text-lg font-bold text-gray-800">{modal === "add" ? "Tambah Handle" : `Edit: ${active?.name}`}</h2>
@@ -463,7 +463,7 @@ function AccessoryPanel() {
       </div>
 
       {(modal === "add" || modal === "edit") && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setModal("closed")}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg rounded-xl bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
               <h2 className="text-lg font-bold text-gray-800">{modal === "add" ? "Tambah Aksesori" : `Edit: ${active?.name}`}</h2>
@@ -549,7 +549,7 @@ function ImageUpload({ value, onChange }: { value: string; onChange: (url: strin
 
 function DeleteModal({ name, saving, onCancel, onDelete }: { name: string; saving: boolean; onCancel: () => void; onDelete: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onCancel}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
         <h2 className="text-lg font-bold text-gray-800">Hapus Item</h2>
         <p className="mt-2 text-sm text-gray-500">Yakin mau hapus <strong>{name}</strong>?</p>

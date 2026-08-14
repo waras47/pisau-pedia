@@ -196,7 +196,7 @@ export default function CollectionsPage() {
       </div>
 
       {(modal === "add" || modal === "edit") && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setModal("closed")}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg rounded-xl bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
               <h2 className="text-lg font-bold text-gray-800">
@@ -273,7 +273,7 @@ export default function CollectionsPage() {
       )}
 
       {modal === "delete" && active && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setModal("closed")}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
             <h2 className="text-lg font-bold text-gray-800">Hapus Koleksi</h2>
             <p className="mt-2 text-sm text-gray-500">

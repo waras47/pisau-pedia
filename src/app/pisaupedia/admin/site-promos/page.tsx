@@ -290,7 +290,7 @@ export default function SitePromosPage() {
       {/* Add/Edit Modal */}
       {(modal === "add" || modal === "edit") && (
         <>
-          <div className="fixed inset-0 z-50 bg-black/50" onClick={() => setModal("closed")} />
+          <div className="fixed inset-0 z-50 bg-black/50" />
           <div className="fixed inset-0 z-[51] flex items-center justify-center p-4">
             <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -475,7 +475,7 @@ export default function SitePromosPage() {
       {/* Delete confirmation */}
       {modal === "delete" && (
         <>
-          <div className="fixed inset-0 z-50 bg-black/50" onClick={() => setModal("closed")} />
+          <div className="fixed inset-0 z-50 bg-black/50" />
           <div className="fixed inset-0 z-[51] flex items-center justify-center p-4">
             <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">Hapus Promo</h2>
