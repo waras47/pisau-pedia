@@ -62,7 +62,7 @@ export function ProductDetail({ product, related, reviews = [] }: ProductDetailP
 
   const tabs: { key: typeof activeTab; label: string }[] = [
     { key: "description", label: "Description" },
-    { key: "specification", label: "Specification" },
+    ...(product.specs?.length ? [{ key: "specification" as const, label: "Specification" }] : []),
     ...(product.careInstructions ? [{ key: "care" as const, label: "Knife Care" }] : []),
   ];
 

@@ -1142,41 +1142,82 @@ function AngleImageUploadField({
   );
 }
 
+// ponytail: hardcoded to match the label set every knife/blade product in the
+// DB already uses (verified via product_specs table) — not category-driven,
+// since categories have no "is knife" flag. Accessories just leave these
+// blank; empty rows are dropped on save, so specs ends up [] and the
+// storefront's Specification tab auto-hides. Upgrade path: add a category
+// "kind" field if a genuinely different preset is needed for another type.
+const PRESET_SPEC_LABELS = [
+  "Blade Shape",
+  "Steel Type",
+  "Blade Length",
+  "Blade Height",
+  "Spine Thickness",
+  "Handle Length",
+  "Handle Type",
+  "Handle Materials",
+  "Saya/sheath Material",
+];
+
 function SpecsEditor({ specs, onChange }: { specs: ProductSpec[]; onChange: (s: ProductSpec[]) => void }) {
-  const addSpec = () => onChange([...specs, { label: "", value: "" }]);
-  const removeSpec = (i: number) => onChange(specs.filter((_, idx) => idx !== i));
-  const updateSpec = (i: number, key: "label" | "value", val: string) => {
-    const next = [...specs];
-    const current = next[i];
-    if (!current) return;
-    next[i] = { label: current.label, value: current.value, [key]: val };
-    onChange(next);
+  const extras = specs.filter((s) => !PRESET_SPEC_LABELS.includes(s.label));
+
+  const setPresetValue = (label: string, value: string) => {
+    const preset = PRESET_SPEC_LABELS.map((l) => ({
+      label: l,
+      value: l === label ? value : (specs.find((s) => s.label === l)?.value ?? ""),
+    })).filter((s) => s.value.trim() !== "");
+    onChange([...preset, ...extras]);
+  };
+
+  const addExtra = () => onChange([...specs, { label: "", value: "" }]);
+  const removeExtra = (i: number) => {
+    const target = extras[i];
+    onChange(specs.filter((s) => s !== target));
+  };
+  const updateExtra = (i: number, key: "label" | "value", val: string) => {
+    const target = extras[i];
+    if (!target) return;
+    onChange(specs.map((s) => (s === target ? { ...s, [key]: val } : s)));
   };
 
   return (
-    <Field label="Specifications">
+    <Field label="Specifications (knife/blade products only — kosongkan untuk kategori lain)">
       <div className="flex flex-col gap-2">
-        {specs.map((spec, i) => (
+        {PRESET_SPEC_LABELS.map((label) => (
+          <div key={label} className="flex items-center gap-2">
+            <span className="admin-input flex w-40 shrink-0 items-center bg-gray-50 text-gray-500">{label}</span>
+            <input
+              type="text"
+              value={specs.find((s) => s.label === label)?.value ?? ""}
+              onChange={(e) => setPresetValue(label, e.target.value)}
+              className="admin-input"
+              placeholder="Value"
+            />
+          </div>
+        ))}
+        {extras.map((spec, i) => (
           <div key={i} className="flex items-center gap-2">
             <input
               type="text"
               value={spec.label}
-              onChange={(e) => updateSpec(i, "label", e.target.value)}
+              onChange={(e) => updateExtra(i, "label", e.target.value)}
               className="admin-input"
-              placeholder="Label (e.g. Steel)"
+              placeholder="Custom label"
             />
             <input
               type="text"
               value={spec.value}
-              onChange={(e) => updateSpec(i, "value", e.target.value)}
+              onChange={(e) => updateExtra(i, "value", e.target.value)}
               className="admin-input"
-              placeholder="Value (e.g. Aogami #2)"
+              placeholder="Value"
             />
-            <button type="button" onClick={() => removeSpec(i)} className="shrink-0 text-red-400 hover:text-red-600">✕</button>
+            <button type="button" onClick={() => removeExtra(i)} className="shrink-0 text-red-400 hover:text-red-600">✕</button>
           </div>
         ))}
-        <button type="button" onClick={addSpec} className="self-start text-xs font-medium text-emerald-500 hover:underline">
-          + Add spec
+        <button type="button" onClick={addExtra} className="self-start text-xs font-medium text-emerald-500 hover:underline">
+          + Add custom spec
         </button>
       </div>
     </Field>
