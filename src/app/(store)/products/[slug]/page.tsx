@@ -2,6 +2,7 @@ import { type Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { env } from "@/shared/config/env";
+import { siteConfig } from "@/shared/config/site.config";
 
 import {
   getProductBySlug as getStaticProductBySlug,
@@ -135,7 +136,19 @@ function ProductJsonLd({ product }: { product: Product }) {
     name: product.name,
     description: product.description ?? product.category,
     image: product.image,
+    sku: product.sku,
     brand: { "@type": "Brand", name: "Pisau Pedia" },
+    // Powers the "Blade Length: 210mm · Blade Height: ..." spec line Google
+    // shows in rich results — same data already entered in the admin panel.
+    ...(product.specs?.length
+      ? {
+          additionalProperty: product.specs.map((s) => ({
+            "@type": "PropertyValue",
+            name: s.label,
+            value: s.value,
+          })),
+        }
+      : {}),
     ...(product.rating && product.reviewCount
       ? {
           aggregateRating: {
@@ -147,6 +160,7 @@ function ProductJsonLd({ product }: { product: Product }) {
       : {}),
     offers: {
       "@type": "Offer",
+      url: `${siteConfig.siteUrl}/products/${product.slug}`,
       priceCurrency: product.currency,
       price: product.price,
       availability:
