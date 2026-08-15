@@ -105,9 +105,26 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const apiProduct = await getApiProduct(params.slug);
   const product = apiProduct ? toProduct(apiProduct) : getStaticProductBySlug(params.slug);
   if (!product) return { title: "Product not found" };
+  const title = `${product.name} — Pisau Pedia`;
+  const description = product.description ?? product.category;
   return {
-    title: `${product.name} — Pisau Pedia`,
-    description: product.description ?? product.category,
+    title,
+    description,
+    // Without these, every product page fell back to the root layout's
+    // generic homepage OG tags — links shared to WhatsApp/Facebook showed
+    // "Pisau Dapur Berkualitas..." instead of the actual product.
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: product.image ? [{ url: product.image }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: product.image ? [product.image] : undefined,
+    },
   };
 }
 

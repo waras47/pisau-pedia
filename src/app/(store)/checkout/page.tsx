@@ -60,7 +60,11 @@ function OrderSummary() {
           <div className="divide-y divide-border border-y border-border">
             {items.map((item) => (
               <div key={item.slug} className="flex items-center gap-4 py-4">
-                <div className="relative h-16 w-16 flex-none bg-muted">
+                <div className="relative h-16 w-16 flex-none overflow-hidden bg-muted">
+                  {item.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                  ) : null}
                   <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-[11px] text-background">
                     {item.quantity}
                   </span>
