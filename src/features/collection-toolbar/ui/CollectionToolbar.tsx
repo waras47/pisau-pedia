@@ -82,8 +82,13 @@ export function CollectionToolbar({ products, perPage = 12 }: CollectionToolbarP
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-4 border-b border-border pb-6">
-        <div className="flex flex-wrap items-center gap-3">
+      {/* Mobile: outer stacks the two groups (2 rows); each group is itself a
+          2-col grid so its own controls sit side by side instead of each
+          wrapping to its own line (that used to strand "Featured" alone on a
+          3rd/4th row). Desktop (sm+): reverts to the original single-row
+          flex-wrap layout, proven to fit at normal desktop widths. */}
+      <div className="flex flex-col gap-3 border-b border-border pb-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center">
           <div className="flex items-center gap-2">
             <label htmlFor="category-filter" className="text-xs text-muted-foreground whitespace-nowrap">
               Category
@@ -92,7 +97,7 @@ export function CollectionToolbar({ products, perPage = 12 }: CollectionToolbarP
               id="category-filter"
               value={activeCategory}
               onChange={(e) => handleCategoryChange(e.target.value)}
-              className="border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+              className="w-full border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent sm:w-auto"
             >
               {categories.map((category) => (
                 <option key={category} value={category}>
@@ -109,7 +114,7 @@ export function CollectionToolbar({ products, perPage = 12 }: CollectionToolbarP
               id="stock-filter"
               value={stockFilter}
               onChange={(e) => { setStockFilter(e.target.value as StockFilter); setPage(1); }}
-              className="border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+              className="w-full border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent sm:w-auto"
             >
               {stockOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -120,23 +125,25 @@ export function CollectionToolbar({ products, perPage = 12 }: CollectionToolbarP
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="text-xs text-muted-foreground">
-            {filteredProducts.length} produk
-          </span>
-          <select
-            value={itemsPerPage}
-            onChange={(e) => handlePerPageChange(Number(e.target.value))}
-            className="border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
-          >
-            {PER_PAGE_OPTIONS.map((n) => (
-              <option key={n} value={n}>{n} / halaman</option>
-            ))}
-          </select>
+        <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center">
+          <div className="flex flex-col justify-center gap-1 sm:flex-row sm:items-center sm:gap-3">
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              {filteredProducts.length} produk
+            </span>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => handlePerPageChange(Number(e.target.value))}
+              className="w-full border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent sm:w-auto"
+            >
+              {PER_PAGE_OPTIONS.map((n) => (
+                <option key={n} value={n}>{n} / halaman</option>
+              ))}
+            </select>
+          </div>
           <select
             value={sort}
             onChange={(e) => { setSort(e.target.value as SortKey); setPage(1); }}
-            className="border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+            className="w-full self-end border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent sm:w-auto sm:self-auto"
           >
             {sortOptions.map((option) => (
               <option key={option.value} value={option.value}>

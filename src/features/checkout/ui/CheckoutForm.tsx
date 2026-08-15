@@ -281,11 +281,20 @@ export function CheckoutForm() {
                       active ? "border-accent bg-accent/5" : "border-border hover:bg-muted"
                     }`}
                   >
-                    <span>
-                      <span className="font-medium">{opt.code.toUpperCase()} — {opt.service}</span>
-                      <span className="block text-xs text-muted-foreground">
-                        {opt.description}
-                        {opt.etd ? ` · estimasi ${opt.etd}` : ""}
+                    <span className="flex items-center gap-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`/couriers/${opt.code}.svg`}
+                        alt={opt.code}
+                        className="h-6 w-10 shrink-0 object-contain"
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                      />
+                      <span>
+                        <span className="font-medium">{opt.code.toUpperCase()} — {opt.service}</span>
+                        <span className="block text-xs text-muted-foreground">
+                          {opt.description}
+                          {opt.etd ? ` · estimasi ${opt.etd}` : ""}
+                        </span>
                       </span>
                     </span>
                     <span className="font-semibold">{formatRupiah(opt.cost)}</span>
