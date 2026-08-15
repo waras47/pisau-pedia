@@ -40,15 +40,15 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <PlaceholderImage label={product.category} ratio="landscape" />
       )}
       {isSoldOut ? (
-        <Badge variant="neutral" className="absolute left-3 top-3">
+        <Badge variant="neutral" className="absolute left-2 top-2 px-1.5 py-0.5 text-[9px] sm:left-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-[11px]">
           Sold Out
         </Badge>
       ) : product.badge === "new" ? (
-        <Badge variant="neutral" className="absolute left-3 top-3">
+        <Badge variant="neutral" className="absolute left-2 top-2 px-1.5 py-0.5 text-[9px] sm:left-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-[11px]">
           New
         </Badge>
       ) : discount > 0 ? (
-        <Badge variant="copper" className="absolute left-3 top-3">
+        <Badge variant="copper" className="absolute left-2 top-2 px-1.5 py-0.5 text-[9px] sm:left-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-[11px]">
           Save {discount}%
         </Badge>
       ) : null}

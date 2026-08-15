@@ -23,6 +23,24 @@ function formatRupiah(amount: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(amount);
 }
 
+// ponytail: colored code badge instead of real courier logos — the only
+// full-color assets found (RajaOngkir/Komerce CDN) turned out to be
+// deliberately grayscale sitewide, and per-courier official logos would
+// need individual visual verification. Distinct colors, not brand-accurate.
+const COURIER_COLORS: Record<string, string> = {
+  jne: "bg-red-600",
+  sicepat: "bg-rose-700",
+  jnt: "bg-red-500",
+  tiki: "bg-orange-500",
+  pos: "bg-amber-600",
+  ninja: "bg-neutral-800",
+  ide: "bg-sky-600",
+  sap: "bg-blue-700",
+};
+function courierColor(code: string) {
+  return COURIER_COLORS[code.toLowerCase()] ?? "bg-muted-foreground";
+}
+
 export function CheckoutForm() {
   const { items, subtotal } = useCart();
   const {
@@ -282,13 +300,11 @@ export function CheckoutForm() {
                     }`}
                   >
                     <span className="flex items-center gap-3">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={`/couriers/${opt.code}.svg`}
-                        alt={opt.code}
-                        className="h-6 w-10 shrink-0 object-contain"
-                        onError={(e) => { e.currentTarget.style.display = "none"; }}
-                      />
+                      <span
+                        className={`flex h-6 w-12 shrink-0 items-center justify-center rounded text-[10px] font-bold tracking-wide text-white ${courierColor(opt.code)}`}
+                      >
+                        {opt.code.toUpperCase()}
+                      </span>
                       <span>
                         <span className="font-medium">{opt.code.toUpperCase()} — {opt.service}</span>
                         <span className="block text-xs text-muted-foreground">

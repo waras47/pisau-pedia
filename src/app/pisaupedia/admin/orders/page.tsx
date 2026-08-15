@@ -490,7 +490,7 @@ function ManualOrderModal({ onClose, onCreated }: { onClose: () => void; onCreat
                 <select
                   value={it.productSlug}
                   onChange={(e) => updateItem(i, { productSlug: e.target.value })}
-                  className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                  className="min-w-0 flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm"
                 >
                   <option value="">Pilih produk...</option>
                   {products.map((p) => (
@@ -502,10 +502,10 @@ function ManualOrderModal({ onClose, onCreated }: { onClose: () => void; onCreat
                   min={1}
                   value={it.quantity}
                   onChange={(e) => updateItem(i, { quantity: Number(e.target.value) })}
-                  className="w-20 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                  className="w-16 shrink-0 rounded-lg border border-gray-200 px-3 py-2 text-sm sm:w-20"
                 />
                 {items.length > 1 && (
-                  <button type="button" onClick={() => setItems((prev) => prev.filter((_, idx) => idx !== i))} className="text-xs text-red-500 hover:underline">
+                  <button type="button" onClick={() => setItems((prev) => prev.filter((_, idx) => idx !== i))} className="shrink-0 text-xs text-red-500 hover:underline">
                     Hapus
                   </button>
                 )}
