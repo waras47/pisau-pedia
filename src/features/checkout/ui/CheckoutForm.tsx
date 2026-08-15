@@ -23,22 +23,22 @@ function formatRupiah(amount: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(amount);
 }
 
-// ponytail: colored code badge instead of real courier logos — the only
-// full-color assets found (RajaOngkir/Komerce CDN) turned out to be
-// deliberately grayscale sitewide, and per-courier official logos would
-// need individual visual verification. Distinct colors, not brand-accurate.
-const COURIER_COLORS: Record<string, string> = {
-  jne: "bg-red-600",
-  sicepat: "bg-rose-700",
-  jnt: "bg-red-500",
-  tiki: "bg-orange-500",
-  pos: "bg-amber-600",
-  ninja: "bg-neutral-800",
-  ide: "bg-sky-600",
-  sap: "bg-blue-700",
+// Real logos sourced from each courier's own official site (verified
+// full-color, not the grayscale set RajaOngkir/Komerce serves) — extensions
+// vary since that's whatever format each site actually hosted.
+const COURIER_LOGO_EXT: Record<string, string> = {
+  jne: "svg",
+  sicepat: "svg",
+  jnt: "svg",
+  tiki: "png",
+  pos: "png",
+  ninja: "png",
+  ide: "jpg",
+  sap: "svg",
 };
-function courierColor(code: string) {
-  return COURIER_COLORS[code.toLowerCase()] ?? "bg-muted-foreground";
+function courierLogo(code: string) {
+  const ext = COURIER_LOGO_EXT[code.toLowerCase()];
+  return ext ? `/couriers/${code.toLowerCase()}.${ext}` : null;
 }
 
 export function CheckoutForm() {
@@ -300,11 +300,19 @@ export function CheckoutForm() {
                     }`}
                   >
                     <span className="flex items-center gap-3">
-                      <span
-                        className={`flex h-6 w-12 shrink-0 items-center justify-center rounded text-[10px] font-bold tracking-wide text-white ${courierColor(opt.code)}`}
-                      >
-                        {opt.code.toUpperCase()}
-                      </span>
+                      {courierLogo(opt.code) ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={courierLogo(opt.code)!}
+                          alt={opt.code}
+                          className="h-6 w-12 shrink-0 object-contain"
+                          onError={(e) => { e.currentTarget.style.display = "none"; }}
+                        />
+                      ) : (
+                        <span className="flex h-6 w-12 shrink-0 items-center justify-center rounded bg-muted-foreground text-[10px] font-bold tracking-wide text-white">
+                          {opt.code.toUpperCase()}
+                        </span>
+                      )}
                       <span>
                         <span className="font-medium">{opt.code.toUpperCase()} — {opt.service}</span>
                         <span className="block text-xs text-muted-foreground">
