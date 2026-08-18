@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Inter, Newsreader, Space_Grotesk } from "next/font/google";
 
 import { siteConfig } from "@/shared/config/site.config";
@@ -64,6 +65,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${spaceGrotesk.variable} ${inter.variable} ${newsreader.variable}`}
     >
       <body className="font-body antialiased">
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-5FF9C3V852"
+          strategy="afterInteractive"
+        />
+        <Script id="ga4" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-5FF9C3V852');`}
+        </Script>
         <script
           type="application/ld+json"
           // eslint-disable-next-line react/no-danger
