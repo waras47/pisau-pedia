@@ -1,4 +1,5 @@
 import { apiFetch } from "@/shared/api/client";
+import { compressImage } from "@/shared/api/upload.api";
 import { env } from "@/shared/config/env";
 import { tokenStorage } from "@/entities/session/model/token-storage";
 
@@ -47,8 +48,9 @@ export interface AccessoryItem {
 // --- Image Upload ---
 
 export async function uploadImage(file: File): Promise<string> {
+  const compressed = await compressImage(file);
   const form = new FormData();
-  form.append("image", file);
+  form.append("image", compressed);
   const token = tokenStorage.getAccessToken();
   const res = await fetch(`${env.apiBaseUrl}/admin/uploads/image`, {
     method: "POST",
