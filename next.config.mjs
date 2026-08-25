@@ -18,6 +18,15 @@ const nextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/privacy",
+        destination: "/policies/privacy",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
