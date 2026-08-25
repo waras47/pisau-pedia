@@ -24,7 +24,7 @@ export default function CartPage() {
         {items.length === 0 ? (
           <div className="flex flex-col items-start gap-4 py-10">
             <p className="text-muted-foreground">{t("cart_empty")}</p>
-            <Link href="/collections/japanese-knives">
+            <Link href="/collections/knives">
               <Button>Browse knives</Button>
             </Link>
           </div>

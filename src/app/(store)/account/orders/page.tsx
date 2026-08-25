@@ -61,7 +61,7 @@ export default function MyOrdersPage() {
         ) : orders.length === 0 ? (
           <div className="flex flex-col items-start gap-4">
             <p className="text-muted-foreground">Belum ada pesanan.</p>
-            <Link href="/collections/japanese-knives" className="text-sm font-medium text-accent hover:underline">
+            <Link href="/collections/knives" className="text-sm font-medium text-accent hover:underline">
               Mulai belanja
             </Link>
           </div>

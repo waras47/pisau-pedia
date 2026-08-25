@@ -76,7 +76,7 @@ export function ProductDetail({ product, related, reviews = [] }: ProductDetailP
           </Link>
           <ChevronRight size={12} />
           <Link
-            href="/collections/japanese-knives"
+            href="/collections/knives"
             className="hover:text-foreground"
           >
             Japanese Knives
