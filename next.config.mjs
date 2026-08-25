@@ -25,6 +25,11 @@ const nextConfig = {
         destination: "/policies/privacy",
         permanent: true,
       },
+      {
+        source: "/terms",
+        destination: "/policies/terms",
+        permanent: true,
+      },
     ];
   },
 };
