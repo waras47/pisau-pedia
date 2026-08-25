@@ -1,5 +1,6 @@
 import { env } from "@/shared/config/env";
 import { apiFetch } from "@/shared/api/client";
+import { compressImage } from "@/shared/api/upload.api";
 
 export type ReviewStatus = "pending" | "approved" | "rejected";
 
@@ -91,8 +92,9 @@ export function deleteReview(id: string) {
 }
 
 export async function uploadReviewPhoto(file: File): Promise<string> {
+  const compressed = await compressImage(file);
   const form = new FormData();
-  form.append("image", file);
+  form.append("image", compressed);
   const res = await fetch(`${env.apiBaseUrl}/reviews/upload-photo`, {
     method: "POST",
     body: form,

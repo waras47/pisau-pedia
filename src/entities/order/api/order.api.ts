@@ -1,5 +1,6 @@
 import { apiFetch, apiFetchPaginated } from "@/shared/api/client";
 import { HttpError } from "@/shared/api/http-error";
+import { compressImage } from "@/shared/api/upload.api";
 import { env } from "@/shared/config/env";
 
 import { orderStatusOptions } from "@/entities/order/model/order-status";
@@ -116,8 +117,9 @@ export function getPublicOrder(id: string) {
 // bypasses apiFetch (which hardcodes a JSON Content-Type) the same way
 // shared/api/upload.api.ts's admin uploadImage() does.
 export async function uploadPaymentProof(orderId: string, file: File) {
+  const compressed = await compressImage(file);
   const form = new FormData();
-  form.append("image", file);
+  form.append("image", compressed);
 
   const res = await fetch(`${env.apiBaseUrl}/orders/${orderId}/payment-proof`, {
     method: "POST",
