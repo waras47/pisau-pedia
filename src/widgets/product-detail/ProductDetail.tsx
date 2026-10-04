@@ -49,16 +49,19 @@ export function ProductDetail({ product, related, reviews = [] }: ProductDetailP
 
   const availableAngles = ANGLE_ENTRIES.filter(({ key }) => product.angleImages?.[key]);
   const hasAngleImages = availableAngles.length > 0;
-  const [selectedAngle, setSelectedAngle] = useState(
-    availableAngles[0]?.key ?? ANGLE_ENTRIES[0]!.key,
-  );
+  const [selectedAngle, setSelectedAngle] = useState<
+    "front" | "back" | "side" | "top" | null
+  >(null);
+
   const [activeTab, setActiveTab] = useState<"description" | "specification" | "care">(
     "description",
   );
 
-  const mainImage = hasAngleImages
+  // Defaults to the same photo shown on the listing page (product.image);
+  // picking an angle below swaps the preview, same as before deselecting it.
+  const mainImage = selectedAngle
     ? product.angleImages?.[selectedAngle]
-    : product.image;
+    : product.image ?? product.angleImages?.[availableAngles[0]?.key ?? "front"];
 
   const tabs: { key: typeof activeTab; label: string }[] = [
     { key: "description", label: "Description" },
@@ -116,7 +119,9 @@ export function ProductDetail({ product, related, reviews = [] }: ProductDetailP
                     <button
                       key={key}
                       type="button"
-                      onClick={() => setSelectedAngle(key)}
+                      onClick={() =>
+                        setSelectedAngle((current) => (current === key ? null : key))
+                      }
                       className={`relative aspect-[15/8] w-full overflow-hidden border bg-muted transition-colors ${
                         selectedAngle === key ? "border-foreground" : "border-transparent"
                       }`}
