@@ -1,7 +1,8 @@
 import { type ReactNode } from "react";
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Inter, Newsreader, Space_Grotesk } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
+import localFont from "next/font/local";
 
 import { siteConfig } from "@/shared/config/site.config";
 
@@ -21,10 +22,11 @@ const inter = Inter({
   display: "swap",
 });
 
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  style: ["italic"],
+const newsreader = localFont({
+  src: [
+    { path: "./fonts/newsreader-italic.woff2", weight: "400", style: "italic" },
+    { path: "./fonts/newsreader-italic.woff2", weight: "500", style: "italic" },
+  ],
   variable: "--font-accent",
   display: "swap",
 });
