@@ -39,4 +39,9 @@ jobs:
         run: rsync -avz deploy/ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/pisau-pedia/frontend/"
 
       - name: Restart pm2 process
-        run: ssh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" "pm2 restart pisaupedia-frontend"
+        run: |
+          ssh "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "cd /opt/pisau-pedia/frontend && \
+             (pm2 reload pisaupedia-frontend --update-env || \
+              PORT=3000 pm2 start server.js --name pisaupedia-frontend --cwd /opt/pisau-pedia/frontend) && \
+             pm2 save"
