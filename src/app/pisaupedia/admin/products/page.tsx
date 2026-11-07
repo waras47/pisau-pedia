@@ -87,6 +87,12 @@ function generateSlug(name: string) {
     .replace(/(^-|-$)/g, "");
 }
 
+function getStockStyle(stock: number) {
+  if (stock === 0) return "bg-red-50 text-red-500";
+  if (stock <= 2) return "bg-amber-50 text-amber-600";
+  return "bg-gray-100 text-gray-700";
+}
+
 function getStatusStyle(badge: Product["badge"]) {
   switch (badge) {
     case "sold-out":
@@ -123,7 +129,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState(() => searchParams.get("q") ?? "");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [sortKey, setSortKey] = useState<"name" | "price" | "rating" | "category">("name");
+  const [sortKey, setSortKey] = useState<"name" | "price" | "stock" | "rating" | "category">("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [successInfo, setSuccessInfo] = useState<SuccessInfo | null>(null);
@@ -221,6 +227,9 @@ export default function ProductsPage() {
           break;
         case "price":
           cmp = a.price - b.price;
+          break;
+        case "stock":
+          cmp = (a.stock ?? 0) - (b.stock ?? 0);
           break;
         case "rating":
           cmp = a.rating - b.rating;
@@ -477,7 +486,12 @@ export default function ProductsPage() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600">{p.category}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600">{p.category}</span>
+                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium tabular-nums ${getStockStyle(p.stock ?? 0)}`}>
+                      Stok: {p.stock ?? 0}
+                    </span>
+                  </div>
                   <div className="text-right">
                     <p className="font-medium text-gray-700">{formatRupiah(p.price)}</p>
                     {p.compareAtPrice ? (
@@ -529,6 +543,9 @@ export default function ProductsPage() {
                   Price <SortArrow col="price" />
                 </th>
                 <th className="px-4 py-4 font-medium">Compare</th>
+                <th className="cursor-pointer px-4 py-4 font-medium hover:text-gray-600" onClick={() => handleSort("stock")}>
+                  Stock <SortArrow col="stock" />
+                </th>
                 <th className="cursor-pointer px-4 py-4 font-medium hover:text-gray-600" onClick={() => handleSort("rating")}>
                   Rating <SortArrow col="rating" />
                 </th>
@@ -539,7 +556,7 @@ export default function ProductsPage() {
             <tbody>
               {paged.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-gray-400">
+                  <td colSpan={10} className="px-4 py-12 text-center text-gray-400">
                     No products found matching your criteria.
                   </td>
                 </tr>
@@ -581,6 +598,11 @@ export default function ProductsPage() {
                     <td className="px-4 py-3 font-medium text-gray-700">{formatRupiah(p.price)}</td>
                     <td className="px-4 py-3 text-gray-400">
                       {p.compareAtPrice ? <span className="line-through">{formatRupiah(p.compareAtPrice)}</span> : "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-medium tabular-nums ${getStockStyle(p.stock ?? 0)}`}>
+                        {p.stock ?? 0}
+                      </span>
                     </td>
                     <td className="px-4 py-3">
                       {p.reviewCount > 0 ? (
