@@ -3,6 +3,7 @@ import { CategoryBanners } from "@/widgets/category-banners";
 
 import { FeaturedCollection } from "@/widgets/featured-collection";
 import { Hero } from "@/widgets/hero";
+import { KnivesRow } from "@/widgets/knives-row";
 import { MonthlyPick } from "@/widgets/monthly-pick";
 import { NewArrivals } from "@/widgets/new-arrivals";
 import { PromoBanner } from "@/widgets/promo-banner";
@@ -15,6 +16,7 @@ export default function HomePage() {
       <Hero />
       <PromoBanner />
       <FeaturedCollection />
+      <KnivesRow />
       <CategoryBanners />
       <MonthlyPick />
       <NewArrivals />

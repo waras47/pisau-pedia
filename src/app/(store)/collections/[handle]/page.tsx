@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { env } from "@/shared/config/env";
 
 import { type ProductApiItem } from "@/entities/product/api/product.api";
+import { KNIFE_TYPE_SLUGS } from "@/entities/product/model/knife-types";
 import { type Product } from "@/entities/product/model/product.types";
 
 import { CollectionListing } from "@/widgets/collection-listing";
@@ -25,8 +26,7 @@ interface CategoryApiItem {
 // row. Sharpening has no product category at all (it's a service, handled by
 // /pages/sharpening-repairs), "accessories" aggregates the generic
 // "aksesoris" bucket plus every accessory sub-category split out of it, and
-// "knives" aggregates every knife-type category.
-const KNIFE_TYPE_SLUGS = ["gyuto", "k-tip-gyuto", "slicer", "petty", "deba", "bunka", "yanagiba", "honesuki", "kiritsuke", "taiwan", "santoku", "nakiri"];
+// "knives" aggregates every knife-type category (KNIFE_TYPE_SLUGS).
 const ACCESSORY_SLUGS = [
   "aksesoris",
   "cutting-boards",
@@ -89,7 +89,7 @@ async function getProductsInCategory(slug: string): Promise<ProductApiItem[]> {
   return json.data as ProductApiItem[];
 }
 
-async function getProductsInCategories(slugs: string[]): Promise<ProductApiItem[]> {
+async function getProductsInCategories(slugs: readonly string[]): Promise<ProductApiItem[]> {
   const results = await Promise.all(slugs.map((slug) => getProductsInCategory(slug)));
   return results.flat();
 }

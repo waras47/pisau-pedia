@@ -124,6 +124,9 @@ const en = {
   new_arrivals_title: "Shop New Arrivals",
   new_arrivals_view_all: "View all",
 
+  // Japanese knives row (homepage)
+  knives_row_title: "Japanese Knives",
+
   // Testimonials (homepage)
   testimonials_eyebrow: "Reviews and counting",
   testimonials_title: "Let customers speak for us",
@@ -398,6 +401,9 @@ const id = {
   // New arrivals (homepage)
   new_arrivals_title: "Produk Terbaru",
   new_arrivals_view_all: "Lihat semua",
+
+  // Baris pisau Jepang (beranda)
+  knives_row_title: "Pisau Bergaya Jepang",
 
   // Testimonials (homepage)
   testimonials_eyebrow: "Ulasan dan terus bertambah",

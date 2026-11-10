@@ -10,6 +10,7 @@ export {
   monthlyPick,
   newArrivals,
 } from "./model/product.data";
+export { KNIFE_TYPE_SLUGS } from "./model/knife-types";
 export {
   type Product,
   type ProductAngleImages,
