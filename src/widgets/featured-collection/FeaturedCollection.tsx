@@ -9,7 +9,7 @@ import { FeaturedProductsHeading } from "./FeaturedProductsHeading";
 
 async function getFeatured(): Promise<Product[]> {
   try {
-    const res = await fetch(`${env.apiBaseUrl}/products?per_page=8&sort=popular`, {
+    const res = await fetch(`${env.apiBaseUrl}/products?per_page=8&sort=newest`, {
       cache: "no-store",
     });
     if (!res.ok) return [];
