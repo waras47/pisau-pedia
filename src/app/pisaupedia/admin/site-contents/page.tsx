@@ -516,6 +516,10 @@ function CategoryBannersForm({ value, onChange }: { value: CategoryBanner[]; onC
 /*  Browse Categories                                                  */
 /* ------------------------------------------------------------------ */
 
+// Homepage "Jelajahi Koleksi Kami" shows two rows of 3; keep in sync with
+// BROWSE_CATEGORIES_MAX in src/widgets/browse-categories/BrowseCategories.tsx.
+const BROWSE_CATEGORIES_MAX = 6;
+
 function BrowseCategoriesForm({ value, onChange }: { value: BrowseCategory[]; onChange: (v: BrowseCategory[]) => void }) {
   function update(idx: number, patch: Partial<BrowseCategory>) {
     const next = value.map((c, i) => (i === idx ? { ...c, ...patch } : c));
@@ -558,15 +562,21 @@ function BrowseCategoriesForm({ value, onChange }: { value: BrowseCategory[]; on
           </div>
         </div>
       ))}
-      <button type="button" onClick={add} className="self-start rounded-lg border border-dashed border-gray-300 px-4 py-2 text-sm text-gray-500 hover:border-emerald-400 hover:text-emerald-600">
-        + Tambah Kategori
-      </button>
+      {value.length < BROWSE_CATEGORIES_MAX ? (
+        <button type="button" onClick={add} className="self-start rounded-lg border border-dashed border-gray-300 px-4 py-2 text-sm text-gray-500 hover:border-emerald-400 hover:text-emerald-600">
+          + Tambah Kategori
+        </button>
+      ) : (
+        <p className="text-xs text-gray-400">
+          Maksimal {BROWSE_CATEGORIES_MAX} kategori (2 baris × 3 kolom di beranda).
+        </p>
+      )}
     </div>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/*  Featured Banner                                                    */
+/*  Featured Banner                                                   */
 /* ------------------------------------------------------------------ */
 
 function FeaturedBannerForm({ value, onChange }: { value: FeaturedBanner; onChange: (v: FeaturedBanner) => void }) {

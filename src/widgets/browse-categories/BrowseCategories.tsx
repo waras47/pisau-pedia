@@ -9,6 +9,10 @@ import { SectionHeading } from "@/shared/ui/SectionHeading";
 import { env } from "@/shared/config/env";
 import { localized } from "@/shared/lib/localized";
 
+// Two rows of the 3-column grid. Keep in sync with the admin editor limit
+// (src/app/pisaupedia/admin/site-contents/page.tsx).
+const BROWSE_CATEGORIES_MAX = 6;
+
 interface BrowseCategory {
   title: string;
   href: string;
@@ -25,7 +29,7 @@ export function BrowseCategories() {
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
         const items = json?.data?.value as BrowseCategory[] | undefined;
-        if (items?.length) setCategories(items);
+        if (items?.length) setCategories(items.slice(0, BROWSE_CATEGORIES_MAX));
       })
       .catch(() => {});
   }, []);
