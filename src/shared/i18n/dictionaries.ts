@@ -35,6 +35,7 @@ const en = {
   featured_desc:
     "Choose your blade shape, steel type, and handle material — Pisaupedia's knife configurator, for home kitchens and restaurant kitchens alike.",
   featured_cta: "Start Building",
+  featured_products_title: "Our Latest Product",
 
   // About page
   about_hero_eyebrow: "Our Story",
@@ -313,6 +314,7 @@ const id = {
   featured_desc:
     "Pilih sendiri bentuk bilah, jenis baja, hingga material gagang — configurator pisau custom dari Pisaupedia, untuk dapur rumah sampai dapur restoran.",
   featured_cta: "Mulai Rakit Pisau",
+  featured_products_title: "Our Latest Product",
 
   // About page
   about_hero_eyebrow: "Cerita Kami",

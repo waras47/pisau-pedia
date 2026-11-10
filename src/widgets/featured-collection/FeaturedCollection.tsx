@@ -5,6 +5,7 @@ import { ProductCarousel } from "@/entities/product";
 import type { Product } from "@/entities/product";
 
 import { FeaturedBanner } from "./FeaturedBanner";
+import { FeaturedProductsHeading } from "./FeaturedProductsHeading";
 
 async function getFeatured(): Promise<Product[]> {
   try {
@@ -54,11 +55,15 @@ export async function FeaturedCollection() {
       <Container className="flex flex-col gap-10">
         <FeaturedBanner />
 
-        {products.length > 0 ? (
-          <ProductCarousel products={products} />
-        ) : (
-          <p className="text-center text-sm text-gray-400">Belum ada produk.</p>
-        )}
+        <div className="flex flex-col gap-10">
+          <FeaturedProductsHeading />
+
+          {products.length > 0 ? (
+            <ProductCarousel products={products} />
+          ) : (
+            <p className="text-center text-sm text-gray-400">Belum ada produk.</p>
+          )}
+        </div>
       </Container>
     </section>
   );
