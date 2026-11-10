@@ -403,7 +403,7 @@ const id = {
   new_arrivals_view_all: "Lihat semua",
 
   // Baris pisau Jepang (beranda)
-  knives_row_title: "Pisau Bergaya Jepang",
+  knives_row_title: "Our Knives",
 
   // Testimonials (homepage)
   testimonials_eyebrow: "Ulasan dan terus bertambah",
