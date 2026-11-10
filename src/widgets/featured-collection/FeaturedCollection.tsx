@@ -51,7 +51,7 @@ export async function FeaturedCollection() {
   const products = await getFeatured();
 
   return (
-    <section className="bg-muted/40 py-16">
+    <section className="bg-muted/40 pb-10 pt-16">
       <Container className="flex flex-col gap-10">
         <FeaturedBanner />
 

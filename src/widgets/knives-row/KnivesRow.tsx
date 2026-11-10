@@ -52,7 +52,7 @@ export async function KnivesRow() {
   if (products.length === 0) return null;
 
   return (
-    <section className="py-16">
+    <section className="bg-muted/40 pb-16">
       <Container className="flex flex-col gap-10">
         <KnivesRowHeading />
 
