@@ -91,6 +91,7 @@ function toProduct(p: ProductApiItem | ProductApiDetail): Product {
     description: detail.description,
     descriptionEn: detail.description_en,
     careInstructions: detail.care_instructions,
+    youtubeUrl: detail.youtube_url,
     specs: detail.specs,
     highlights: detail.highlights,
     angleImages: detail.angle_images,

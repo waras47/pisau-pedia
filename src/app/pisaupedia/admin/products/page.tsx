@@ -5,7 +5,9 @@ import { useSearchParams } from "next/navigation";
 
 import { HttpError } from "@/shared/api/http-error";
 import { uploadImage } from "@/shared/api/upload.api";
+import { getYoutubeVideoId } from "@/shared/lib/youtube";
 import { ImageUploadField as SharedImageUploadField } from "@/shared/ui/ImageUploadField";
+import { YoutubeEmbed } from "@/shared/ui/YoutubeEmbed";
 
 import { type CategoryApiItem,listCategories } from "@/entities/category/api/category.api";
 import { type Product, type ProductAngleImages, type ProductSpec } from "@/entities/product";
@@ -177,6 +179,11 @@ export default function ProductsPage() {
     return missing;
   }, [editProduct.name, editProduct.category, editProduct.price]);
 
+  // A filled-in link that isn't a YouTube video would silently show nothing
+  // on the storefront, so block saving until it's fixed or cleared.
+  const youtubeInvalid =
+    !!editProduct.youtubeUrl?.trim() && !getYoutubeVideoId(editProduct.youtubeUrl);
+
   // Derived
   const allCategories = useMemo(
     () => Array.from(new Set(products.map((p) => p.category))).sort(),
@@ -264,6 +271,7 @@ export default function ProductsPage() {
       description: detail.description,
       descriptionEn: detail.description_en,
       careInstructions: detail.care_instructions,
+      youtubeUrl: detail.youtube_url,
       specs: detail.specs,
       highlights: detail.highlights,
       image: detail.images[0],
@@ -283,7 +291,7 @@ export default function ProductsPage() {
   };
 
   async function handleSave() {
-    if (missingFields.length > 0) return;
+    if (missingFields.length > 0 || youtubeInvalid) return;
     setSaving(true);
     try {
       const categoryId = categories.find((c) => c.name === editProduct.category)?.id;
@@ -306,6 +314,7 @@ export default function ProductsPage() {
         description: editProduct.description,
         description_en: editProduct.descriptionEn || undefined,
         care_instructions: editProduct.careInstructions || undefined,
+        youtube_url: editProduct.youtubeUrl?.trim() ?? "",
         specs: editProduct.specs,
         highlights: editProduct.highlights,
         images: images,
@@ -875,6 +884,28 @@ export default function ProductsPage() {
                   />
                 </Field>
 
+                {/* YouTube video — shown under the description on the product page */}
+                <Field label="Video YouTube (opsional)">
+                  <input
+                    type="text"
+                    value={editProduct.youtubeUrl ?? ""}
+                    onChange={(e) => updateField("youtubeUrl", e.target.value)}
+                    className="admin-input"
+                    placeholder="https://www.youtube.com/watch?v=... atau kode embed <iframe>"
+                  />
+                  {youtubeInvalid ? (
+                    <p className="mt-1 text-xs text-red-500">
+                      Link tidak dikenali sebagai video YouTube. Tempel link video, link youtu.be, atau kode embed dari YouTube.
+                    </p>
+                  ) : editProduct.youtubeUrl?.trim() ? (
+                    <YoutubeEmbed url={editProduct.youtubeUrl} title="Preview video" className="mt-2 max-w-sm rounded-lg" />
+                  ) : (
+                    <p className="mt-1 text-xs text-gray-400">
+                      Kosongkan jika produk tidak punya video. Video tampil di bawah deskripsi produk.
+                    </p>
+                  )}
+                </Field>
+
                 {/* Specs */}
                 <SpecsEditor
                   specs={editProduct.specs ?? []}
@@ -905,7 +936,7 @@ export default function ProductsPage() {
               <button
                 type="button"
                 onClick={handleSave}
-                disabled={missingFields.length > 0 || saving}
+                disabled={missingFields.length > 0 || youtubeInvalid || saving}
                 className="rounded-lg bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-40"
               >
                 {saving ? "Menyimpan..." : modal === "add" ? "Add Product" : "Save Changes"}

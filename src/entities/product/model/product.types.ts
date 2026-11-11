@@ -35,6 +35,8 @@ export interface Product {
   description?: string;
   descriptionEn?: string;
   careInstructions?: string;
+  /** Admin-entered YouTube link or embed snippet, shown under the description. */
+  youtubeUrl?: string;
   highlights?: string[];
   specs?: ProductSpec[];
   galleryLabels?: string[];

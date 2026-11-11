@@ -7,6 +7,7 @@ import { ChevronRight } from "lucide-react";
 import { Container } from "@/shared/ui/Container";
 import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
 import { SectionHeading } from "@/shared/ui/SectionHeading";
+import { YoutubeEmbed } from "@/shared/ui/YoutubeEmbed";
 
 import {
   type Product,
@@ -233,9 +234,12 @@ export function ProductDetail({ product, related, reviews = [] }: ProductDetailP
           </div>
 
           {activeTab === "description" ? (
-            <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
-              {description ?? "Deskripsi lengkap untuk produk ini akan segera ditambahkan."}
-            </p>
+            <div className="flex max-w-3xl flex-col gap-6">
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                {description ?? "Deskripsi lengkap untuk produk ini akan segera ditambahkan."}
+              </p>
+              <YoutubeEmbed url={product.youtubeUrl} title={`Video ${product.name}`} />
+            </div>
           ) : null}
 
           {activeTab === "specification" ? (
