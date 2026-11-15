@@ -128,6 +128,11 @@ const en = {
   // Japanese knives row (homepage)
   knives_row_title: "Japanese Knives",
 
+  // Instagram (homepage)
+  instagram_title: "Follow Us on Instagram",
+  instagram_desc: "Behind the forge, new releases, and knives in real kitchens.",
+  instagram_follow: "Follow",
+
   // Testimonials (homepage)
   testimonials_eyebrow: "Reviews and counting",
   testimonials_title: "Let customers speak for us",
@@ -406,6 +411,11 @@ const id = {
 
   // Baris pisau Jepang (beranda)
   knives_row_title: "Our Knives",
+
+  // Instagram (beranda)
+  instagram_title: "Ikuti Kami di Instagram",
+  instagram_desc: "Proses tempa, produk terbaru, dan pisau kami di dapur pelanggan.",
+  instagram_follow: "Follow",
 
   // Testimonials (homepage)
   testimonials_eyebrow: "Ulasan dan terus bertambah",

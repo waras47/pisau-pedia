@@ -5,7 +5,9 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { apiFetch } from "@/shared/api/client";
 import { uploadImage } from "@/shared/api/upload.api";
 import { HttpError } from "@/shared/api/http-error";
+import { getInstagramEmbedUrl, getInstagramHandle, instagramProfileUrl } from "@/shared/lib/instagram";
 import { getYoutubeVideoId } from "@/shared/lib/youtube";
+import { InstagramEmbed } from "@/shared/ui/InstagramEmbed";
 import { YoutubeEmbed } from "@/shared/ui/YoutubeEmbed";
 
 /* ------------------------------------------------------------------ */
@@ -134,6 +136,29 @@ const HOMEPAGE_VIDEO_SLOTS = 3;
 const emptyHomepageVideo: HomepageVideo = { url: "", title: "", title_id: "", title_en: "" };
 const defaultHomepageVideos: HomepageVideo[] = Array.from({ length: HOMEPAGE_VIDEO_SLOTS }, () => ({ ...emptyHomepageVideo }));
 
+// Homepage Instagram block: follow CTA + one row of 4 official post embeds.
+interface InstagramFeedSetting {
+  account: string;
+  posts: string[];
+}
+const INSTAGRAM_POST_SLOTS = 4;
+const defaultInstagramFeed: InstagramFeedSetting = {
+  account: "",
+  posts: Array.from({ length: INSTAGRAM_POST_SLOTS }, () => ""),
+};
+
+function instagramFeedErrors(value: unknown): string[] {
+  const v = value as Partial<InstagramFeedSetting> | undefined;
+  const errors: string[] = [];
+  const account = v?.account?.trim() ?? "";
+  if (account && !getInstagramHandle(account)) errors.push("alamat akun tidak valid");
+  if (!account && (v?.posts ?? []).some((p) => p?.trim())) errors.push("isi alamat akun dulu");
+  (v?.posts ?? []).forEach((p, i) => {
+    if (p?.trim() && !getInstagramEmbedUrl(p)) errors.push(`link postingan ${i + 1} bukan postingan Instagram`);
+  });
+  return errors;
+}
+
 function invalidHomepageVideoSlots(value: unknown): number[] {
   if (!Array.isArray(value)) return [];
   return (value as HomepageVideo[]).flatMap((v, i) =>
@@ -152,6 +177,7 @@ const SECTION_KEYS = [
   "browse_categories",
   "featured_banner",
   "homepage_videos",
+  "instagram_feed",
   "exchange_rate_override",
 ] as const;
 
@@ -164,6 +190,7 @@ const SECTION_LABELS: Record<SectionKey, string> = {
   browse_categories: "Browse Categories (Jelajahi Koleksi)",
   featured_banner: "Featured Banner",
   homepage_videos: "Video YouTube Beranda (3 panel)",
+  instagram_feed: "Instagram Beranda (akun + 4 postingan)",
   exchange_rate_override: "Kurs Mata Uang (USD/IDR)",
 };
 
@@ -213,6 +240,13 @@ export default function SiteContentsPage() {
   }
 
   async function handleSave(key: string) {
+    if (key === "instagram_feed") {
+      const errors = instagramFeedErrors(data[key]);
+      if (errors.length > 0) {
+        showToast(`Instagram: ${errors.join(", ")}`, "err");
+        return;
+      }
+    }
     if (key === "homepage_videos") {
       const bad = invalidHomepageVideoSlots(data[key]);
       if (bad.length > 0) {
@@ -340,6 +374,8 @@ function SectionForm({
       return <FeaturedBannerForm value={(value as FeaturedBanner | undefined) ?? defaultFeaturedBanner} onChange={onChange} />;
     case "homepage_videos":
       return <HomepageVideosForm value={(value as HomepageVideo[] | undefined) ?? defaultHomepageVideos} onChange={onChange} />;
+    case "instagram_feed":
+      return <InstagramFeedForm value={(value as InstagramFeedSetting | undefined) ?? defaultInstagramFeed} onChange={onChange} />;
     case "exchange_rate_override":
       return <ExchangeRateForm value={(value as ExchangeRateOverride | undefined) ?? defaultExchangeRateOverride} onChange={onChange} />;
   }
@@ -656,6 +692,73 @@ function HomepageVideosForm({ value, onChange }: { value: HomepageVideo[]; onCha
                 onChangeEn={(v) => updateTitle(idx, "en", v)}
                 full
               />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Homepage Instagram                                                 */
+/* ------------------------------------------------------------------ */
+
+function InstagramFeedForm({ value, onChange }: { value: InstagramFeedSetting; onChange: (v: InstagramFeedSetting) => void }) {
+  const posts = Array.from({ length: INSTAGRAM_POST_SLOTS }, (_, i) => value.posts?.[i] ?? "");
+  const account = value.account ?? "";
+  const handle = getInstagramHandle(account);
+
+  function setPost(idx: number, url: string) {
+    onChange({ account, posts: posts.map((p, i) => (i === idx ? url : p)) });
+  }
+
+  return (
+    <div className="flex flex-col gap-5">
+      <p className="text-xs text-gray-400">
+        Tampil di beranda di bawah Video YouTube: ajakan follow + 1 baris berisi 4 postingan (embed resmi Instagram).
+        Kosongkan alamat akun untuk menyembunyikan bagian ini.
+      </p>
+      <Field label="Alamat akun Instagram">
+        <input
+          type="text"
+          value={account}
+          onChange={(e) => onChange({ account: e.target.value, posts })}
+          className="sc-input max-w-md"
+          placeholder="pisaupedia, @pisaupedia, atau https://instagram.com/pisaupedia"
+        />
+        {account.trim() && !handle ? (
+          <p className="text-xs text-red-500">Alamat akun tidak dikenali.</p>
+        ) : handle ? (
+          <p className="text-xs text-gray-400">
+            Tombol Follow mengarah ke{" "}
+            <a href={instagramProfileUrl(handle)} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">
+              {instagramProfileUrl(handle)}
+            </a>
+          </p>
+        ) : null}
+      </Field>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {posts.map((post, idx) => {
+          const invalid = !!post.trim() && !getInstagramEmbedUrl(post);
+          return (
+            <div key={idx} className="flex flex-col gap-3 rounded-lg border border-gray-100 p-4">
+              <Field label={`Link postingan ${idx + 1}`}>
+                <input
+                  type="text"
+                  value={post}
+                  onChange={(e) => setPost(idx, e.target.value)}
+                  className="sc-input"
+                  placeholder="https://www.instagram.com/p/..."
+                />
+              </Field>
+              {invalid ? (
+                <p className="text-xs text-red-500">Bukan link postingan/reel Instagram.</p>
+              ) : post.trim() ? (
+                <InstagramEmbed url={post} title={`Preview postingan ${idx + 1}`} />
+              ) : (
+                <p className="text-xs text-gray-400">Salin dari Instagram: ⋯ pada postingan → Salin tautan.</p>
+              )}
             </div>
           );
         })}
