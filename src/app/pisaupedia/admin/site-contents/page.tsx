@@ -5,6 +5,8 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { apiFetch } from "@/shared/api/client";
 import { uploadImage } from "@/shared/api/upload.api";
 import { HttpError } from "@/shared/api/http-error";
+import { getYoutubeVideoId } from "@/shared/lib/youtube";
+import { YoutubeEmbed } from "@/shared/ui/YoutubeEmbed";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -121,6 +123,24 @@ const defaultFeaturedBanner: FeaturedBanner = {
 };
 const defaultExchangeRateOverride: ExchangeRateOverride = { mode: "auto", usd_to_idr: 0 };
 
+// Homepage YouTube row (3 panels between "Our Knives" and Category Banners).
+interface HomepageVideo {
+  url: string;
+  title: string;
+  title_id: string;
+  title_en: string;
+}
+const HOMEPAGE_VIDEO_SLOTS = 3;
+const emptyHomepageVideo: HomepageVideo = { url: "", title: "", title_id: "", title_en: "" };
+const defaultHomepageVideos: HomepageVideo[] = Array.from({ length: HOMEPAGE_VIDEO_SLOTS }, () => ({ ...emptyHomepageVideo }));
+
+function invalidHomepageVideoSlots(value: unknown): number[] {
+  if (!Array.isArray(value)) return [];
+  return (value as HomepageVideo[]).flatMap((v, i) =>
+    v?.url?.trim() && !getYoutubeVideoId(v.url) ? [i + 1] : [],
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /*  Section config                                                     */
 /* ------------------------------------------------------------------ */
@@ -131,6 +151,7 @@ const SECTION_KEYS = [
   "category_banners",
   "browse_categories",
   "featured_banner",
+  "homepage_videos",
   "exchange_rate_override",
 ] as const;
 
@@ -142,6 +163,7 @@ const SECTION_LABELS: Record<SectionKey, string> = {
   category_banners: "Category Banners",
   browse_categories: "Browse Categories (Jelajahi Koleksi)",
   featured_banner: "Featured Banner",
+  homepage_videos: "Video YouTube Beranda (3 panel)",
   exchange_rate_override: "Kurs Mata Uang (USD/IDR)",
 };
 
@@ -191,6 +213,13 @@ export default function SiteContentsPage() {
   }
 
   async function handleSave(key: string) {
+    if (key === "homepage_videos") {
+      const bad = invalidHomepageVideoSlots(data[key]);
+      if (bad.length > 0) {
+        showToast(`Link video ${bad.join(", ")} bukan video YouTube`, "err");
+        return;
+      }
+    }
     setSaving((p) => ({ ...p, [key]: true }));
     try {
       await apiFetch("/admin/site-contents", {
@@ -309,6 +338,8 @@ function SectionForm({
       return <BrowseCategoriesForm value={(value as BrowseCategory[] | undefined) ?? defaultBrowseCategories} onChange={onChange} />;
     case "featured_banner":
       return <FeaturedBannerForm value={(value as FeaturedBanner | undefined) ?? defaultFeaturedBanner} onChange={onChange} />;
+    case "homepage_videos":
+      return <HomepageVideosForm value={(value as HomepageVideo[] | undefined) ?? defaultHomepageVideos} onChange={onChange} />;
     case "exchange_rate_override":
       return <ExchangeRateForm value={(value as ExchangeRateOverride | undefined) ?? defaultExchangeRateOverride} onChange={onChange} />;
   }
@@ -571,6 +602,64 @@ function BrowseCategoriesForm({ value, onChange }: { value: BrowseCategory[]; on
           Maksimal {BROWSE_CATEGORIES_MAX} kategori (2 baris × 3 kolom di beranda).
         </p>
       )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Homepage YouTube videos                                            */
+/* ------------------------------------------------------------------ */
+
+function HomepageVideosForm({ value, onChange }: { value: HomepageVideo[]; onChange: (v: HomepageVideo[]) => void }) {
+  // Always edit exactly 3 slots, padding older/shorter saved values.
+  const slots = Array.from({ length: HOMEPAGE_VIDEO_SLOTS }, (_, i) => ({ ...emptyHomepageVideo, ...value[i] }));
+
+  function update(idx: number, patch: Partial<HomepageVideo>) {
+    onChange(slots.map((v, i) => (i === idx ? { ...v, ...patch } : v)));
+  }
+  function updateTitle(idx: number, lang: "id" | "en", val: string) {
+    update(idx, lang === "id" ? { title_id: val, title: val } : { title_en: val });
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <p className="text-xs text-gray-400">
+        Tampil di beranda antara &quot;Our Knives&quot; dan Category Banners, 3 video dalam satu baris.
+        Slot yang dikosongkan tidak ditampilkan; kalau semua kosong, bagian ini disembunyikan.
+      </p>
+      <div className="grid gap-4 lg:grid-cols-3">
+        {slots.map((video, idx) => {
+          const url = video.url.trim();
+          const invalid = !!url && !getYoutubeVideoId(url);
+          return (
+            <div key={idx} className="flex flex-col gap-3 rounded-lg border border-gray-100 p-4">
+              <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">Video {idx + 1}</span>
+              <Field label="Link YouTube">
+                <input
+                  type="text"
+                  value={video.url}
+                  onChange={(e) => update(idx, { url: e.target.value })}
+                  className="sc-input"
+                  placeholder="https://www.youtube.com/watch?v=... atau kode <iframe>"
+                />
+              </Field>
+              {invalid ? (
+                <p className="text-xs text-red-500">Link tidak dikenali sebagai video YouTube.</p>
+              ) : url ? (
+                <YoutubeEmbed url={url} title={`Preview video ${idx + 1}`} className="rounded-lg" />
+              ) : null}
+              <BilingualField
+                label="Judul (opsional)"
+                valueId={video.title_id || video.title || ""}
+                valueEn={video.title_en || ""}
+                onChangeId={(v) => updateTitle(idx, "id", v)}
+                onChangeEn={(v) => updateTitle(idx, "en", v)}
+                full
+              />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
