@@ -48,11 +48,18 @@ export function ProductDetail({ product, related, reviews = [] }: ProductDetailP
   const galleryLabels =
     product.galleryLabels ?? [product.category, "Detail", "In use"];
 
-  const availableAngles = ANGLE_ENTRIES.filter(({ key }) => product.angleImages?.[key]);
-  const hasAngleImages = availableAngles.length > 0;
-  const [selectedAngle, setSelectedAngle] = useState<
-    "front" | "back" | "side" | "top" | null
-  >(null);
+  // The listing thumbnail (product.image) always leads the gallery, so it is
+  // what shows when the product is opened and stays selectable after the
+  // visitor looks at another angle.
+  const galleryItems: { key: string; label: string; url: string }[] = [
+    ...(product.image ? [{ key: "main", label: "Utama", url: product.image }] : []),
+    ...ANGLE_ENTRIES.flatMap(({ key, label }) => {
+      const url = product.angleImages?.[key];
+      return url && url !== product.image ? [{ key, label, url }] : [];
+    }),
+  ];
+  const hasGallery = galleryItems.length > 1;
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<"description" | "specification" | "care">(
     "description",
@@ -60,9 +67,8 @@ export function ProductDetail({ product, related, reviews = [] }: ProductDetailP
 
   // Defaults to the same photo shown on the listing page (product.image);
   // picking an angle below swaps the preview, same as before deselecting it.
-  const mainImage = selectedAngle
-    ? product.angleImages?.[selectedAngle]
-    : product.image ?? product.angleImages?.[availableAngles[0]?.key ?? "front"];
+  const selectedItem = galleryItems.find((item) => item.key === selectedKey) ?? galleryItems[0];
+  const mainImage = selectedItem?.url;
 
   const tabs: { key: typeof activeTab; label: string }[] = [
     { key: "description", label: "Description" },
@@ -93,71 +99,42 @@ export function ProductDetail({ product, related, reviews = [] }: ProductDetailP
         <div className="grid gap-10 lg:grid-cols-2">
           <div className="flex flex-col gap-4">
             {mainImage ? (
-              // Box ratio matches the product photo set's actual aspect
-              // ratio (~1.875:1 / 15:8) — object-cover on a square box was
-              // cropping the tip/handle off. object-contain + matching
-              // ratio shows the full knife with no letterboxing.
+              // Photos fill the 15:8 frame (object-cover) so every product
+              // looks the same size regardless of the uploaded photo's ratio.
               <div className="aspect-[15/8] w-full overflow-hidden bg-muted">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={mainImage}
-                  alt={product.name}
-                  className="h-full w-full object-contain"
+                  alt={selectedItem && selectedItem.key !== "main" ? `${product.name} — ${selectedItem.label}` : product.name}
+                  className="h-full w-full object-cover"
                 />
               </div>
             ) : (
-              <PlaceholderImage
-                label={hasAngleImages ? ANGLE_ENTRIES.find((a) => a.key === selectedAngle)?.label : galleryLabels[0]}
-                ratio="video"
-              />
+              <PlaceholderImage label={galleryLabels[0]} ratio="video" />
             )}
 
-            {hasAngleImages ? (
-              <div className="grid grid-cols-4 gap-4">
-                {ANGLE_ENTRIES.map(({ key, label }) => {
-                  const url = product.angleImages?.[key];
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() =>
-                        setSelectedAngle((current) => (current === key ? null : key))
-                      }
-                      className={`relative aspect-[15/8] w-full overflow-hidden border bg-muted transition-colors ${
-                        selectedAngle === key ? "border-foreground" : "border-transparent"
-                      }`}
-                    >
-                      {url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={url} alt={`${product.name} — ${label}`} className="h-full w-full object-contain" />
-                      ) : (
-                        <PlaceholderImage label={label} ratio="video" />
-                      )}
-                      <span className="absolute inset-x-0 bottom-0 bg-background/80 py-0.5 text-center text-[10px] uppercase tracking-wide text-muted-foreground">
-                        {label}
-                      </span>
-                    </button>
-                  );
-                })}
+            {hasGallery ? (
+              <div className="grid grid-cols-5 gap-3">
+                {galleryItems.map(({ key, label, url }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setSelectedKey(key)}
+                    aria-label={`Lihat foto ${label}`}
+                    aria-pressed={selectedItem?.key === key}
+                    className={`relative aspect-[15/8] w-full overflow-hidden border bg-muted transition-colors ${
+                      selectedItem?.key === key ? "border-foreground" : "border-transparent hover:border-border"
+                    }`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt="" className="h-full w-full object-cover" />
+                    <span className="absolute inset-x-0 bottom-0 bg-background/80 py-0.5 text-center text-[10px] uppercase tracking-wide text-muted-foreground">
+                      {label}
+                    </span>
+                  </button>
+                ))}
               </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-4">
-                {galleryLabels.slice(1, 4).map((label) =>
-                  product.image ? (
-                    <div key={label} className="aspect-[15/8] w-full overflow-hidden bg-muted">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={product.image}
-                        alt={`${product.name} — ${label}`}
-                        className="h-full w-full object-contain"
-                      />
-                    </div>
-                  ) : (
-                    <PlaceholderImage key={label} label={label} ratio="video" />
-                  ),
-                )}
-              </div>
-            )}
+            ) : null}
           </div>
 
           <div className="flex flex-col gap-6 lg:pl-6">

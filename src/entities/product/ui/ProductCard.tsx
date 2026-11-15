@@ -33,7 +33,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <img
             src={product.image}
             alt={product.name}
-            className={`h-full w-full object-contain ${isSoldOut ? "grayscale" : ""}`}
+            className={`h-full w-full object-cover ${isSoldOut ? "grayscale" : ""}`}
           />
         </div>
       ) : (
