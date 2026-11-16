@@ -2,6 +2,8 @@ import { type Product } from "@/entities/product";
 
 /** Snapshot produk + quantity. Hanya simpan field yang dibutuhkan untuk tampilan cart. */
 export interface CartItem {
+  /** UUID produk — dipakai sebagai content_ids Meta Pixel. Kosong untuk item lama di localStorage. */
+  productId?: string;
   slug: string;
   name: string;
   category: string;

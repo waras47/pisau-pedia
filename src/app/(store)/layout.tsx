@@ -3,6 +3,7 @@ import { type ReactNode } from "react";
 import { AuthProvider } from "@/features/auth/model/AuthProvider";
 import { CartProvider } from "@/features/cart";
 import { LocaleProvider } from "@/features/locale-currency";
+import { MetaPixel } from "@/features/meta-pixel";
 import { ThemeProvider } from "@/features/theme-toggle";
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
@@ -16,6 +17,7 @@ export default function StoreLayout({ children }: { children: ReactNode }) {
       <LocaleProvider>
         <AuthProvider>
           <CartProvider>
+            <MetaPixel />
             <Header />
             <main>{children}</main>
             <Footer />

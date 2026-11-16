@@ -12,6 +12,8 @@ import { type ProductApiDetail, type ProductApiItem } from "@/entities/product/a
 import { type Product } from "@/entities/product/model/product.types";
 import { type Review } from "@/entities/review";
 
+import { TrackViewContent } from "@/features/meta-pixel";
+
 import { ProductDetail } from "@/widgets/product-detail";
 
 interface ProductPageProps {
@@ -191,6 +193,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
     return (
       <>
         <ProductJsonLd product={product} />
+        <TrackViewContent
+          id={product.id}
+          name={product.name}
+          category={product.category}
+          price={product.price}
+          currency={product.currency}
+        />
         <ProductDetail product={product} related={related} reviews={reviews} />
       </>
     );
@@ -206,6 +215,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <>
       <ProductJsonLd product={product} />
+      <TrackViewContent
+        id={product.id}
+        name={product.name}
+        category={product.category}
+        price={product.price}
+        currency={product.currency}
+      />
       <ProductDetail product={product} related={related} reviews={reviews} />
     </>
   );

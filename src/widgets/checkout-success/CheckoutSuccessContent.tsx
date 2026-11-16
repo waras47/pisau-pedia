@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CheckCircle2, Clock, AlertTriangle } from "lucide-react";
 
 import { paymentConfig } from "@/shared/config/payment.config";
+import { trackPixelOnce } from "@/shared/lib/meta-pixel";
 import { Button } from "@/shared/ui/Button";
 import { Container } from "@/shared/ui/Container";
 import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
@@ -12,6 +13,7 @@ import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
 import { getPublicOrder, type OrderResponse, uploadPaymentProof } from "@/entities/order/api/order.api";
 
 import { useCart } from "@/features/cart";
+import { resolveProductIds } from "@/features/meta-pixel";
 
 const PAYMENT_DEADLINE_HOURS = 12;
 
@@ -69,6 +71,38 @@ export function CheckoutSuccessContent({ orderId }: CheckoutSuccessContentProps)
       .then(setOrder)
       .catch(() => setOrder(null));
   }, [orderId]);
+
+  // Meta Pixel: pesanan dibuat → InitiateCheckout, sudah lunas → Purchase.
+  // eventID sama dengan event server (Conversions API via n8n), jadi Meta
+  // menghitungnya sekali saja; trackPixelOnce mencegah kirim ulang saat refresh.
+  useEffect(() => {
+    if (!order) return;
+    const items = order.items ?? [];
+    let cancelled = false;
+    resolveProductIds(items.map((i) => i.product_slug)).then((ids) => {
+      if (cancelled) return;
+      const contents = items.map((i) => ({
+        id: ids[i.product_slug],
+        quantity: i.quantity,
+        item_price: i.price,
+      }));
+      const params = {
+        content_ids: contents.map((c) => c.id),
+        contents,
+        content_type: "product",
+        num_items: items.reduce((sum, i) => sum + i.quantity, 0),
+        value: order.total,
+        currency: order.currency || "IDR",
+      };
+      trackPixelOnce(`checkout_${order.id}`, "InitiateCheckout", params, `checkout_${order.id}`);
+      if (order.payment_status === "paid") {
+        trackPixelOnce(`purchase_${order.id}`, "Purchase", params, `purchase_${order.id}`);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [order]);
 
   const deadline = useMemo(() => {
     if (!order?.created_at) return null;
