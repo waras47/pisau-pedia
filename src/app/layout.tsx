@@ -1,25 +1,26 @@
 import { type ReactNode } from "react";
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Inter, Space_Grotesk } from "next/font/google";
 import localFont from "next/font/local";
 
 import { siteConfig } from "@/shared/config/site.config";
 
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
+// Font di-host sendiri (latin subset, variable) supaya build tidak bergantung
+// pada fetch ke fonts.googleapis.com, yang bikin `next/font/google` gagal di CI.
+const spaceGrotesk = localFont({
+  src: [{ path: "./fonts/space-grotesk-variable.woff2", weight: "300 700", style: "normal" }],
   variable: "--font-display",
   display: "swap",
+  fallback: ["system-ui", "sans-serif"],
 });
 
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+const inter = localFont({
+  src: [{ path: "./fonts/inter-variable.woff2", weight: "100 900", style: "normal" }],
   variable: "--font-body",
   display: "swap",
+  fallback: ["system-ui", "sans-serif"],
 });
 
 const newsreader = localFont({
