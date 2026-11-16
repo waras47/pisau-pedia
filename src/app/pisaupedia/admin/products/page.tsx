@@ -5,8 +5,10 @@ import { useSearchParams } from "next/navigation";
 
 import { HttpError } from "@/shared/api/http-error";
 import { uploadImage } from "@/shared/api/upload.api";
+import { getTiktokVideoId, isTiktokShortLink } from "@/shared/lib/tiktok";
 import { getYoutubeVideoId } from "@/shared/lib/youtube";
 import { ImageUploadField as SharedImageUploadField } from "@/shared/ui/ImageUploadField";
+import { TiktokEmbed } from "@/shared/ui/TiktokEmbed";
 import { YoutubeEmbed } from "@/shared/ui/YoutubeEmbed";
 
 import { type CategoryApiItem,listCategories } from "@/entities/category/api/category.api";
@@ -183,6 +185,8 @@ export default function ProductsPage() {
   // on the storefront, so block saving until it's fixed or cleared.
   const youtubeInvalid =
     !!editProduct.youtubeUrl?.trim() && !getYoutubeVideoId(editProduct.youtubeUrl);
+  const tiktokInvalid =
+    !!editProduct.tiktokUrl?.trim() && !getTiktokVideoId(editProduct.tiktokUrl);
 
   // Derived
   const allCategories = useMemo(
@@ -272,6 +276,7 @@ export default function ProductsPage() {
       descriptionEn: detail.description_en,
       careInstructions: detail.care_instructions,
       youtubeUrl: detail.youtube_url,
+      tiktokUrl: detail.tiktok_url,
       specs: detail.specs,
       highlights: detail.highlights,
       image: detail.images[0],
@@ -291,7 +296,7 @@ export default function ProductsPage() {
   };
 
   async function handleSave() {
-    if (missingFields.length > 0 || youtubeInvalid) return;
+    if (missingFields.length > 0 || youtubeInvalid || tiktokInvalid) return;
     setSaving(true);
     try {
       const categoryId = categories.find((c) => c.name === editProduct.category)?.id;
@@ -315,6 +320,7 @@ export default function ProductsPage() {
         description_en: editProduct.descriptionEn || undefined,
         care_instructions: editProduct.careInstructions || undefined,
         youtube_url: editProduct.youtubeUrl?.trim() ?? "",
+        tiktok_url: editProduct.tiktokUrl?.trim() ?? "",
         specs: editProduct.specs,
         highlights: editProduct.highlights,
         images: images,
@@ -906,6 +912,28 @@ export default function ProductsPage() {
                   )}
                 </Field>
 
+                {/* TikTok video — shown with the YouTube video on the product page */}
+                <Field label="Video TikTok (opsional)">
+                  <input
+                    type="text"
+                    value={editProduct.tiktokUrl ?? ""}
+                    onChange={(e) => updateField("tiktokUrl", e.target.value)}
+                    className="admin-input"
+                    placeholder="https://www.tiktok.com/@pisaupedia/video/..."
+                  />
+                  {tiktokInvalid ? (
+                    <p className="mt-1 text-xs text-red-500">
+                      {isTiktokShortLink(editProduct.tiktokUrl)
+                        ? "Link pendek (vm.tiktok.com) belum bisa dipakai. Buka link itu di browser, lalu salin alamat lengkap yang berisi /video/…"
+                        : "Link tidak dikenali sebagai video TikTok. Tempel link video lengkap (tiktok.com/@akun/video/…) atau kode embed dari TikTok."}
+                    </p>
+                  ) : editProduct.tiktokUrl?.trim() ? (
+                    <TiktokEmbed url={editProduct.tiktokUrl} title="Preview video TikTok" className="mt-2 max-w-[220px]" />
+                  ) : (
+                    <p className="mt-1 text-xs text-gray-400">Kosongkan jika produk tidak punya video TikTok.</p>
+                  )}
+                </Field>
+
                 {/* Specs */}
                 <SpecsEditor
                   specs={editProduct.specs ?? []}
@@ -936,7 +964,7 @@ export default function ProductsPage() {
               <button
                 type="button"
                 onClick={handleSave}
-                disabled={missingFields.length > 0 || youtubeInvalid || saving}
+                disabled={missingFields.length > 0 || youtubeInvalid || tiktokInvalid || saving}
                 className="rounded-lg bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-40"
               >
                 {saving ? "Menyimpan..." : modal === "add" ? "Add Product" : "Save Changes"}

@@ -37,6 +37,8 @@ export interface Product {
   careInstructions?: string;
   /** Admin-entered YouTube link or embed snippet, shown under the description. */
   youtubeUrl?: string;
+  /** Admin-entered TikTok video link, shown next to/under the YouTube video. */
+  tiktokUrl?: string;
   highlights?: string[];
   specs?: ProductSpec[];
   galleryLabels?: string[];

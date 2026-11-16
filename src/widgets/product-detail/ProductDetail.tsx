@@ -7,6 +7,7 @@ import { ChevronRight } from "lucide-react";
 import { Container } from "@/shared/ui/Container";
 import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
 import { SectionHeading } from "@/shared/ui/SectionHeading";
+import { TiktokEmbed } from "@/shared/ui/TiktokEmbed";
 import { YoutubeEmbed } from "@/shared/ui/YoutubeEmbed";
 
 import {
@@ -215,7 +216,13 @@ export function ProductDetail({ product, related, reviews = [] }: ProductDetailP
               <p className="text-sm leading-relaxed text-muted-foreground">
                 {description ?? "Deskripsi lengkap untuk produk ini akan segera ditambahkan."}
               </p>
-              <YoutubeEmbed url={product.youtubeUrl} title={`Video ${product.name}`} />
+              {/* YouTube (16:9) and TikTok (9:16) sit side by side on wide screens. */}
+              <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+                {product.youtubeUrl ? (
+                  <YoutubeEmbed url={product.youtubeUrl} title={`Video ${product.name}`} className="sm:flex-1" />
+                ) : null}
+                <TiktokEmbed url={product.tiktokUrl} title={`TikTok ${product.name}`} className="sm:w-[260px] sm:flex-none" />
+              </div>
             </div>
           ) : null}
 
