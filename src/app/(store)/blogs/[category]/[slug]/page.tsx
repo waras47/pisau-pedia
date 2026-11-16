@@ -9,6 +9,7 @@ import {
   type BlogPost,
 } from "@/entities/blog";
 import { env } from "@/shared/config/env";
+import { decodeParam } from "@/shared/lib/route-params";
 
 import { BlogPostDetail } from "@/widgets/blog-post-detail";
 
@@ -67,7 +68,7 @@ async function fetchPostData(
   postSlug: string,
 ): Promise<ApiFetchResult | null> {
   try {
-    const postRes = await fetch(`${env.apiBaseUrl}/posts/${postSlug}`, {
+    const postRes = await fetch(`${env.apiBaseUrl}/posts/${encodeURIComponent(postSlug)}`, {
       next: { revalidate: 60 },
     });
     if (!postRes.ok) throw new Error("API error");
@@ -79,7 +80,7 @@ async function fetchPostData(
     const post = apiToPost(apiPost);
 
     // Fetch category
-    const catRes = await fetch(`${env.apiBaseUrl}/post-categories/${categorySlug}`, {
+    const catRes = await fetch(`${env.apiBaseUrl}/post-categories/${encodeURIComponent(categorySlug)}`, {
       next: { revalidate: 60 },
     });
     if (!catRes.ok) throw new Error("API error");
@@ -88,7 +89,7 @@ async function fetchPostData(
 
     // Fetch related posts (same category, exclude current)
     const relatedRes = await fetch(
-      `${env.apiBaseUrl}/posts?category=${categorySlug}&status=published&per_page=4`,
+      `${env.apiBaseUrl}/posts?category=${encodeURIComponent(categorySlug)}&status=published&per_page=4`,
       { next: { revalidate: 60 } },
     );
     let related: BlogPost[] = [];
@@ -107,9 +108,11 @@ async function fetchPostData(
 }
 
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
-  const apiResult = await fetchPostData(params.category, params.slug);
-  const post = apiResult?.post ?? getPostBySlug(params.slug);
-  if (!post || post.categorySlug !== params.category) return { title: "Not found" };
+  const categorySlug = decodeParam(params.category);
+  const postSlug = decodeParam(params.slug);
+  const apiResult = await fetchPostData(categorySlug, postSlug);
+  const post = apiResult?.post ?? getPostBySlug(postSlug);
+  if (!post || post.categorySlug !== categorySlug) return { title: "Not found" };
   return {
     title: `${post.title.id} — Pisau Pedia`,
     description: post.excerpt.id,
@@ -117,7 +120,9 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
 }
 
 export default async function PostPage({ params }: PostPageProps) {
-  const apiResult = await fetchPostData(params.category, params.slug);
+  const categorySlug = decodeParam(params.category);
+  const postSlug = decodeParam(params.slug);
+  const apiResult = await fetchPostData(categorySlug, postSlug);
 
   if (apiResult) {
     return (
@@ -130,8 +135,8 @@ export default async function PostPage({ params }: PostPageProps) {
   }
 
   // Fallback to static data
-  const post = getPostBySlug(params.slug);
-  if (!post || post.categorySlug !== params.category) notFound();
+  const post = getPostBySlug(postSlug);
+  if (!post || post.categorySlug !== categorySlug) notFound();
 
   const category = getCategoryBySlug(post.categorySlug);
   if (!category) notFound();

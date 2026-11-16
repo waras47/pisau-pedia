@@ -9,6 +9,7 @@ import {
   type BlogPost,
 } from "@/entities/blog";
 import { env } from "@/shared/config/env";
+import { decodeParam } from "@/shared/lib/route-params";
 
 import { BlogCategoryListing } from "@/widgets/blog-category-listing";
 
@@ -59,7 +60,7 @@ async function fetchCategoryData(
   slug: string,
 ): Promise<{ category: BlogCategory; posts: BlogPost[] } | null> {
   try {
-    const catRes = await fetch(`${env.apiBaseUrl}/post-categories/${slug}`, {
+    const catRes = await fetch(`${env.apiBaseUrl}/post-categories/${encodeURIComponent(slug)}`, {
       next: { revalidate: 60 },
     });
     if (!catRes.ok) throw new Error("API error");
@@ -67,7 +68,7 @@ async function fetchCategoryData(
     const category = apiToCategory(catJson.data);
 
     const postRes = await fetch(
-      `${env.apiBaseUrl}/posts?category=${slug}&status=published&per_page=50`,
+      `${env.apiBaseUrl}/posts?category=${encodeURIComponent(slug)}&status=published&per_page=50`,
       { next: { revalidate: 60 } },
     );
     if (!postRes.ok) throw new Error("API error");
@@ -81,8 +82,8 @@ async function fetchCategoryData(
 }
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
-  const apiResult = await fetchCategoryData(params.category);
-  const category = apiResult?.category ?? getCategoryBySlug(params.category);
+  const apiResult = await fetchCategoryData(decodeParam(params.category));
+  const category = apiResult?.category ?? getCategoryBySlug(decodeParam(params.category));
   if (!category) return { title: "Not found" };
   return {
     title: `${category.name.id} — Pisau Pedia`,
@@ -91,14 +92,14 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const apiResult = await fetchCategoryData(params.category);
+  const apiResult = await fetchCategoryData(decodeParam(params.category));
 
   if (apiResult) {
     return <BlogCategoryListing category={apiResult.category} posts={apiResult.posts} />;
   }
 
   // Fallback to static data
-  const category = getCategoryBySlug(params.category);
+  const category = getCategoryBySlug(decodeParam(params.category));
   if (!category) notFound();
 
   const categoryPosts = getPostsByCategory(category.slug);
