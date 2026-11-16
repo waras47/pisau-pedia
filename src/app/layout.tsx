@@ -37,6 +37,10 @@ export const metadata: Metadata = {
   title: `${siteConfig.tagline} — ${siteConfig.name}`,
   description: siteConfig.description,
   manifest: "/manifest.json",
+  // Verifikasi kepemilikan situs untuk Google Merchant Center / Search Console.
+  verification: {
+    google: "i7TiZQA-LkJ0jiQZj0xCQbvEhNG64yKCTBr5nQoY0w8",
+  },
   openGraph: {
     type: "website",
     locale: "id_ID",
