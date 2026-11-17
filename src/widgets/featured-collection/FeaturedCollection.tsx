@@ -1,41 +1,69 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-
-import { featuredProducts, ProductCarousel } from "@/entities/product";
-import { Badge } from "@/shared/ui/Badge";
+import { env } from "@/shared/config/env";
 import { Container } from "@/shared/ui/Container";
-import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
 
-export function FeaturedCollection() {
+import { ProductCarousel } from "@/entities/product";
+import type { Product } from "@/entities/product";
+
+import { FeaturedBanner } from "./FeaturedBanner";
+import { FeaturedProductsHeading } from "./FeaturedProductsHeading";
+
+async function getFeatured(): Promise<Product[]> {
+  try {
+    const res = await fetch(`${env.apiBaseUrl}/products?per_page=8&sort=newest`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    const items = json.data as Array<{
+      id: string;
+      name: string;
+      slug: string;
+      price: number;
+      compare_at_price?: number;
+      category?: string;
+      rating: number;
+      review_count: number;
+      badge?: string;
+      maker?: string;
+      image?: string;
+    }>;
+    if (!items?.length) return [];
+    return items.map((p) => ({
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      price: p.price,
+      compareAtPrice: p.compare_at_price,
+      currency: "IDR" as const,
+      category: p.category ?? "",
+      rating: p.rating,
+      reviewCount: p.review_count,
+      badge: p.badge as "new" | "sale" | "sold-out" | undefined,
+      maker: p.maker,
+      image: p.image,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export async function FeaturedCollection() {
+  const products = await getFeatured();
+
   return (
-    <section className="bg-muted/40 py-16">
+    <section className="bg-muted/40 pb-10 pt-16">
       <Container className="flex flex-col gap-10">
-        <div className="grid items-center gap-8 lg:grid-cols-2">
-          <PlaceholderImage
-            ratio="landscape"
-            label="Workshop visit — Tanaka Forge"
-          />
-          <div className="flex flex-col items-start gap-4">
-            <Badge variant="copper">20% Off — Until June 21</Badge>
-            <h2 className="font-display text-3xl font-semibold tracking-tightest sm:text-4xl">
-              Featured Maker: Tanaka Forge
-            </h2>
-            <p className="max-w-md text-muted-foreground">
-              Ten years of the ZDP-189 Bunka. To mark the anniversary, the
-              entire Tanaka Forge collection is 20% off, with free custom
-              engraving on every blade.
-            </p>
-            <Link
-              href="/collections/tanaka-forge"
-              className="inline-flex items-center gap-1.5 text-sm font-medium uppercase tracking-widest2 text-accent"
-            >
-              Shop Tanaka Forge knives
-              <ArrowRight size={14} />
-            </Link>
-          </div>
-        </div>
+        <FeaturedBanner />
 
-        <ProductCarousel products={featuredProducts} />
+        <div className="flex flex-col gap-10">
+          <FeaturedProductsHeading />
+
+          {products.length > 0 ? (
+            <ProductCarousel products={products} />
+          ) : (
+            <p className="text-center text-sm text-gray-400">Belum ada produk.</p>
+          )}
+        </div>
       </Container>
     </section>
   );

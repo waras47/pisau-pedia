@@ -1,38 +1,52 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
+import { useLocaleCurrency } from "@/features/locale-currency/model/LocaleProvider";
 import { Container } from "@/shared/ui/Container";
-import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
 import { SectionHeading } from "@/shared/ui/SectionHeading";
+import { env } from "@/shared/config/env";
+import { localized } from "@/shared/lib/localized";
 
-const categories = [
-  {
-    title: "Japanese Knives",
-    href: "/collections/knives",
-    label: "Knife collection",
-  },
-  {
-    title: "Sharpening Tools",
-    href: "/collections/sharpening",
-    label: "Sharpening stones",
-  },
-  {
-    title: "Kitchen Accessories",
-    href: "/collections/accessories",
-    label: "Kitchen accessories",
-  },
-];
+// Two rows of the 3-column grid. Keep in sync with the admin editor limit
+// (src/app/pisaupedia/admin/site-contents/page.tsx).
+const BROWSE_CATEGORIES_MAX = 6;
+
+interface BrowseCategory {
+  title: string;
+  href: string;
+  image: string;
+  [key: string]: string;
+}
 
 export function BrowseCategories() {
+  const { t, locale } = useLocaleCurrency();
+  const [categories, setCategories] = useState<BrowseCategory[]>([]);
+
+  useEffect(() => {
+    fetch(`${env.apiBaseUrl}/site-contents/browse_categories`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        const items = json?.data?.value as BrowseCategory[] | undefined;
+        if (items?.length) setCategories(items.slice(0, BROWSE_CATEGORIES_MAX));
+      })
+      .catch(() => {});
+  }, []);
+
+  if (!categories.length) return null;
+
   return (
     <section className="bg-surface py-16">
       <Container className="flex flex-col gap-10">
-        <SectionHeading title="Browse Our Selection" align="center" />
+        <SectionHeading title={t("browse_title")} align="center" />
         <div className="grid gap-6 sm:grid-cols-3">
-          {categories.map((category) => (
-            <Link key={category.title} href={category.href} className="group flex flex-col gap-4">
-              <PlaceholderImage ratio="portrait" label={category.label} />
+          {categories.map((cat, i) => (
+            <Link key={i} href={cat.href} className="group flex flex-col gap-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={cat.image} alt={localized(cat, "title", locale)} className="aspect-[4/3] w-full object-cover" />
               <span className="text-center font-display text-lg font-medium transition-colors group-hover:text-accent">
-                {category.title}
+                {localized(cat, "title", locale)}
               </span>
             </Link>
           ))}

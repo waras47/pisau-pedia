@@ -10,6 +10,8 @@ import {
   type ReactNode,
 } from "react";
 
+import { trackPixel } from "@/shared/lib/meta-pixel";
+
 import { type Product } from "@/entities/product";
 
 import { CartDrawer } from "../ui/CartDrawer";
@@ -45,24 +47,34 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const closeCart = useCallback(() => setIsOpen(false), []);
 
   const addItem = useCallback((product: Product, quantity = 1) => {
+    trackPixel("AddToCart", {
+      content_ids: [product.id],
+      content_type: "product",
+      content_name: product.name,
+      contents: [{ id: product.id, quantity }],
+      value: product.price * quantity,
+      currency: product.currency || "IDR",
+    });
     setItems((prev) => {
       const existing = prev.find((i) => i.slug === product.slug);
       if (existing) {
         return prev.map((i) =>
           i.slug === product.slug
-            ? { ...i, quantity: i.quantity + quantity }
+            ? { ...i, productId: i.productId ?? product.id, quantity: i.quantity + quantity }
             : i,
         );
       }
       return [
         ...prev,
         {
+          productId: product.id,
           slug: product.slug,
           name: product.name,
           category: product.category,
           price: product.price,
           currency: product.currency,
           quantity,
+          image: product.image,
           component: product.component,
         },
       ];

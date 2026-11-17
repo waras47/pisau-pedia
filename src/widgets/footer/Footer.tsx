@@ -1,10 +1,11 @@
-import { Facebook, Instagram, Youtube } from "lucide-react";
 import Link from "next/link";
+import { Facebook, Instagram, Youtube, MapPin, Phone, Banknote } from "lucide-react";
+
+import { siteConfig } from "@/shared/config/site.config";
+import { Container } from "@/shared/ui/Container";
+import { Logo } from "@/shared/ui/Logo";
 
 import { NewsletterForm } from "@/features/newsletter-signup";
-import { siteConfig } from "@/shared/config/site.config";
-import { BladeMark } from "@/shared/icons";
-import { Container } from "@/shared/ui/Container";
 
 const footerColumns = [
   {
@@ -13,15 +14,13 @@ const footerColumns = [
       { label: "Japanese Knives", href: "/collections/knives" },
       { label: "Sharpening Tools", href: "/collections/sharpening" },
       { label: "Kitchen Accessories", href: "/collections/accessories" },
-      { label: "Gift Cards", href: "/products/gift-card" },
     ],
   },
   {
     title: "Support",
     links: [
       { label: "FAQ", href: "/pages/faq" },
-      { label: "Shipping & Returns", href: "/pages/shipping" },
-      { label: "Sharpening Service", href: "/pages/sharpening-service" },
+      { label: "Sharpening Service", href: "/pages/sharpening-repairs" },
       { label: "Contact Us", href: "/pages/contact" },
     ],
   },
@@ -30,8 +29,6 @@ const footerColumns = [
     links: [
       { label: "About Us", href: "/pages/about" },
       { label: "Reviews", href: "/pages/reviews" },
-      { label: "Become a Reseller", href: "/pages/reseller" },
-      { label: "Affiliate Program", href: "/pages/affiliate" },
     ],
   },
 ];
@@ -49,19 +46,50 @@ export function Footer() {
     <footer className="border-t border-border bg-surface">
       <Container className="grid gap-12 py-16 lg:grid-cols-[1.4fr_2fr_1.4fr]">
         <div className="flex flex-col gap-4">
-          <Link href="/" className="flex items-center gap-2 font-display text-xl font-semibold">
-            <BladeMark className="h-6 w-6 text-accent" />
-            {siteConfig.name}
+          <Link href="/" className="flex items-center">
+            <Logo className="h-9 w-auto" />
           </Link>
-          <p className="max-w-xs text-sm text-muted-foreground">
-            {siteConfig.description}
-          </p>
+
+          <div className="flex gap-2.5 text-sm text-foreground/90">
+            <MapPin size={15} className="mt-0.5 shrink-0 text-accent" />
+            <a
+              href="https://maps.app.goo.gl/DhrwhjL1G37aC5f38"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-accent"
+            >
+              Jl Baru No 84 RT 06 RW 06, Jl Raya Hankam, Jati Murni, Pondok Melati, Kota Bekasi, Jawa Barat 17431, Indonesia
+            </a>
+          </div>
+
+          <div className="flex gap-2.5 text-sm text-foreground/90">
+            <Phone size={15} className="mt-0.5 shrink-0 text-accent" />
+            <a
+              href={`https://wa.me/${siteConfig.social.whatsapp}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-accent"
+            >
+              08559991117
+            </a>
+          </div>
+
+          {/* <div className="flex gap-2.5 text-sm text-foreground/90">
+            <Banknote size={15} className="mt-0.5 shrink-0 text-accent" />
+            <div>
+              <p>Bank Mandiri — 1170011490331</p>
+              <p className="text-muted-foreground">a.n. Rahmawati Nur Aida</p>
+            </div>
+          </div> */}
+
           <div className="flex items-center gap-3 pt-2">
             {socialLinks.map(({ label, href, icon: Icon }) => (
               <Link
                 key={label}
                 href={href}
                 aria-label={label}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex h-9 w-9 items-center justify-center border border-border text-foreground transition-colors hover:border-accent hover:text-accent"
               >
                 <Icon size={16} />

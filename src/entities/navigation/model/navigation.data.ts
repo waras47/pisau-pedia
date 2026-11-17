@@ -15,19 +15,29 @@ export const mainNav: NavItem[] = [
         title: "By Type",
         links: [
           { label: "Gyuto — Chef's Knife", href: "/collections/gyuto" },
-          { label: "Santoku — Multi-Purpose", href: "/collections/santoku" },
+          { label: "K-Tip Gyuto", href: "/collections/k-tip-gyuto" },
+          { label: "Slicer — Slicing", href: "/collections/slicer" },
           { label: "Bunka — Multi-Purpose", href: "/collections/bunka" },
-          { label: "Nakiri — Vegetable", href: "/collections/nakiri" },
           { label: "Petty — Paring", href: "/collections/petty" },
+          { label: "Deba — Fish & Bone", href: "/collections/deba" },
+          { label: "Yanagiba — Sashimi", href: "/collections/yanagiba" },
+          { label: "Honesuki — Deboning", href: "/collections/honesuki" },
+          { label: "Kiritsuke", href: "/collections/kiritsuke" },
+          { label: "Taiwan Tuna", href: "/collections/taiwan" },
         ],
       },
       {
         title: "By Usage",
         links: [
           { label: "Multi-Purpose", href: "/collections/multi-purpose" },
-          { label: "Vegetable Knives", href: "/collections/vegetable" },
           { label: "Slicing & Sashimi", href: "/collections/slicing" },
-          { label: "Bread Knives", href: "/collections/bread" },
+        ],
+      },
+      {
+        title: "Components",
+        links: [
+          { label: "Knife Blades", href: "/collections/knife-blades" },
+          { label: "Knife Handles", href: "/collections/knife-handles" },
         ],
       },
       {
@@ -59,6 +69,13 @@ export const mainNav: NavItem[] = [
           { label: "Stone Holders", href: "/collections/stone-holders" },
           { label: "Leather Strops", href: "/collections/strops" },
           { label: "Honing Rods", href: "/collections/honing-rods" },
+        ],
+      },
+      {
+        title: "Services",
+        links: [
+          { label: "Sharpening & Repairs", href: "/pages/sharpening-repairs" },
+          { label: "Knife Engravings", href: "/pages/engraving-request" },
         ],
       },
     ],

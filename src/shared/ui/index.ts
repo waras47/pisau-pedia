@@ -4,3 +4,5 @@ export { Container } from "./Container";
 export { IconButton } from "./IconButton";
 export { PlaceholderImage } from "./PlaceholderImage";
 export { SectionHeading } from "./SectionHeading";
+export { TiktokEmbed } from "./TiktokEmbed";
+export { YoutubeEmbed } from "./YoutubeEmbed";

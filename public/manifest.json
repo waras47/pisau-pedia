@@ -1,0 +1,21 @@
+{
+  "name": "Pisau Pedia Admin",
+  "short_name": "PisauPedia",
+  "description": "Pisau Pedia — Knives & Cutlery Admin Panel",
+  "start_url": "/pisaupedia/admin",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a1a2e",
+  "icons": [
+    {
+      "src": "/logo-pisaupedia.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo-pisaupedia.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,14 +1,17 @@
 export const siteConfig = {
-  name: "KISSAKI",
-  tagline: "Japanese Kitchen Knives",
+  name: "Pisau Pedia",
+  tagline: "Pisau Dapur Berkualitas, Asli Indonesia",
   description:
-    "Hand-forged Japanese kitchen knives and sharpening tools, selected for home cooks and professional chefs.",
-  freeShippingThreshold: 300,
-  currency: "EUR",
+    "Pisaupedia menghadirkan pisau dapur berkualitas asli Indonesia dengan pilihan material sesuai kebutuhan Anda. Melayani pesanan khusus perorangan & restoran, penggantian handle, pembuatan sarung pisau, dan perbaikan pisau.",
+  // TODO: ganti dengan domain production sungguhan begitu sudah di-deploy.
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "https://pisaupedia.com",
+  freeShippingThreshold: 500000,
+  currency: "IDR",
   social: {
-    instagram: "https://instagram.com",
+    instagram: "https://www.instagram.com/pisaupedia",
     tiktok: "https://tiktok.com",
     youtube: "https://youtube.com",
-    facebook: "https://facebook.com",
+    facebook: "https://www.facebook.com/share/1Efdp5ACxr/",
+    whatsapp: "628559991117",
   },
 } as const;

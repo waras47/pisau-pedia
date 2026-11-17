@@ -1,4 +1,5 @@
 import {
+  accessories,
   featuredProducts,
   japaneseKnives,
   monthlyPick,
@@ -9,6 +10,7 @@ import { type Product } from "@/entities/product/model/product.types";
 /** Gabungan seluruh katalog. Nanti diganti query CMS/API by slug. */
 export const allProducts: Product[] = [
   ...japaneseKnives,
+  ...accessories,
   ...featuredProducts,
   ...newArrivals,
   monthlyPick,

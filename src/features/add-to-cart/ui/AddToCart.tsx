@@ -54,7 +54,9 @@ export function AddToCart({ product }: AddToCartProps) {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Ships in 2–4 business days · Free EU shipping over €150
+        {isSoldOut
+          ? "Stok habis"
+          : `Stok: ${product.stock ?? 0} unit`}
       </p>
     </div>
   );

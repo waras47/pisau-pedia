@@ -1,13 +1,16 @@
-import { siteConfig } from "@/shared/config/site.config";
+"use client";
+
 import { Container } from "@/shared/ui/Container";
+import { useLocaleCurrency } from "@/features/locale-currency/model/LocaleProvider";
 
 export function AnnouncementBar() {
+  const { t } = useLocaleCurrency();
+
   return (
-    <div className="bg-accent text-accent-foreground">
+    <div className="bg-[#34a8eb] text-white">
       <Container className="flex h-9 items-center justify-center text-center">
         <p className="text-xs tracking-wide">
-          Free worldwide express shipping on orders over{" "}
-          {siteConfig.freeShippingThreshold}€
+          {t("announcement_bar")}
         </p>
       </Container>
     </div>
