@@ -95,6 +95,7 @@ function toProduct(p: ProductApiItem | ProductApiDetail): Product {
     careInstructions: detail.care_instructions,
     youtubeUrl: detail.youtube_url,
     tiktokUrl: detail.tiktok_url,
+    instagramUrl: detail.instagram_url,
     specs: detail.specs,
     highlights: detail.highlights,
     angleImages: detail.angle_images,

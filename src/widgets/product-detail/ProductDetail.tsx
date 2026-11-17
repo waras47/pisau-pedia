@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
 import { Container } from "@/shared/ui/Container";
+import { InstagramEmbed } from "@/shared/ui/InstagramEmbed";
 import { PlaceholderImage } from "@/shared/ui/PlaceholderImage";
 import { SectionHeading } from "@/shared/ui/SectionHeading";
 import { TiktokEmbed } from "@/shared/ui/TiktokEmbed";
@@ -212,16 +213,23 @@ export function ProductDetail({ product, related, reviews = [] }: ProductDetailP
           </div>
 
           {activeTab === "description" ? (
-            <div className="flex max-w-3xl flex-col gap-6">
-              <p className="text-sm leading-relaxed text-muted-foreground">
+            <div className="flex flex-col gap-6">
+              <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
                 {description ?? "Deskripsi lengkap untuk produk ini akan segera ditambahkan."}
               </p>
-              {/* YouTube (16:9) and TikTok (9:16) sit side by side on wide screens. */}
-              <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+              {/* YouTube (16:9), TikTok and Instagram Reels (9:16) sit side by side on wide screens. */}
+              <div className="flex flex-col flex-wrap gap-6 sm:flex-row sm:items-start">
                 {product.youtubeUrl ? (
-                  <YoutubeEmbed url={product.youtubeUrl} title={`Video ${product.name}`} className="sm:flex-1" />
+                  <YoutubeEmbed url={product.youtubeUrl} title={`Video ${product.name}`} className="sm:min-w-[320px] sm:flex-1" />
                 ) : null}
                 <TiktokEmbed url={product.tiktokUrl} title={`TikTok ${product.name}`} className="sm:w-[260px] sm:flex-none" />
+                {product.instagramUrl ? (
+                  <InstagramEmbed
+                    url={product.instagramUrl}
+                    title={`Instagram ${product.name}`}
+                    className="max-w-[326px] sm:w-[280px] sm:flex-none"
+                  />
+                ) : null}
               </div>
             </div>
           ) : null}

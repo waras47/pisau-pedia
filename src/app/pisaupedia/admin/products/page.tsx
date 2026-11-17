@@ -5,9 +5,11 @@ import { useSearchParams } from "next/navigation";
 
 import { HttpError } from "@/shared/api/http-error";
 import { uploadImage } from "@/shared/api/upload.api";
+import { getInstagramEmbedUrl } from "@/shared/lib/instagram";
 import { getTiktokVideoId, isTiktokShortLink } from "@/shared/lib/tiktok";
 import { getYoutubeVideoId } from "@/shared/lib/youtube";
 import { ImageUploadField as SharedImageUploadField } from "@/shared/ui/ImageUploadField";
+import { InstagramEmbed } from "@/shared/ui/InstagramEmbed";
 import { TiktokEmbed } from "@/shared/ui/TiktokEmbed";
 import { YoutubeEmbed } from "@/shared/ui/YoutubeEmbed";
 
@@ -187,6 +189,9 @@ export default function ProductsPage() {
     !!editProduct.youtubeUrl?.trim() && !getYoutubeVideoId(editProduct.youtubeUrl);
   const tiktokInvalid =
     !!editProduct.tiktokUrl?.trim() && !getTiktokVideoId(editProduct.tiktokUrl);
+  const instagramInvalid =
+    !!editProduct.instagramUrl?.trim() && !getInstagramEmbedUrl(editProduct.instagramUrl);
+  const videoLinksInvalid = youtubeInvalid || tiktokInvalid || instagramInvalid;
 
   // Derived
   const allCategories = useMemo(
@@ -277,6 +282,7 @@ export default function ProductsPage() {
       careInstructions: detail.care_instructions,
       youtubeUrl: detail.youtube_url,
       tiktokUrl: detail.tiktok_url,
+      instagramUrl: detail.instagram_url,
       specs: detail.specs,
       highlights: detail.highlights,
       image: detail.images[0],
@@ -296,7 +302,7 @@ export default function ProductsPage() {
   };
 
   async function handleSave() {
-    if (missingFields.length > 0 || youtubeInvalid || tiktokInvalid) return;
+    if (missingFields.length > 0 || videoLinksInvalid) return;
     setSaving(true);
     try {
       const categoryId = categories.find((c) => c.name === editProduct.category)?.id;
@@ -321,6 +327,7 @@ export default function ProductsPage() {
         care_instructions: editProduct.careInstructions || undefined,
         youtube_url: editProduct.youtubeUrl?.trim() ?? "",
         tiktok_url: editProduct.tiktokUrl?.trim() ?? "",
+        instagram_url: editProduct.instagramUrl?.trim() ?? "",
         specs: editProduct.specs,
         highlights: editProduct.highlights,
         images: images,
@@ -934,6 +941,26 @@ export default function ProductsPage() {
                   )}
                 </Field>
 
+                {/* Instagram Reels — shown with the other videos on the product page */}
+                <Field label="Instagram Reels (opsional)">
+                  <input
+                    type="text"
+                    value={editProduct.instagramUrl ?? ""}
+                    onChange={(e) => updateField("instagramUrl", e.target.value)}
+                    className="admin-input"
+                    placeholder="https://www.instagram.com/reel/..."
+                  />
+                  {instagramInvalid ? (
+                    <p className="mt-1 text-xs text-red-500">
+                      Link tidak dikenali sebagai Reels/postingan Instagram. Tempel link lengkap (instagram.com/reel/…) atau kode embed dari Instagram.
+                    </p>
+                  ) : editProduct.instagramUrl?.trim() ? (
+                    <InstagramEmbed url={editProduct.instagramUrl} title="Preview Instagram Reels" className="mt-2 max-w-[260px]" />
+                  ) : (
+                    <p className="mt-1 text-xs text-gray-400">Kosongkan jika produk tidak punya Reels Instagram.</p>
+                  )}
+                </Field>
+
                 {/* Specs */}
                 <SpecsEditor
                   specs={editProduct.specs ?? []}
@@ -964,7 +991,7 @@ export default function ProductsPage() {
               <button
                 type="button"
                 onClick={handleSave}
-                disabled={missingFields.length > 0 || youtubeInvalid || tiktokInvalid || saving}
+                disabled={missingFields.length > 0 || videoLinksInvalid || saving}
                 className="rounded-lg bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-40"
               >
                 {saving ? "Menyimpan..." : modal === "add" ? "Add Product" : "Save Changes"}

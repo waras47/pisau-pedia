@@ -39,6 +39,8 @@ export interface Product {
   youtubeUrl?: string;
   /** Admin-entered TikTok video link, shown next to/under the YouTube video. */
   tiktokUrl?: string;
+  /** Admin-entered Instagram Reels/post link, shown with the other videos. */
+  instagramUrl?: string;
   highlights?: string[];
   specs?: ProductSpec[];
   galleryLabels?: string[];

@@ -34,6 +34,7 @@ export interface ProductApiDetail extends ProductApiItem {
   care_instructions?: string;
   youtube_url?: string;
   tiktok_url?: string;
+  instagram_url?: string;
   images: string[];
   angle_images: ProductAngleImages;
   specs: { label: string; value: string }[];
@@ -55,6 +56,7 @@ export interface ProductInput {
   care_instructions?: string;
   youtube_url?: string;
   tiktok_url?: string;
+  instagram_url?: string;
   price: number;
   compare_at_price?: number;
   maker?: string;
